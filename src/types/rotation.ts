@@ -15,4 +15,5 @@ export interface Assignment {
 export interface RotationState {
   players: Player[];
   assignments: Assignment[];
+  numberOfGames: number;
 }

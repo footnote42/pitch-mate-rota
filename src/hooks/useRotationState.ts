@@ -3,11 +3,14 @@ import { Player, Assignment, RotationState } from '@/types/rotation';
 
 const STORAGE_KEY = 'squad-rotation-state';
 const PLAYERS_ON_FIELD = 8;
-const NUMBER_OF_GAMES = 5;
+const DEFAULT_NUMBER_OF_GAMES = 5;
+const MIN_GAMES = 3;
+const MAX_GAMES = 8;
 
 export const useRotationState = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
+  const [numberOfGames, setNumberOfGames] = useState<number>(DEFAULT_NUMBER_OF_GAMES);
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
 
   // Load state from localStorage on mount
@@ -18,6 +21,7 @@ export const useRotationState = () => {
         const parsed: RotationState = JSON.parse(savedState);
         setPlayers(parsed.players || []);
         setAssignments(parsed.assignments || []);
+        setNumberOfGames(parsed.numberOfGames || DEFAULT_NUMBER_OF_GAMES);
       } catch (error) {
         console.error('Error loading saved state:', error);
       }
@@ -26,10 +30,10 @@ export const useRotationState = () => {
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    const state: RotationState = { players, assignments };
+    const state: RotationState = { players, assignments, numberOfGames };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     setLastSaved(new Date());
-  }, [players, assignments]);
+  }, [players, assignments, numberOfGames]);
 
   const addPlayer = (name: string, experienceLevel: 'experienced' | 'novice') => {
     const newPlayer: Player = {
@@ -103,7 +107,7 @@ export const useRotationState = () => {
   };
 
   const getTotalHalves = () => {
-    return NUMBER_OF_GAMES * 2;
+    return numberOfGames * 2;
   };
 
   const getMinimumHalves = () => {
@@ -124,10 +128,36 @@ export const useRotationState = () => {
     return { experiencedCount, noviceCount, total: assignedPlayers.length };
   };
 
+  const changeNumberOfGames = (newNumber: number): boolean => {
+    if (newNumber < MIN_GAMES || newNumber > MAX_GAMES) {
+      return false;
+    }
+    
+    // Check if there are any assignments
+    if (assignments.length > 0) {
+      // Return false to trigger confirmation dialog in component
+      return false;
+    }
+    
+    setNumberOfGames(newNumber);
+    return true;
+  };
+
+  const confirmChangeNumberOfGames = (newNumber: number) => {
+    if (newNumber < MIN_GAMES || newNumber > MAX_GAMES) {
+      return;
+    }
+    
+    // Clear all assignments and update game count
+    setAssignments([]);
+    setNumberOfGames(newNumber);
+  };
+
   return {
     players,
     assignments,
     lastSaved,
+    numberOfGames,
     addPlayer,
     removePlayer,
     toggleExperience,
@@ -143,7 +173,10 @@ export const useRotationState = () => {
     getMinimumHalves,
     getFairShare,
     getExperienceBalance,
+    changeNumberOfGames,
+    confirmChangeNumberOfGames,
     PLAYERS_ON_FIELD,
-    NUMBER_OF_GAMES,
+    MIN_GAMES,
+    MAX_GAMES,
   };
 };
