@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -16,7 +17,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { useState } from 'react';
 
 interface GameCountSelectorProps {
   numberOfGames: number;
