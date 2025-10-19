@@ -11,6 +11,7 @@ export const useRotationState = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [numberOfGames, setNumberOfGames] = useState<number>(DEFAULT_NUMBER_OF_GAMES);
+  const [gameLabels, setGameLabels] = useState<Record<number, string>>({});
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
 
   // Load state from localStorage on mount
@@ -22,6 +23,7 @@ export const useRotationState = () => {
         setPlayers(parsed.players || []);
         setAssignments(parsed.assignments || []);
         setNumberOfGames(parsed.numberOfGames || DEFAULT_NUMBER_OF_GAMES);
+        setGameLabels(parsed.gameLabels || {});
       } catch (error) {
         console.error('Error loading saved state:', error);
       }
@@ -30,10 +32,10 @@ export const useRotationState = () => {
 
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    const state: RotationState = { players, assignments, numberOfGames };
+    const state: RotationState = { players, assignments, numberOfGames, gameLabels };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     setLastSaved(new Date());
-  }, [players, assignments, numberOfGames]);
+  }, [players, assignments, numberOfGames, gameLabels]);
 
   const addPlayer = (name: string, experienceLevel: 'experienced' | 'novice') => {
     const newPlayer: Player = {
@@ -92,6 +94,14 @@ export const useRotationState = () => {
   const resetAll = () => {
     setPlayers([]);
     setAssignments([]);
+    setGameLabels({});
+  };
+  
+  const updateGameLabel = (game: number, label: string) => {
+    setGameLabels(prev => ({
+      ...prev,
+      [game]: label
+    }));
   };
 
   const isAssigned = (playerId: string, game: number, half: number) => {
@@ -175,6 +185,8 @@ export const useRotationState = () => {
     getExperienceBalance,
     changeNumberOfGames,
     confirmChangeNumberOfGames,
+    gameLabels,
+    updateGameLabel,
     PLAYERS_ON_FIELD,
     MIN_GAMES,
     MAX_GAMES,

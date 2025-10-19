@@ -25,6 +25,8 @@ const Index = () => {
     getExperienceBalance,
     changeNumberOfGames,
     confirmChangeNumberOfGames,
+    gameLabels,
+    updateGameLabel,
     PLAYERS_ON_FIELD,
     MIN_GAMES,
     MAX_GAMES,
@@ -69,6 +71,8 @@ const Index = () => {
           getExperienceBalance={getExperienceBalance}
           clearHalf={clearHalf}
           clearGame={clearGame}
+          gameLabels={gameLabels}
+          updateGameLabel={updateGameLabel}
         />
 
         {players.length > 0 && (

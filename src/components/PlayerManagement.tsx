@@ -70,14 +70,30 @@ export const PlayerManagement = ({
             onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()}
             className="flex-1"
           />
-          <Button
-            onClick={() => setNewPlayerExperience(prev => prev === 'novice' ? 'experienced' : 'novice')}
-            variant={newPlayerExperience === 'experienced' ? 'default' : 'outline'}
-            size="icon"
-            className="shrink-0"
-          >
-            {newPlayerExperience === 'experienced' ? <Award className="h-4 w-4" /> : <User className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center gap-1 border rounded-md p-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => setNewPlayerExperience('novice')}
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                newPlayerExperience === 'novice'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Nov
+            </button>
+            <button
+              type="button"
+              onClick={() => setNewPlayerExperience('experienced')}
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                newPlayerExperience === 'experienced'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Exp
+            </button>
+          </div>
           <Button onClick={handleAddPlayer} size="icon" className="shrink-0">
             <UserPlus className="h-4 w-4" />
           </Button>

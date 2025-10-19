@@ -25,6 +25,8 @@ interface RotationGridProps {
   getExperienceBalance: (game: number, half: number) => { experiencedCount: number; noviceCount: number; total: number };
   clearHalf: (game: number, half: number) => void;
   clearGame: (game: number) => void;
+  gameLabels: Record<number, string>;
+  updateGameLabel: (game: number, label: string) => void;
 }
 
 export const RotationGrid = ({
@@ -37,6 +39,8 @@ export const RotationGrid = ({
   getExperienceBalance,
   clearHalf,
   clearGame,
+  gameLabels,
+  updateGameLabel,
 }: RotationGridProps) => {
   const [clearAction, setClearAction] = useState<{ type: 'half' | 'game'; game: number; half?: number } | null>(null);
 
@@ -74,6 +78,23 @@ export const RotationGrid = ({
     <div className="bg-card rounded-lg border overflow-hidden">
       <div className="overflow-x-auto">
         <div className="inline-block min-w-full">
+          {/* Game label row */}
+          <div className="flex border-b bg-muted">
+            <div className="sticky left-0 z-20 bg-muted border-r min-w-[140px] px-3 py-2">
+              <span className="text-sm font-semibold text-foreground">Team / Time</span>
+            </div>
+            {games.map(game => (
+              <div key={`label-${game}`} className="border-r last:border-r-0 min-w-[176px] px-2 py-2">
+                <input
+                  type="text"
+                  value={gameLabels[game] || ''}
+                  onChange={(e) => updateGameLabel(game, e.target.value)}
+                  placeholder="Team X - 1000 hrs"
+                  className="w-full text-center text-xs font-medium bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 placeholder:text-muted-foreground/50"
+                />
+              </div>
+            ))}
+          </div>
           {/* Header row */}
           <div className="flex border-b bg-muted">
             <div className="sticky left-0 z-20 bg-muted border-r min-w-[140px] px-3 py-2">

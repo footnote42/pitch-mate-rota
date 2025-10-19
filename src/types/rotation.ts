@@ -16,4 +16,5 @@ export interface RotationState {
   players: Player[];
   assignments: Assignment[];
   numberOfGames: number;
+  gameLabels: Record<number, string>;
 }
