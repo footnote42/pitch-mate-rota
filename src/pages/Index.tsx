@@ -3,12 +3,15 @@ import { Header } from '@/components/Header';
 import { PlayerManagement } from '@/components/PlayerManagement';
 import { RotationGrid } from '@/components/RotationGrid';
 import { GameCountSelector } from '@/components/GameCountSelector';
+import { AgeGroupSelector } from '@/components/AgeGroupSelector';
 
 const Index = () => {
   const {
     players,
     lastSaved,
     numberOfGames,
+    ageGroup,
+    playersOnField,
     addPlayer,
     removePlayer,
     toggleExperience,
@@ -25,9 +28,10 @@ const Index = () => {
     getExperienceBalance,
     changeNumberOfGames,
     confirmChangeNumberOfGames,
+    changeAgeGroup,
+    confirmChangeAgeGroup,
     gameLabels,
     updateGameLabel,
-    PLAYERS_ON_FIELD,
     MIN_GAMES,
     MAX_GAMES,
   } = useRotationState();
@@ -41,7 +45,12 @@ const Index = () => {
       />
 
       <main className="container mx-auto px-4 py-6 space-y-6">
-        <div className="bg-card border rounded-lg p-4">
+        <div className="bg-card border rounded-lg p-4 space-y-3">
+          <AgeGroupSelector
+            ageGroup={ageGroup}
+            onChangeAgeGroup={changeAgeGroup}
+            onConfirmChange={confirmChangeAgeGroup}
+          />
           <GameCountSelector
             numberOfGames={numberOfGames}
             minGames={MIN_GAMES}
@@ -64,7 +73,7 @@ const Index = () => {
         <RotationGrid
           players={players}
           numberOfGames={numberOfGames}
-          playersOnField={PLAYERS_ON_FIELD}
+          playersOnField={playersOnField}
           isAssigned={isAssigned}
           toggleAssignment={toggleAssignment}
           getHalfCount={getHalfCount}
