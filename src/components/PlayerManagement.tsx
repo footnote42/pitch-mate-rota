@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Player } from '@/types/rotation';
 import { UserPlus, X, Award, User } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +16,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+const playerNameSchema = z.string()
+  .trim()
+  .min(1, 'Name cannot be empty')
+  .max(50, 'Name must be less than 50 characters')
+  .regex(/^[a-zA-Z0-9\s'-]+$/, 'Name contains invalid characters');
 
 interface PlayerManagementProps {
   players: Player[];
@@ -37,13 +45,23 @@ export const PlayerManagement = ({
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerExperience, setNewPlayerExperience] = useState<'experienced' | 'novice'>('novice');
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
+  const { toast } = useToast();
 
   const handleAddPlayer = () => {
-    if (newPlayerName.trim()) {
-      onAddPlayer(newPlayerName.trim(), newPlayerExperience);
-      setNewPlayerName('');
-      setNewPlayerExperience('novice');
+    const result = playerNameSchema.safeParse(newPlayerName);
+    
+    if (!result.success) {
+      toast({
+        title: "Invalid name",
+        description: result.error.errors[0].message,
+        variant: "destructive"
+      });
+      return;
     }
+    
+    onAddPlayer(result.data, newPlayerExperience);
+    setNewPlayerName('');
+    setNewPlayerExperience('novice');
   };
 
   const confirmRemove = (player: Player) => {
