@@ -51,26 +51,26 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ---
 
-### Stage 2: Trojans RFC Branding ⬜
-**Goal:** Make it unmistakably Wayne's tool for Trojans RFC
+### Stage 2: Trojans FC Branding ✅
+**Goal:** Make it unmistakably Wayne's tool for Trojans RC
 
-- [ ] Find Trojans badge/logo:
+- [x] Find Trojans badge/logo:
   - Image stored here: '/docs/images/trojans-badge.png
-- [ ] Add badge to header (top-right corner, ~40-50px size)
-- [ ] Update color scheme to Trojans colors:
+- [x] Add badge to header (top-right corner, ~40-50px size)
+- [x] Update color scheme to Trojans colors:
   - Primary blue: from their website theme https://trojansfc.rfu.club/
   - Secondary red: from their website theme https://trojansfc.rfu.club/
   - White/light gray for backgrounds
   - Accent colors for warnings/success states
-- [ ] Update button styles to use Trojans blue
-- [ ] Update hover states and focus indicators
-- [ ] Test badge rendering on mobile (ensure not too large)
-- [ ] Ensure sufficient color contrast for accessibility
+- [x] Update button styles to use Trojans blue
+- [x] Update hover states and focus indicators
+- [x] Test badge rendering on mobile (ensure not too large)
+- [x] Ensure sufficient color contrast for accessibility
 
 **Success Criteria:**
-- Trojans badge visible and crisp on all screen sizes
-- Color scheme feels cohesive with club branding
-- Still passes WCAG AA contrast requirements
+- Trojans badge visible and crisp on all screen sizes ✓
+- Color scheme feels cohesive with club branding ✓
+- Still passes WCAG AA contrast requirements ✓
 
 **Time Estimate:** 1 hour
 

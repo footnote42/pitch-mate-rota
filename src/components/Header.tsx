@@ -25,7 +25,7 @@ export const Header = ({ lastSaved, onClearAll, onResetAll }: HeaderProps) => {
   const formatLastSaved = (date: Date) => {
     const now = new Date();
     const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-    
+
     if (diff < 60) return 'Just now';
     if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
     if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
@@ -43,23 +43,31 @@ export const Header = ({ lastSaved, onClearAll, onResetAll }: HeaderProps) => {
                 Last saved: {formatLastSaved(lastSaved)}
               </p>
             </div>
-            <div className="flex gap-2">
-              <Button 
-                variant="secondary"
-                size="sm"
-                onClick={() => setShowClearDialog(true)}
-              >
-                <RotateCcw className="h-4 w-4 mr-2" />
-                New Festival
-              </Button>
-              <Button 
-                variant="destructive"
-                size="sm"
-                onClick={() => setShowResetDialog(true)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Reset All
-              </Button>
+            <div className="flex items-center gap-3">
+              <img
+                src="/trojans-badge.png"
+                alt="Trojans FC Badge"
+                className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 object-contain"
+                title="Trojans FC"
+              />
+              <div className="flex gap-2">
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setShowClearDialog(true)}
+                >
+                  <RotateCcw className="h-4 w-4 mr-2" />
+                  New Festival
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setShowResetDialog(true)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Reset All
+                </Button>
+              </div>
             </div>
           </div>
         </div>
@@ -92,7 +100,7 @@ export const Header = ({ lastSaved, onClearAll, onResetAll }: HeaderProps) => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction 
+            <AlertDialogAction
               onClick={() => { onResetAll(); setShowResetDialog(false); }}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
