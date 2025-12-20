@@ -10,7 +10,11 @@
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_type",
       "mcp__playwright__browser_run_code",
-      "mcp__playwright__browser_tabs"
+      "mcp__playwright__browser_tabs",
+      "Bash(ping:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push)"
     ]
   }
 }
