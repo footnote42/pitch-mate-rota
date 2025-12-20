@@ -213,32 +213,32 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ---
 
-### Stage 8: Visual Polish Pass ⬜
+### Stage 8: Visual Polish Pass ✅
 **Goal:** Ensure desktop doesn't feel broken, mobile feels great
 
-- [ ] Desktop layout review:
+- [x] Desktop layout review:
   - Grid should be readable but not stretched awkwardly
   - Consider max-width container for very wide screens
   - Ensure spacing feels intentional
-- [ ] Mobile layout refinement:
+- [x] Mobile layout refinement:
   - Test grid scrolling (horizontal if needed)
   - Verify touch targets are ≥44x44px
   - Check that badge doesn't overlap text on small screens
-- [ ] Typography audit:
+- [x] Typography audit:
   - Consistent heading hierarchy
   - Readable font sizes on mobile (minimum 16px for body)
   - Proper line-height for readability
-- [ ] Spacing consistency:
+- [x] Spacing consistency:
   - Use Tailwind's spacing scale consistently
   - Check padding/margin feels balanced
-- [ ] Color contrast check:
+- [x] Color contrast check:
   - Run accessibility checker on key interactions
   - Ensure warnings/errors are distinguishable
 
 **Success Criteria:**
-- App looks intentional, not template-y
-- No jarring layout shifts between breakpoints
-- Text is comfortable to read on 5" phone screen
+- App looks intentional, not template-y ✓
+- No jarring layout shifts between breakpoints ✓
+- Text is comfortable to read on 5" phone screen ✓
 
 **Time Estimate:** 1 hour
 
