@@ -55,7 +55,7 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 **Goal:** Make it unmistakably Wayne's tool for Trojans RC
 
 - [x] Find Trojans badge/logo:
-  - Image stored here: '/docs/images/trojans-badge.png
+  - Image stored here: '/docs/images/trojans_logo.png'
 - [x] Add badge to header (top-right corner, ~40-50px size)
 - [x] Update color scheme to Trojans colors:
   - Primary blue: from their website theme https://trojansfc.rfu.club/

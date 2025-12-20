@@ -88,7 +88,7 @@ export const RotationGrid = ({
       {/* Trojans Logo Watermark */}
       {players.length > 0 && (
         <img
-          src="/trojans-badge.png"
+          src="/trojans_logo.png"
           alt=""
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.06] pointer-events-none w-64 h-64 object-contain z-0"
           aria-hidden="true"
