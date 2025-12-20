@@ -85,7 +85,7 @@ export const RotationGrid = ({
 
   return (
     <div className="bg-card rounded-lg border overflow-hidden relative">
-      {/* Trojans Badge Watermark */}
+      {/* Trojans Logo Watermark */}
       {players.length > 0 && (
         <img
           src="/trojans-badge.png"

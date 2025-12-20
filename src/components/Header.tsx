@@ -47,7 +47,7 @@ export const Header = ({ lastSaved, onClearAll, onResetAll, onOpenTutorial }: He
             <div className="flex items-center gap-3">
               <img
                 src="/trojans-badge.png"
-                alt="Trojans FC Badge"
+                alt="Trojans FC Logo"
                 className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 object-contain"
                 title="Trojans FC"
               />
