@@ -28,11 +28,11 @@ export const GridCell = ({ assigned, disabled, onClick }: GridCellProps) => {
         min-w-[88px] h-12 border-r last:border-r-0 
         flex items-center justify-center
         transition-all duration-150
-        ${assigned 
-          ? 'bg-success hover:bg-success/80 cursor-pointer' 
-          : disabled 
-            ? 'bg-muted/50 cursor-not-allowed' 
-            : 'bg-card hover:bg-accent cursor-pointer'
+        ${assigned
+          ? 'bg-success hover:bg-success/80 cursor-pointer'
+          : disabled
+            ? 'bg-muted/50 cursor-not-allowed'
+            : 'bg-card hover:bg-accent hover:shadow-sm cursor-pointer'
         }
         ${flash ? 'bg-destructive' : ''}
         active:scale-95

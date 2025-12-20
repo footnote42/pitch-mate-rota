@@ -7,9 +7,12 @@ import { GameCountSelector } from '@/components/GameCountSelector';
 import { AgeGroupSelector } from '@/components/AgeGroupSelector';
 import { Tutorial } from '@/components/Tutorial';
 import { ShareToWhatsApp } from '@/components/ShareToWhatsApp';
+import { useToast } from '@/hooks/use-toast';
 
 const Index = () => {
   const [showTutorial, setShowTutorial] = useState(false);
+  const [celebrationShown, setCelebrationShown] = useState<string | null>(null);
+  const { toast } = useToast();
   const {
     players,
     lastSaved,
@@ -48,6 +51,42 @@ const Index = () => {
       setShowTutorial(true);
     }
   }, []);
+
+  // Completion celebration
+  useEffect(() => {
+    const isGridComplete = () => {
+      if (players.length === 0) return false;
+
+      // Check all required halves are filled
+      const totalRequiredAssignments = numberOfGames * 2 * playersOnField;
+      if (assignments.length < totalRequiredAssignments) return false;
+
+      // Check all halves are balanced
+      for (let game = 1; game <= numberOfGames; game++) {
+        for (let half = 1; half <= 2; half++) {
+          const balance = getExperienceBalance(game, half);
+          if (!balance.isBalanced) return false;
+        }
+      }
+
+      return true;
+    };
+
+    const gridComplete = isGridComplete();
+    const completionKey = `${numberOfGames}-${assignments.length}`;
+
+    if (gridComplete && celebrationShown !== completionKey) {
+      toast({
+        title: "Looking good, Coach!",
+        description: "Your squad is match-ready 🏉",
+        duration: 4000,
+      });
+      setCelebrationShown(completionKey);
+    } else if (!gridComplete && celebrationShown) {
+      // Reset if grid becomes incomplete
+      setCelebrationShown(null);
+    }
+  }, [assignments, numberOfGames, players, playersOnField, getExperienceBalance, celebrationShown, toast]);
 
   return (
     <div className="min-h-screen bg-background">

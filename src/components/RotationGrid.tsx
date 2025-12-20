@@ -84,8 +84,18 @@ export const RotationGrid = ({
   const halves = [1, 2];
 
   return (
-    <div className="bg-card rounded-lg border overflow-hidden">
-      <div className="overflow-x-auto">
+    <div className="bg-card rounded-lg border overflow-hidden relative">
+      {/* Trojans Badge Watermark */}
+      {players.length > 0 && (
+        <img
+          src="/trojans-badge.png"
+          alt=""
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.06] pointer-events-none w-64 h-64 object-contain z-0"
+          aria-hidden="true"
+        />
+      )}
+
+      <div className="overflow-x-auto relative z-10">
         <div className="inline-block min-w-full">
           {/* Game label row */}
           <div className="flex border-b bg-muted">

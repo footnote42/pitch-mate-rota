@@ -246,48 +246,48 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ## Phase 4: Delight & Final Testing
 
-### Stage 9: Delightful Details (Choose 2-3) ⬜
+### Stage 9: Delightful Details (Choose 2-3) ✅
 **Goal:** Add moments of joy without distracting from function
 
-**Option A: Completion Celebration**
-- [ ] Detect when rotation grid is fully assigned AND balanced
-- [ ] Show subtle success toast:
+**Option A: Completion Celebration** ✅
+- [x] Detect when rotation grid is fully assigned AND balanced
+- [x] Show subtle success toast:
   - Message: "Looking good, Coach! Your squad is match-ready 🏉"
   - Duration: 3-4 seconds
   - Position: Top-center or bottom-center
-- [ ] Optional: Add subtle confetti animation (react-confetti)
-- [ ] Ensure doesn't trigger repeatedly on minor edits
+- [x] Optional: Add subtle confetti animation (react-confetti)
+- [x] Ensure doesn't trigger repeatedly on minor edits
 
-**Option B: Loading States**
+**Option B: Loading States** ❌ Skipped
 - [ ] Add loading spinner when first loading app
 - [ ] Use rugby-themed spinner if simple (spinning rugby ball SVG)
 - [ ] Skeleton loaders for player list/grid while data loads
 - [ ] Keep animations subtle and fast (<500ms)
 
-**Option C: Hover Interactions**
-- [ ] Add subtle hover effects to grid cells:
+**Option C: Hover Interactions** ✅
+- [x] Add subtle hover effects to grid cells:
   - Slight scale or shadow change
   - Color shift to indicate interactivity
-- [ ] Player card hover states:
+- [x] Player card hover states:
   - Slight elevation or border highlight
-- [ ] Button hover refinement:
+- [x] Button hover refinement:
   - Smooth color transitions
   - Consider: subtle icon animations
 
-**Option D: Grid Background Watermark**
-- [ ] Add subtle Trojans badge to grid background:
+**Option D: Grid Background Watermark** ✅
+- [x] Add subtle Trojans badge to grid background:
   - Position: center of grid area
   - Opacity: 5-8% (barely visible)
   - Ensure doesn't interfere with readability
   - Only show when grid has content
-- [ ] Test on various grid states (empty, partial, full)
+- [x] Test on various grid states (empty, partial, full)
 
-**Choose 2-3 options above to implement**
+**Choose 2-3 options above to implement** - Implemented A, C, D
 
 **Success Criteria:**
-- Delights feel earned, not gimmicky
-- Nothing slows down or interferes with core functionality
-- At least one detail makes Wayne smile
+- Delights feel earned, not gimmicky ✓
+- Nothing slows down or interferes with core functionality ✓
+- At least one detail makes Wayne smile ✓
 
 **Time Estimate:** 1-2 hours total
 
