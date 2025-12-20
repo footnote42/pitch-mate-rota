@@ -24,28 +24,28 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ## Phase 1: Foundation & Branding
 
-### Stage 1: Experience Level System ⬜
+### Stage 1: Experience Level System ✅
 **Goal:** Replace confusing "Nov/Exp" toggle with clear 3-level system
 
-- [ ] Remove existing "Nov/Exp" toggle from player input
-- [ ] Implement 3-level experience system:
+- [x] Remove existing "Nov/Exp" toggle from player input
+- [x] Implement 3-level experience system:
   - Level 1: "New Player" (⭐)
   - Level 2: "Getting There" (⭐⭐)
   - Level 3: "Match Ready" (⭐⭐⭐)
-- [ ] Use radio buttons or segmented control component (shadcn/ui)
-- [ ] Update player data structure to store `experience: 1 | 2 | 3`
-- [ ] Update balance checking logic to use weighted system:
+- [x] Use radio buttons or segmented control component (shadcn/ui)
+- [x] Update player data structure to store `experience: 1 | 2 | 3`
+- [x] Update balance checking logic to use weighted system:
   - New Player = 1 point
   - Getting There = 2 points
   - Match Ready = 3 points
   - Target: 12-16 points per half for 8 players
-- [ ] Update player list display to show stars instead of text
-- [ ] Test on mobile - ensure controls are touch-friendly
+- [x] Update player list display to show stars instead of text
+- [x] Test on mobile - ensure controls are touch-friendly
 
 **Success Criteria:** 
-- New users immediately understand what each level means
-- Balance algorithm accounts for 3 levels (not just 2)
-- Stars render clearly on mobile devices
+- New users immediately understand what each level means ✓
+- Balance algorithm accounts for 3 levels (not just 2) ✓
+- Stars render clearly on mobile devices ✓
 
 **Time Estimate:** 1-2 hours
 
@@ -54,12 +54,12 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 ### Stage 2: Trojans RFC Branding ⬜
 **Goal:** Make it unmistakably Wayne's tool for Trojans RFC
 
-- [ ] Fetch Trojans badge/logo:
-  - URL: `https://trojansfc.rfu.club/Media/Default/Logos/1362-2311190112.jpg`
-  - Save to `/public/trojans-badge.jpg` (or similar)
+- [ ] Find Trojans badge/logo:
+  - Image stored here: '/docs/images/trojans-badge.png
 - [ ] Add badge to header (top-right corner, ~40-50px size)
 - [ ] Update color scheme to Trojans colors:
-  - Primary blue: `#003C7D` (from their website theme)
+  - Primary blue: from their website theme https://trojansfc.rfu.club/
+  - Secondary red: from their website theme https://trojansfc.rfu.club/
   - White/light gray for backgrounds
   - Accent colors for warnings/success states
 - [ ] Update button styles to use Trojans blue

@@ -1,6 +1,7 @@
 import { Player } from '@/types/rotation';
 import { GridCell } from './GridCell';
 import { ExperienceBalance } from './ExperienceBalance';
+import { ExperienceLevelBadge } from './ExperienceLevelBadge';
 import { Button } from '@/components/ui/button';
 import { Eraser } from 'lucide-react';
 import {
@@ -22,7 +23,7 @@ interface RotationGridProps {
   isAssigned: (playerId: string, game: number, half: number) => boolean;
   toggleAssignment: (playerId: string, game: number, half: number) => boolean;
   getHalfCount: (game: number, half: number) => number;
-  getExperienceBalance: (game: number, half: number) => { experiencedCount: number; noviceCount: number; total: number };
+  getExperienceBalance: (game: number, half: number) => { totalPoints: number; playerCount: number; isBalanced: boolean; targetPoints: number };
   clearHalf: (game: number, half: number) => void;
   clearGame: (game: number) => void;
   gameLabels: Record<number, string>;
@@ -54,7 +55,7 @@ export const RotationGrid = ({
 
   const confirmClear = () => {
     if (!clearAction) return;
-    
+
     if (clearAction.type === 'half' && clearAction.half !== undefined) {
       clearHalf(clearAction.game, clearAction.half);
     } else if (clearAction.type === 'game') {
@@ -105,7 +106,7 @@ export const RotationGrid = ({
                 {halves.map(half => {
                   const count = getHalfCount(game, half);
                   const isFull = count >= playersOnField;
-                  
+
                   return (
                     <div key={half} className="flex flex-col min-w-[88px] px-2 py-1 border-r last:border-r-0">
                       <div className="flex items-center justify-between mb-1">
@@ -134,7 +135,8 @@ export const RotationGrid = ({
           {/* Player rows */}
           {players.map(player => (
             <div key={player.id} className="flex border-b last:border-b-0 hover:bg-accent/50 transition-colors">
-              <div className="sticky left-0 z-10 bg-card border-r min-w-[140px] px-3 py-2 flex items-center">
+              <div className="sticky left-0 z-10 bg-card border-r min-w-[140px] px-3 py-2 flex items-center gap-1">
+                <ExperienceLevelBadge level={player.experienceLevel} size="sm" />
                 <span className="text-sm font-medium text-foreground truncate">{player.name}</span>
               </div>
               {games.map(game => (
@@ -143,7 +145,7 @@ export const RotationGrid = ({
                     const assigned = isAssigned(player.id, game, half);
                     const count = getHalfCount(game, half);
                     const isFull = count >= playersOnField;
-                    
+
                     return (
                       <GridCell
                         key={half}
@@ -170,9 +172,10 @@ export const RotationGrid = ({
                   return (
                     <ExperienceBalance
                       key={half}
-                      experiencedCount={balance.experiencedCount}
-                      noviceCount={balance.noviceCount}
-                      total={balance.total}
+                      totalPoints={balance.totalPoints}
+                      playerCount={balance.playerCount}
+                      isBalanced={balance.isBalanced}
+                      targetPoints={balance.targetPoints}
                     />
                   );
                 })}
@@ -206,13 +209,13 @@ export const RotationGrid = ({
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {clearAction?.type === 'half' 
+              {clearAction?.type === 'half'
                 ? `Clear Game ${clearAction.game} - ${clearAction.half === 1 ? '1st' : '2nd'} Half?`
                 : `Clear Game ${clearAction?.game}?`
               }
             </AlertDialogTitle>
             <AlertDialogDescription>
-              {clearAction?.type === 'half' 
+              {clearAction?.type === 'half'
                 ? 'All player assignments in this half will be cleared.'
                 : 'Both halves will be cleared.'
               }

@@ -1,4 +1,19 @@
-export type ExperienceLevel = 'experienced' | 'novice';
+export type ExperienceLevel = 1 | 2 | 3;
+
+export const EXPERIENCE_LABELS = {
+  1: 'New Player',
+  2: 'Getting There',
+  3: 'Match Ready'
+} as const;
+
+export const EXPERIENCE_STARS = {
+  1: '⭐',
+  2: '⭐⭐',
+  3: '⭐⭐⭐'
+} as const;
+
+// Legacy type for migration
+export type LegacyExperienceLevel = 'experienced' | 'novice';
 
 export interface Player {
   id: string;

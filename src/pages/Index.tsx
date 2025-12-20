@@ -14,7 +14,7 @@ const Index = () => {
     playersOnField,
     addPlayer,
     removePlayer,
-    toggleExperience,
+    setExperienceLevel,
     toggleAssignment,
     clearHalf,
     clearGame,
@@ -64,7 +64,7 @@ const Index = () => {
           players={players}
           onAddPlayer={addPlayer}
           onRemovePlayer={removePlayer}
-          onToggleExperience={toggleExperience}
+          onSetExperienceLevel={setExperienceLevel}
           getPlayerHalfCount={getPlayerHalfCount}
           minimumHalves={getMinimumHalves()}
           fairShare={getFairShare()}

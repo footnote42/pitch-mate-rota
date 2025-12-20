@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Player, Assignment, RotationState } from '@/types/rotation';
+import { Player, Assignment, RotationState, ExperienceLevel, LegacyExperienceLevel } from '@/types/rotation';
 import { AgeGroup, AGE_GROUP_CONFIGS, DEFAULT_AGE_GROUP, AGE_GROUP_PREFERENCE_KEY } from '@/types/ageGroup';
 
 const STORAGE_KEY = 'squad-rotation-state';
@@ -14,7 +14,7 @@ export const useRotationState = () => {
   const [gameLabels, setGameLabels] = useState<Record<number, string>>({});
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
   const [ageGroup, setAgeGroup] = useState<AgeGroup>(DEFAULT_AGE_GROUP);
-  
+
   const playersOnField = AGE_GROUP_CONFIGS[ageGroup].playersOnField;
 
   // Load age group preference from localStorage on mount
@@ -32,13 +32,30 @@ export const useRotationState = () => {
     }
   }, []);
 
+  // Migration helper: convert legacy experience levels to new system
+  const migrateExperienceLevel = (level: any): ExperienceLevel => {
+    if (typeof level === 'number' && (level === 1 || level === 2 || level === 3)) {
+      return level as ExperienceLevel;
+    }
+    // Legacy string values
+    if (level === 'experienced') return 3;
+    if (level === 'novice') return 1;
+    // Default fallback
+    return 2;
+  };
+
   // Load state from localStorage on mount
   useEffect(() => {
     const savedState = localStorage.getItem(STORAGE_KEY);
     if (savedState) {
       try {
-        const parsed: RotationState = JSON.parse(savedState);
-        setPlayers(parsed.players || []);
+        const parsed: any = JSON.parse(savedState);
+        // Migrate players if needed
+        const migratedPlayers = (parsed.players || []).map((p: any) => ({
+          ...p,
+          experienceLevel: migrateExperienceLevel(p.experienceLevel)
+        }));
+        setPlayers(migratedPlayers);
         setAssignments(parsed.assignments || []);
         setNumberOfGames(parsed.numberOfGames || DEFAULT_NUMBER_OF_GAMES);
         setGameLabels(parsed.gameLabels || {});
@@ -60,7 +77,7 @@ export const useRotationState = () => {
     setLastSaved(new Date());
   }, [players, assignments, numberOfGames, gameLabels]);
 
-  const addPlayer = (name: string, experienceLevel: 'experienced' | 'novice') => {
+  const addPlayer = (name: string, experienceLevel: ExperienceLevel = 2) => {
     const newPlayer: Player = {
       id: `player-${Date.now()}-${Math.random()}`,
       name,
@@ -74,10 +91,10 @@ export const useRotationState = () => {
     setAssignments(prev => prev.filter(a => a.playerId !== playerId));
   };
 
-  const toggleExperience = (playerId: string) => {
-    setPlayers(prev => prev.map(p => 
-      p.id === playerId 
-        ? { ...p, experienceLevel: p.experienceLevel === 'experienced' ? 'novice' : 'experienced' }
+  const setExperienceLevel = (playerId: string, level: ExperienceLevel) => {
+    setPlayers(prev => prev.map(p =>
+      p.id === playerId
+        ? { ...p, experienceLevel: level }
         : p
     ));
   };
@@ -119,7 +136,7 @@ export const useRotationState = () => {
     setAssignments([]);
     setGameLabels({});
   };
-  
+
   const updateGameLabel = (game: number, label: string) => {
     setGameLabels(prev => ({
       ...prev,
@@ -155,23 +172,33 @@ export const useRotationState = () => {
   const getExperienceBalance = (game: number, half: number) => {
     const halfAssignments = assignments.filter(a => a.game === game && a.half === half);
     const assignedPlayers = players.filter(p => halfAssignments.some(a => a.playerId === p.id));
-    const experiencedCount = assignedPlayers.filter(p => p.experienceLevel === 'experienced').length;
-    const noviceCount = assignedPlayers.filter(p => p.experienceLevel === 'novice').length;
-    
-    return { experiencedCount, noviceCount, total: assignedPlayers.length };
+
+    // Calculate weighted points (1-3 based on experience level)
+    const totalPoints = assignedPlayers.reduce((sum, p) => sum + p.experienceLevel, 0);
+    const playerCount = assignedPlayers.length;
+
+    // Target: 2 points per player (ideal mix)
+    // For 8 players: target = 16, acceptable range 12-20
+    const targetPoints = playersOnField * 2;
+    const minPoints = playersOnField * 1.5;
+    const maxPoints = playersOnField * 2.5;
+
+    const isBalanced = playerCount === 0 || (totalPoints >= minPoints && totalPoints <= maxPoints);
+
+    return { totalPoints, playerCount, isBalanced, targetPoints };
   };
 
   const changeNumberOfGames = (newNumber: number): boolean => {
     if (newNumber < MIN_GAMES || newNumber > MAX_GAMES) {
       return false;
     }
-    
+
     // Check if there are any assignments
     if (assignments.length > 0) {
       // Return false to trigger confirmation dialog in component
       return false;
     }
-    
+
     setNumberOfGames(newNumber);
     return true;
   };
@@ -180,7 +207,7 @@ export const useRotationState = () => {
     if (newNumber < MIN_GAMES || newNumber > MAX_GAMES) {
       return;
     }
-    
+
     // Clear all assignments and update game count
     setAssignments([]);
     setNumberOfGames(newNumber);
@@ -192,7 +219,7 @@ export const useRotationState = () => {
       // Return false to trigger confirmation dialog in component
       return false;
     }
-    
+
     setAgeGroup(newAgeGroup);
     return true;
   };
@@ -212,7 +239,7 @@ export const useRotationState = () => {
     playersOnField,
     addPlayer,
     removePlayer,
-    toggleExperience,
+    setExperienceLevel,
     toggleAssignment,
     clearHalf,
     clearGame,

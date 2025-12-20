@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Player } from '@/types/rotation';
-import { UserPlus, X, Award, User } from 'lucide-react';
+import { Player, ExperienceLevel, EXPERIENCE_LABELS } from '@/types/rotation';
+import { UserPlus, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import {
@@ -16,6 +16,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ExperienceLevelBadge } from './ExperienceLevelBadge';
 
 const playerNameSchema = z.string()
   .trim()
@@ -25,9 +33,9 @@ const playerNameSchema = z.string()
 
 interface PlayerManagementProps {
   players: Player[];
-  onAddPlayer: (name: string, experience: 'experienced' | 'novice') => void;
+  onAddPlayer: (name: string, experience: ExperienceLevel) => void;
   onRemovePlayer: (playerId: string) => void;
-  onToggleExperience: (playerId: string) => void;
+  onSetExperienceLevel: (playerId: string, level: ExperienceLevel) => void;
   getPlayerHalfCount: (playerId: string) => number;
   minimumHalves: number;
   fairShare: number;
@@ -37,19 +45,19 @@ export const PlayerManagement = ({
   players,
   onAddPlayer,
   onRemovePlayer,
-  onToggleExperience,
+  onSetExperienceLevel,
   getPlayerHalfCount,
   minimumHalves,
   fairShare,
 }: PlayerManagementProps) => {
   const [newPlayerName, setNewPlayerName] = useState('');
-  const [newPlayerExperience, setNewPlayerExperience] = useState<'experienced' | 'novice'>('novice');
+  const [newPlayerExperience, setNewPlayerExperience] = useState<ExperienceLevel>(2);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
   const { toast } = useToast();
 
   const handleAddPlayer = () => {
     const result = playerNameSchema.safeParse(newPlayerName);
-    
+
     if (!result.success) {
       toast({
         title: "Invalid name",
@@ -58,10 +66,10 @@ export const PlayerManagement = ({
       });
       return;
     }
-    
+
     onAddPlayer(result.data, newPlayerExperience);
     setNewPlayerName('');
-    setNewPlayerExperience('novice');
+    setNewPlayerExperience(2);
   };
 
   const confirmRemove = (player: Player) => {
@@ -77,44 +85,54 @@ export const PlayerManagement = ({
 
   return (
     <div className="bg-card rounded-lg border p-4 space-y-4">
-      <div className="space-y-2">
+      <div className="space-y-3">
         <h2 className="text-lg font-semibold text-foreground">Players ({players.length})</h2>
-        
-        <div className="flex gap-2">
+
+        <div className="space-y-2">
           <Input
             placeholder="Player name"
             value={newPlayerName}
             onChange={(e) => setNewPlayerName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()}
-            className="flex-1"
           />
-          <div className="flex items-center gap-1 border rounded-md p-1 shrink-0">
-            <button
-              type="button"
-              onClick={() => setNewPlayerExperience('novice')}
-              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
-                newPlayerExperience === 'novice'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Nov
-            </button>
-            <button
-              type="button"
-              onClick={() => setNewPlayerExperience('experienced')}
-              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
-                newPlayerExperience === 'experienced'
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              Exp
-            </button>
+
+          <div className="flex gap-2">
+            <div className="flex-1 flex items-center gap-1 border rounded-md p-1">
+              <button
+                type="button"
+                onClick={() => setNewPlayerExperience(1)}
+                className={`flex-1 px-2 py-2 text-xs font-medium rounded transition-colors ${newPlayerExperience === 1
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                  }`}
+              >
+                ⭐ New
+              </button>
+              <button
+                type="button"
+                onClick={() => setNewPlayerExperience(2)}
+                className={`flex-1 px-2 py-2 text-xs font-medium rounded transition-colors ${newPlayerExperience === 2
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                  }`}
+              >
+                ⭐⭐ Getting There
+              </button>
+              <button
+                type="button"
+                onClick={() => setNewPlayerExperience(3)}
+                className={`flex-1 px-2 py-2 text-xs font-medium rounded transition-colors ${newPlayerExperience === 3
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                  }`}
+              >
+                ⭐⭐⭐ Ready
+              </button>
+            </div>
+            <Button onClick={handleAddPlayer} size="icon" className="shrink-0">
+              <UserPlus className="h-4 w-4" />
+            </Button>
           </div>
-          <Button onClick={handleAddPlayer} size="icon" className="shrink-0">
-            <UserPlus className="h-4 w-4" />
-          </Button>
         </div>
       </div>
 
@@ -130,25 +148,39 @@ export const PlayerManagement = ({
               key={player.id}
               className="flex items-center gap-2 p-2 rounded hover:bg-accent transition-colors group"
             >
-              <button
-                onClick={() => onToggleExperience(player.id)}
-                className="shrink-0"
+              <Select
+                value={player.experienceLevel.toString()}
+                onValueChange={(val) => onSetExperienceLevel(player.id, Number(val) as ExperienceLevel)}
               >
-                {player.experienceLevel === 'experienced' ? (
-                  <Badge variant="default" className="bg-primary">
-                    <Award className="h-3 w-3 mr-1" />
-                    Exp
-                  </Badge>
-                ) : (
-                  <Badge variant="secondary">
-                    <User className="h-3 w-3 mr-1" />
-                    Nov
-                  </Badge>
-                )}
-              </button>
-              
+                <SelectTrigger className="w-32 h-8 shrink-0">
+                  <SelectValue>
+                    <ExperienceLevelBadge level={player.experienceLevel} size="sm" />
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">
+                    <div className="flex items-center gap-2">
+                      <span>⭐</span>
+                      <span>New Player</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="2">
+                    <div className="flex items-center gap-2">
+                      <span>⭐⭐</span>
+                      <span>Getting There</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="3">
+                    <div className="flex items-center gap-2">
+                      <span>⭐⭐⭐</span>
+                      <span>Match Ready</span>
+                    </div>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+
               <span className="flex-1 text-sm font-medium text-foreground">{player.name}</span>
-              
+
               <div className="flex items-center gap-1 text-xs">
                 <span className={belowMinimum ? 'text-warning font-semibold' : 'text-muted-foreground'}>
                   {halfCount}
@@ -169,7 +201,7 @@ export const PlayerManagement = ({
                   </Badge>
                 )}
               </div>
-              
+
               <Button
                 variant="ghost"
                 size="icon"
@@ -181,7 +213,7 @@ export const PlayerManagement = ({
             </div>
           );
         })}
-        
+
         {players.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-4">
             No players added yet. Add your first player above.
