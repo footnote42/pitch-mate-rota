@@ -102,26 +102,26 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ## Phase 2: Usability & Guidance
 
-### Stage 4: First-Use Tutorial ⬜
+### Stage 4: First-Use Tutorial ✅
 **Goal:** Eliminate confusion for first-time users
 
-- [ ] Create "How to Use" modal component (shadcn/ui Dialog)
-- [ ] Design 3-4 step walkthrough:
+- [x] Create "How to Use" modal component (shadcn/ui Dialog)
+- [x] Design 3-4 step walkthrough:
   1. "Add your squad with their experience levels"
   2. "Click cells to assign players to game halves"
   3. "Check balance warnings - mix experienced with newer players"
   4. "Share your plan when ready"
-- [ ] Add visual indicators (icons, highlights) to make steps scannable
-- [ ] Store dismissal in localStorage (don't show every visit)
-- [ ] Add "Help" button (rugby ball icon?) to re-open tutorial
+- [x] Add visual indicators (icons, highlights) to make steps scannable
+- [x] Store dismissal in localStorage (don't show every visit)
+- [x] Add "Help" button (rugby ball icon?) to re-open tutorial
   - Position: floating bottom-right or in header
-- [ ] Test tutorial flow on mobile (ensure readable, not overwhelming)
-- [ ] Add "Skip" button for returning users
+- [x] Test tutorial flow on mobile (ensure readable, not overwhelming)
+- [x] Add "Skip" button for returning users
 
 **Success Criteria:**
-- First-time user understands tool purpose within 30 seconds
-- Tutorial doesn't block critical functionality
-- Help remains accessible without cluttering UI
+- First-time user understands tool purpose within 30 seconds ✓
+- Tutorial doesn't block critical functionality ✓
+- Help remains accessible without cluttering UI ✓
 
 **Time Estimate:** 1-2 hours
 

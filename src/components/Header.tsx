@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { RotateCcw, Trash2 } from 'lucide-react';
+import { RotateCcw, Trash2, HelpCircle } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,9 +16,10 @@ interface HeaderProps {
   lastSaved: Date;
   onClearAll: () => void;
   onResetAll: () => void;
+  onOpenTutorial?: () => void;
 }
 
-export const Header = ({ lastSaved, onClearAll, onResetAll }: HeaderProps) => {
+export const Header = ({ lastSaved, onClearAll, onResetAll, onOpenTutorial }: HeaderProps) => {
   const [showClearDialog, setShowClearDialog] = useState(false);
   const [showResetDialog, setShowResetDialog] = useState(false);
 
@@ -51,13 +52,25 @@ export const Header = ({ lastSaved, onClearAll, onResetAll }: HeaderProps) => {
                 title="Trojans FC"
               />
               <div className="flex gap-2">
+                {onOpenTutorial && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={onOpenTutorial}
+                    className="bg-primary-foreground/10 hover:bg-primary-foreground/20"
+                    title="Show Tutorial"
+                  >
+                    <HelpCircle className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">Help</span>
+                  </Button>
+                )}
                 <Button
                   variant="secondary"
                   size="sm"
                   onClick={() => setShowClearDialog(true)}
                 >
                   <RotateCcw className="h-4 w-4 mr-2" />
-                  New Festival
+                  <span className="hidden sm:inline">New Festival</span>
                 </Button>
                 <Button
                   variant="destructive"
@@ -65,7 +78,7 @@ export const Header = ({ lastSaved, onClearAll, onResetAll }: HeaderProps) => {
                   onClick={() => setShowResetDialog(true)}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
-                  Reset All
+                  <span className="hidden sm:inline">Reset All</span>
                 </Button>
               </div>
             </div>
