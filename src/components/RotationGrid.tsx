@@ -3,7 +3,7 @@ import { GridCell } from './GridCell';
 import { ExperienceBalance } from './ExperienceBalance';
 import { ExperienceLevelBadge } from './ExperienceLevelBadge';
 import { Button } from '@/components/ui/button';
-import { Eraser } from 'lucide-react';
+import { Eraser, Users } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -66,8 +66,16 @@ export const RotationGrid = ({
 
   if (players.length === 0) {
     return (
-      <div className="bg-card rounded-lg border p-8 text-center">
-        <p className="text-muted-foreground">Add your squad above, then click cells to assign players to games</p>
+      <div className="bg-card rounded-lg border p-12 text-center">
+        <div className="flex flex-col items-center gap-3 max-w-md mx-auto">
+          <div className="rounded-full bg-primary/10 p-4">
+            <Users className="h-8 w-8 text-primary" />
+          </div>
+          <div className="space-y-1">
+            <p className="text-base font-medium text-foreground">Ready to build your game plan?</p>
+            <p className="text-sm text-muted-foreground">Add players to your squad, then click cells to build rotations</p>
+          </div>
+        </div>
       </div>
     );
   }

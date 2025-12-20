@@ -151,24 +151,24 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ---
 
-### Stage 6: Enhanced Empty States ⬜
+### Stage 6: Enhanced Empty States ✅
 **Goal:** Guide users when sections are empty
 
-- [ ] Update empty player list message:
+- [x] Update empty player list message:
   - From: "No players added yet. Add your first player above."
   - To: "No squad yet? Time to round up the troops! 🏉"
   - Add helpful subtext: "Use the form above to add players"
-- [ ] Update empty grid state (when no players assigned):
+- [x] Update empty grid state (when no players assigned):
   - Show subtle message: "Add players to your squad, then click cells to build rotations"
   - Include icon or illustration (rugby-themed if simple)
-- [ ] Update "no games" state if applicable
-- [ ] Ensure empty states are encouraging, not intimidating
-- [ ] Test readability on small mobile screens
+- [x] Update "no games" state if applicable
+- [x] Ensure empty states are encouraging, not intimidating
+- [x] Test readability on small mobile screens
 
 **Success Criteria:**
-- Empty states feel helpful rather than sad/broken
-- New users know exactly what to do first
-- Copy maintains coaching personality
+- Empty states feel helpful rather than sad/broken ✓
+- New users know exactly what to do first ✓
+- Copy maintains coaching personality ✓
 
 **Time Estimate:** 30 minutes
 
