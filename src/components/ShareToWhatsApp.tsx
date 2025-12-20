@@ -36,53 +36,55 @@ export const ShareToWhatsApp = ({
         if (playerList.length === 0) return '(empty)';
 
         return playerList
-            .map((p) => `${p.name} ${EXPERIENCE_STARS[p.experienceLevel]}`)
+            .map((p) => p.name)
             .join(', ');
     };
 
-    const getExperienceCounts = () => {
-        return {
-            1: players.filter((p) => p.experienceLevel === 1).length,
-            2: players.filter((p) => p.experienceLevel === 2).length,
-            3: players.filter((p) => p.experienceLevel === 3).length,
-        };
+    const getPlaytimeStats = () => {
+        // Count how many halves each player is assigned to
+        const playerHalfCounts = new Map<string, number>();
+
+        players.forEach(player => {
+            const count = assignments.filter(a => a.playerId === player.id).length;
+            playerHalfCounts.set(player.id, count);
+        });
+
+        const halfCounts = Array.from(playerHalfCounts.values());
+        const totalHalves = halfCounts.reduce((sum, count) => sum + count, 0);
+        const averageHalves = players.length > 0 ? totalHalves / players.length : 0;
+        const minHalves = halfCounts.length > 0 ? Math.min(...halfCounts) : 0;
+
+        return { minHalves, averageHalves };
     };
 
     const formatRotationPlan = (): string => {
         const lines: string[] = [];
 
         // Header
-        lines.push(`📋 Squad Rotation Plan - ${ageGroup}`);
+        lines.push(`Squad Rotation Plan - ${ageGroup}`);
         lines.push('');
 
         // Games
         for (let game = 1; game <= numberOfGames; game++) {
             const gameLabel = gameLabels[game] || `Game ${game}`;
-            lines.push(`🏉 ${gameLabel}`);
+            lines.push(gameLabel);
 
             // Half 1
             const half1Players = getPlayersForHalf(game, 1);
-            lines.push(`  Half 1: ${formatPlayerList(half1Players)}`);
+            lines.push(`Half 1: ${formatPlayerList(half1Players)}`);
 
             // Half 2
             const half2Players = getPlayersForHalf(game, 2);
-            lines.push(`  Half 2: ${formatPlayerList(half2Players)}`);
+            lines.push(`Half 2: ${formatPlayerList(half2Players)}`);
 
             lines.push('');
         }
 
-        // Experience summary
+        // Playtime stats
+        const { minHalves, averageHalves } = getPlaytimeStats();
         lines.push('---');
-        lines.push('✨ Experience Summary');
-        const expCounts = getExperienceCounts();
-        lines.push(`  ⭐⭐⭐ Match Ready: ${expCounts[3]} players`);
-        lines.push(`  ⭐⭐ Getting There: ${expCounts[2]} players`);
-        lines.push(`  ⭐ New Players: ${expCounts[1]} players`);
-        lines.push('');
-
-        // Stats
-        lines.push(`📊 Squad Size: ${players.length}`);
-        lines.push(`🎯 Total Games: ${numberOfGames}`);
+        lines.push(`Minimum playing time: ${minHalves} ${minHalves === 1 ? 'half' : 'halves'}`);
+        lines.push(`Average playing time: ${averageHalves.toFixed(1)} halves per player`);
 
         return lines.join('\n');
     };
