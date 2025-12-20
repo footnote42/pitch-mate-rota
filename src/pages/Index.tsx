@@ -6,6 +6,7 @@ import { RotationGrid } from '@/components/RotationGrid';
 import { GameCountSelector } from '@/components/GameCountSelector';
 import { AgeGroupSelector } from '@/components/AgeGroupSelector';
 import { Tutorial } from '@/components/Tutorial';
+import { ShareToWhatsApp } from '@/components/ShareToWhatsApp';
 
 const Index = () => {
   const [showTutorial, setShowTutorial] = useState(false);
@@ -37,6 +38,7 @@ const Index = () => {
     updateGameLabel,
     MIN_GAMES,
     MAX_GAMES,
+    assignments,
   } = useRotationState();
 
   // Check if user has seen tutorial before
@@ -97,6 +99,19 @@ const Index = () => {
           gameLabels={gameLabels}
           updateGameLabel={updateGameLabel}
         />
+
+        {players.length > 0 && assignments.length > 0 && (
+          <div className="bg-card border rounded-lg p-4">
+            <ShareToWhatsApp
+              players={players}
+              assignments={assignments}
+              numberOfGames={numberOfGames}
+              ageGroup={ageGroup}
+              gameLabels={gameLabels}
+              playersOnField={playersOnField}
+            />
+          </div>
+        )}
 
         {players.length > 0 && (
           <div className="bg-card border rounded-lg p-4">

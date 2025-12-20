@@ -176,14 +176,14 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ## Phase 3: Sharing & Polish
 
-### Stage 7: WhatsApp Share Feature ⬜
+### Stage 7: WhatsApp Share Feature ✅
 **Goal:** Enable coaches to share rotation plans instantly
 
-- [ ] Add "Share to WhatsApp" button (visible when squad has assignments)
+- [x] Add "Share to WhatsApp" button (visible when squad has assignments)
   - Position: Above or below grid, prominent but not obtrusive
   - Use WhatsApp green (#25D366) for button color
   - Icon: WhatsApp logo or share icon
-- [ ] Build share functionality:
+- [x] Build share functionality:
   - Format rotation plan as text:
     ```
     📋 Squad Rotation Plan - [Age Group]
@@ -193,20 +193,21 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
     
     Game 2 (Half 1): ...
     
-    ⭐ Experience Mix: X Match Ready, Y Getting There, Z New Players
+    Minimum playing time: X halves
+    Average playing time: N.n halves per player
     ```
   - Encode message for WhatsApp URL
   - Open: `https://wa.me/?text=[encoded_message]`
-- [ ] Handle edge cases:
+- [x] Handle edge cases:
   - Empty squad → disable button with tooltip
   - Incomplete rotations → show warning but allow share
-- [ ] Test on mobile device (actual WhatsApp integration)
-- [ ] Add copy-to-clipboard fallback if WhatsApp not available
+- [x] Test on mobile device (actual WhatsApp integration)
+- [x] Add copy-to-clipboard fallback if WhatsApp not available
 
 **Success Criteria:**
-- Coaches can share plans in 2 clicks
-- Message format is readable in WhatsApp
-- Works on both mobile and desktop browsers
+- Coaches can share plans in 2 clicks ✓
+- Message format is readable in WhatsApp ✓
+- Works on both mobile and desktop browsers ✓
 
 **Time Estimate:** 1-2 hours
 
