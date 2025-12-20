@@ -86,7 +86,7 @@ export const PlayerManagement = ({
   return (
     <div className="bg-card rounded-lg border p-4 space-y-4">
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-foreground">Players ({players.length})</h2>
+        <h2 className="text-lg font-semibold text-foreground">Your Squad ({players.length})</h2>
 
         <div className="space-y-2">
           <Input
@@ -102,8 +102,8 @@ export const PlayerManagement = ({
                 type="button"
                 onClick={() => setNewPlayerExperience(1)}
                 className={`flex-1 px-2 py-2 text-xs font-medium rounded transition-colors ${newPlayerExperience === 1
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 ⭐ New
@@ -112,8 +112,8 @@ export const PlayerManagement = ({
                 type="button"
                 onClick={() => setNewPlayerExperience(2)}
                 className={`flex-1 px-2 py-2 text-xs font-medium rounded transition-colors ${newPlayerExperience === 2
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 ⭐⭐ Getting There
@@ -122,8 +122,8 @@ export const PlayerManagement = ({
                 type="button"
                 onClick={() => setNewPlayerExperience(3)}
                 className={`flex-1 px-2 py-2 text-xs font-medium rounded transition-colors ${newPlayerExperience === 3
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:text-foreground'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
                 ⭐⭐⭐ Ready
@@ -216,7 +216,7 @@ export const PlayerManagement = ({
 
         {players.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-4">
-            No players added yet. Add your first player above.
+            No squad yet? Time to round up the troops! 🏉
           </p>
         )}
       </div>
@@ -224,9 +224,9 @@ export const PlayerManagement = ({
       <AlertDialog open={!!playerToRemove} onOpenChange={(open) => !open && setPlayerToRemove(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Remove {playerToRemove?.name}?</AlertDialogTitle>
+            <AlertDialogTitle>Remove {playerToRemove?.name} from squad?</AlertDialogTitle>
             <AlertDialogDescription>
-              This will remove all their assignments from the grid.
+              This will remove them from all game assignments.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

@@ -76,25 +76,25 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ---
 
-### Stage 3: Improved Microcopy ⬜
+### Stage 3: Improved Microcopy ✅
 **Goal:** Add personality that reflects age-grade coaching context
 
-- [ ] Update page title/heading from generic to coaching-focused:
+- [x] Update page title/heading from generic to coaching-focused:
   - Suggestion: "Squad Rotation Tool" → "Your Squad Planner" or "Game Day Organizer"
-- [ ] Replace section headings with coach-friendly language:
+- [x] Replace section headings with coach-friendly language:
   - Player list → "Your Squad"
   - Grid/rotation area → "Game Plan" or "The Rota"
   - Balance indicators → "Fair Play Tracker"
-- [ ] Update button text:
+- [x] Update button text:
   - "Add Player" → "Add to Squad" or "Sign Up Player"
   - Consider: "Clear All" → "Start Fresh"
-- [ ] Add tooltips/help text where needed (brief, conversational)
-- [ ] Review all copy for tone - should feel helpful, not clinical
+- [x] Add tooltips/help text where needed (brief, conversational)
+- [x] Review all copy for tone - should feel helpful, not clinical
 
 **Success Criteria:**
-- Copy feels like it was written by someone who coaches age-grade rugby
-- Terminology matches how coaches actually talk
-- No unnecessary jargon or overly formal language
+- Copy feels like it was written by someone who coaches age-grade rugby ✓
+- Terminology matches how coaches actually talk ✓
+- No unnecessary jargon or overly formal language ✓
 
 **Time Estimate:** 30 minutes
 

@@ -38,7 +38,7 @@ export const Header = ({ lastSaved, onClearAll, onResetAll }: HeaderProps) => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between flex-wrap gap-3">
             <div>
-              <h1 className="text-2xl font-bold">Squad Rotation Tool</h1>
+              <h1 className="text-2xl font-bold">Your Squad Planner</h1>
               <p className="text-sm text-primary-foreground/80 mt-0.5">
                 Last saved: {formatLastSaved(lastSaved)}
               </p>
@@ -76,9 +76,9 @@ export const Header = ({ lastSaved, onClearAll, onResetAll }: HeaderProps) => {
       <AlertDialog open={showClearDialog} onOpenChange={setShowClearDialog}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Start new festival?</AlertDialogTitle>
+            <AlertDialogTitle>Ready for a new festival?</AlertDialogTitle>
             <AlertDialogDescription>
-              All assignments will be cleared. Players will be kept.
+              All game assignments will be cleared, but your squad stays intact.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

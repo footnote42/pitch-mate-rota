@@ -67,7 +67,7 @@ export const RotationGrid = ({
   if (players.length === 0) {
     return (
       <div className="bg-card rounded-lg border p-8 text-center">
-        <p className="text-muted-foreground">Add players to start creating rotations</p>
+        <p className="text-muted-foreground">Add your squad above, then click cells to assign players to games</p>
       </div>
     );
   }
@@ -82,7 +82,7 @@ export const RotationGrid = ({
           {/* Game label row */}
           <div className="flex border-b bg-muted">
             <div className="sticky left-0 z-20 bg-muted border-r min-w-[140px] px-3 py-2">
-              <span className="text-sm font-semibold text-foreground">Team / Time</span>
+              <span className="text-sm font-semibold text-foreground">Opposition & Kick-off</span>
             </div>
             {games.map(game => (
               <div key={`label-${game}`} className="border-r last:border-r-0 min-w-[176px] px-2 py-2">
@@ -90,7 +90,7 @@ export const RotationGrid = ({
                   type="text"
                   value={gameLabels[game] || ''}
                   onChange={(e) => updateGameLabel(game, e.target.value)}
-                  placeholder="Team X - 1000 hrs"
+                  placeholder="e.g. Tigers - 10:00"
                   className="w-full text-center text-xs font-medium bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 placeholder:text-muted-foreground/50"
                 />
               </div>
@@ -163,7 +163,7 @@ export const RotationGrid = ({
           {/* Experience balance row */}
           <div className="flex border-t bg-muted/50">
             <div className="sticky left-0 z-10 bg-muted/50 border-r min-w-[140px] px-3 py-2">
-              <span className="text-xs font-semibold text-foreground">Balance</span>
+              <span className="text-xs font-semibold text-foreground">Experience Mix</span>
             </div>
             {games.map(game => (
               <div key={game} className="flex border-r last:border-r-0">
@@ -210,14 +210,14 @@ export const RotationGrid = ({
           <AlertDialogHeader>
             <AlertDialogTitle>
               {clearAction?.type === 'half'
-                ? `Clear Game ${clearAction.game} - ${clearAction.half === 1 ? '1st' : '2nd'} Half?`
-                : `Clear Game ${clearAction?.game}?`
+                ? `Clear this half?`
+                : `Clear both halves of Game ${clearAction?.game}?`
               }
             </AlertDialogTitle>
             <AlertDialogDescription>
               {clearAction?.type === 'half'
-                ? 'All player assignments in this half will be cleared.'
-                : 'Both halves will be cleared.'
+                ? 'All assignments for this half will be removed.'
+                : 'All assignments for this game will be removed.'
               }
             </AlertDialogDescription>
           </AlertDialogHeader>
