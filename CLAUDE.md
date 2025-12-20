@@ -91,50 +91,80 @@ All state updates flow through functions provided by `useRotationState`, passed 
 ```
 src/
 ├── components/
-│   ├── Header.tsx              # App header with save status, reset/clear
-│   ├── PlayerManagement.tsx    # Add/remove players, toggle experience
-│   ├── RotationGrid.tsx        # Main grid (games × halves)
-│   ├── GridCell.tsx            # Individual assignment cell
-│   ├── ExperienceBalance.tsx   # Experience distribution per half
-│   ├── GameCountSelector.tsx   # Change number of games (3-8)
-│   └── ui/                     # 50+ shadcn-ui components
+│   ├── Header.tsx                  # App header with Trojans branding, save status, reset/clear, help button
+│   ├── PlayerManagement.tsx        # Add/remove players, 3-level experience system, sorting
+│   ├── RotationGrid.tsx            # Main grid with Trojans watermark (games × halves)
+│   ├── GridCell.tsx                # Individual assignment cell with hover effects
+│   ├── ExperienceBalance.tsx       # Experience distribution per half
+│   ├── ExperienceLevelBadge.tsx    # Star badges for experience levels
+│   ├── GameCountSelector.tsx       # Change number of games (3-8)
+│   ├── AgeGroupSelector.tsx        # Select age group (U7-U18)
+│   ├── Tutorial.tsx                # 4-step first-use tutorial
+│   ├── ShareToWhatsApp.tsx         # WhatsApp sharing functionality
+│   └── ui/                         # 50+ shadcn-ui components
 ├── hooks/
-│   └── useRotationState.ts     # Core state management logic
+│   ├── useRotationState.ts         # Core state management logic
+│   └── use-toast.ts                # Toast notifications hook
 ├── types/
-│   └── rotation.ts             # TypeScript interfaces
+│   └── rotation.ts                 # TypeScript interfaces
 ├── lib/
-│   └── utils.ts                # cn() utility for className merging
+│   └── utils.ts                    # cn() utility for className merging
 └── pages/
-    ├── Index.tsx               # Main application page
-    └── NotFound.tsx            # 404 fallback
+    ├── Index.tsx                   # Main application page with completion celebration
+    └── NotFound.tsx                # 404 fallback
 ```
 
 ## Key Features
 
 ### Player Management (`PlayerManagement.tsx`)
-- Add players with name + experience level (novice/experienced)
-- Toggle experience level inline
+- Add players with name + 3-level experience system:
+  - ⭐ New Player (Level 1)
+  - ⭐⭐ Getting There (Level 2)
+  - ⭐⭐⭐ Match Ready (Level 3)
+- Change experience level via dropdown
+- Sort players by: Order Added, Alphabetical (A-Z), or Experience Level
 - Remove players with confirmation
-- Players auto-sorted alphabetically
 - Real-time half count with fairness indicators (badges showing "Need X more", "Below fair", "Over-used")
+- Enhanced empty state with encouraging messaging
 
 ### Rotation Grid (`RotationGrid.tsx`)
-- Click-to-toggle assignment system
+- Click-to-toggle assignment system with hover effects
 - Sticky left column (player names) for horizontal scrolling
 - Hard limit: 8 players per half (cells disabled when full)
-- Clear half / Clear game actions
-- Experience balance row at bottom showing experienced vs novice counts
+- Clear half / Clear game actions with confirmation dialogs
+- Experience balance row showing point totals (weighted by experience level)
+- Subtle Trojans RFC logo watermark (6% opacity)
+- Enhanced empty state with icon and helpful messaging
+- Editable game labels (e.g., "Tigers - 10:00")
 
 ### Game Configuration (`GameCountSelector.tsx`)
 - Variable number of games (3-8) via dropdown
 - Smart confirmation: only prompts if assignments exist
 - Clears all assignments when game count changes
 
-### Visual Feedback
+### Tutorial System (`Tutorial.tsx`)
+- 4-step walkthrough for first-time users
+- Visual step indicators with color-coded icons
+- localStorage tracking to show once per user
+- Reopenable via Help button in header
+- Skip option for returning users
+- Mobile-optimized dialog with clear navigation
+
+### WhatsApp Sharing (`ShareToWhatsApp.tsx`)
+- One-click share to WhatsApp with formatted rotation plan
+- Includes game assignments, experience distribution, and playing time stats
+- Copy-to-clipboard fallback for desktop users
+- Only appears when squad has assignments
+- Mobile-first design with WhatsApp green branding
+
+### Visual Feedback & Polish
 - Red flash animation on invalid actions (clicking full cells)
+- Subtle hover effects on grid cells and buttons
 - Color-coded states: success (green), warning (amber), destructive (red)
 - Real-time counters (e.g., "6/8 FULL" indicators)
 - Badge indicators for player fairness tracking
+- Completion celebration toast when grid is fully balanced
+- Trojans RFC branding throughout (logo, colors)
 
 ## Working with shadcn-ui Components
 
@@ -199,9 +229,13 @@ Add calculation functions to `useRotationState` hook rather than computing in co
 ## Important Notes
 
 - **Player IDs** are generated as `player-${Date.now()}-${Math.random()}`
-- **localStorage key** is `'squad-rotation-state'` - changing this will reset user data
+- **localStorage keys**:
+  - `'squad-rotation-state'` - main app state
+  - `'tutorial-completed'` - tutorial tracking
 - **No API calls** - all data is local to the browser
 - **RFU rules** encoded in fairness calculations (50% minimum playing time)
+- **Experience point system**: New (1pt) + Getting There (2pts) + Match Ready (3pts) = target 12-16pts per half
+- **Trojans RFC branding**: Logo at `/trojans_logo.png`, primary blue color scheme
 - This is a **Lovable-generated codebase** but fully editable/customizable
 
 ## Testing

@@ -9,7 +9,8 @@
       "Bash(npm run dev:*)",
       "mcp__playwright__browser_navigate",
       "mcp__playwright__browser_type",
-      "mcp__playwright__browser_run_code"
+      "mcp__playwright__browser_run_code",
+      "mcp__playwright__browser_tabs"
     ]
   }
 }

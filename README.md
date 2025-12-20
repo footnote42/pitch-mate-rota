@@ -1,73 +1,102 @@
-# Welcome to your Lovable project
+# Pitch Mate Rota - Squad Rotation Manager
 
-## Project info
+A rugby player rotation management tool designed for festival games, helping coaches ensure fair playing time and RFU compliance while managing squad rotations.
 
-**URL**: https://lovable.dev/projects/85439aaf-2942-47b5-bb0e-f9d395f63df6
+**Built for**: Trojans RFC Age-Grade Coaches
+**Tech Stack**: React 18 + TypeScript + Vite + shadcn-ui + Tailwind CSS
 
-## How can I edit this code?
+## Features
 
-There are several ways of editing your application.
+### 🏉 Smart Squad Management
+- **3-Level Experience System**: Classify players as New (⭐), Getting There (⭐⭐), or Match Ready (⭐⭐⭐)
+- **Flexible Sorting**: Sort your squad by order added, alphabetically, or by experience level
+- **Real-Time Fairness Tracking**: Visual indicators show playing time distribution and RFU compliance
 
-**Use Lovable**
+### 📊 Intelligent Rotation Grid
+- **Interactive Assignment**: Click cells to quickly assign players to game halves
+- **Balance Indicators**: Weighted experience point system ensures balanced team selection
+- **Hard Limits**: Automatic enforcement of 8 players per half (RFU standard)
+- **Editable Game Labels**: Add opponent names and kick-off times for each game
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/85439aaf-2942-47b5-bb0e-f9d395f63df6) and start prompting.
+### 📱 Mobile-First Design
+- **Offline-First**: All data stored locally - works perfectly pitchside without internet
+- **Touch-Optimized**: Large, easy-to-tap controls designed for outdoor use
+- **Responsive Grid**: Horizontal scrolling for multi-game management on small screens
+- **Trojans RFC Branding**: Custom colors and logo throughout
 
-Changes made via Lovable will be committed automatically to this repo.
+### 🎓 First-Time User Experience
+- **4-Step Tutorial**: Clear walkthrough for new users
+- **Helpful Empty States**: Encouraging messaging guides you through first use
+- **Help Button**: Always accessible tutorial re-launch from header
 
-**Use your preferred IDE**
+### 📲 Quick Sharing
+- **WhatsApp Integration**: Share rotation plans instantly with parents and coaches
+- **Formatted Messages**: Clean, readable format includes all game assignments and stats
+- **Copy-to-Clipboard**: Fallback option for desktop users
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### ✨ Delightful Details
+- **Completion Celebration**: Toast notification when your rotation is fully balanced
+- **Hover Effects**: Subtle visual feedback on interactive elements
+- **Subtle Watermark**: Trojans RFC logo faintly visible in grid background
+- **Smooth Animations**: Professional transitions throughout
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Quick Start
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+# Install dependencies
+npm install
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start development server
 npm run dev
+
+# Build for production
+npm run build
 ```
 
-**Edit a file directly in GitHub**
+## How It Works
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. **Add Your Squad**: Enter player names and select their experience level
+2. **Build Rotations**: Click grid cells to assign players to game halves
+3. **Check Balance**: Monitor experience mix and playing time distribution
+4. **Share**: Send your rotation plan via WhatsApp or copy to clipboard
 
-**Use GitHub Codespaces**
+## RFU Compliance
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+- **Minimum Playing Time**: 50% rule automatically tracked (minimum halves calculated per squad size)
+- **Fair Distribution**: Visual indicators show when players are below, at, or above fair share
+- **8-Player Standard**: Hard limit enforced for U7-U18 age groups
 
-## What technologies are used for this project?
+## Configuration
 
-This project is built with:
+- **Games**: 3-8 games per festival (default: 5)
+- **Age Groups**: U7, U8, U9, U10, U11, U12, U13, U14, U15, U16, U17, U18
+- **Players on Field**: Auto-configured per age group (U7-U18 = 8 players)
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## Data Storage
 
-## How can I deploy this project?
+All data is stored in your browser's localStorage:
+- **Squad rosters**: Persist between sessions
+- **Game assignments**: Automatically saved
+- **Tutorial status**: Remember if you've completed the walkthrough
 
-Simply open [Lovable](https://lovable.dev/projects/85439aaf-2942-47b5-bb0e-f9d395f63df6) and click on Share -> Publish.
+**Note**: Clearing browser data will reset the app. Use the "New Festival" button to clear assignments while keeping your squad.
 
-## Can I connect a custom domain to my Lovable project?
+## Development
 
-Yes, you can!
+Built with:
+- **Vite**: Lightning-fast HMR and build tool
+- **React 18**: Modern React with hooks
+- **TypeScript**: Type-safe development
+- **shadcn-ui**: Beautiful, accessible components
+- **Tailwind CSS**: Utility-first styling
+- **Lucide Icons**: Consistent iconography
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## Deployment
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+This project is deployed via [Lovable](https://lovable.dev/projects/85439aaf-2942-47b5-bb0e-f9d395f63df6).
+
+Push to GitHub and Lovable auto-deploys to production.
+
+## License
+
+Built for Trojans RFC with ❤️ by Wayne
