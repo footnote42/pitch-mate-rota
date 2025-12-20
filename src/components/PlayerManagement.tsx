@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Player, ExperienceLevel, EXPERIENCE_LABELS } from '@/types/rotation';
-import { UserPlus, X } from 'lucide-react';
+import { UserPlus, X, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import {
@@ -31,6 +31,8 @@ const playerNameSchema = z.string()
   .max(50, 'Name must be less than 50 characters')
   .regex(/^[a-zA-Z0-9\s'-]+$/, 'Name contains invalid characters');
 
+type SortOption = 'order-added' | 'alphabetical' | 'experience';
+
 interface PlayerManagementProps {
   players: Player[];
   onAddPlayer: (name: string, experience: ExperienceLevel) => void;
@@ -53,6 +55,7 @@ export const PlayerManagement = ({
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerExperience, setNewPlayerExperience] = useState<ExperienceLevel>(2);
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
+  const [sortBy, setSortBy] = useState<SortOption>('order-added');
   const { toast } = useToast();
 
   const handleAddPlayer = () => {
@@ -83,10 +86,45 @@ export const PlayerManagement = ({
     }
   };
 
+  const getSortedPlayers = (): Player[] => {
+    const playersCopy = [...players];
+
+    switch (sortBy) {
+      case 'alphabetical':
+        return playersCopy.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+
+      case 'experience':
+        // Sort by experience level: 3 (Match Ready) → 2 (Getting There) → 1 (New Player)
+        return playersCopy.sort((a, b) => b.experienceLevel - a.experienceLevel);
+
+      case 'order-added':
+      default:
+        return playersCopy; // Maintain original order
+    }
+  };
+
+  const sortedPlayers = getSortedPlayers();
+
   return (
     <div className="bg-card rounded-lg border p-4 space-y-4">
       <div className="space-y-3">
-        <h2 className="text-lg font-semibold text-foreground">Your Squad ({players.length})</h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="text-lg font-semibold text-foreground">Your Squad ({players.length})</h2>
+
+          {players.length > 0 && (
+            <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortOption)}>
+              <SelectTrigger className="w-[160px] h-8 text-xs">
+                <ArrowUpDown className="h-3 w-3 mr-1" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="order-added">Order Added</SelectItem>
+                <SelectItem value="alphabetical">Alphabetical (A-Z)</SelectItem>
+                <SelectItem value="experience">Experience Level</SelectItem>
+              </SelectContent>
+            </Select>
+          )}
+        </div>
 
         <div className="space-y-2">
           <Input
@@ -137,7 +175,7 @@ export const PlayerManagement = ({
       </div>
 
       <div className="space-y-1 max-h-96 overflow-y-auto">
-        {players.map((player) => {
+        {sortedPlayers.map((player) => {
           const halfCount = getPlayerHalfCount(player.id);
           const belowMinimum = halfCount < minimumHalves;
           const belowFair = halfCount < fairShare - 1;

@@ -127,25 +127,25 @@ This plan takes a functional Squad Rotation Tool and elevates it to portfolio-qu
 
 ---
 
-### Stage 5: Squad Sorting & Organization ⬜
+### Stage 5: Squad Sorting & Organization ✅
 **Goal:** Make large squads easier to manage
 
-- [ ] Add sort dropdown above player list:
+- [x] Add sort dropdown above player list:
   - Options: "Alphabetical (A-Z)", "Experience Level", "Order Added"
   - Default: "Order Added" (preserve current behavior)
-- [ ] Implement sorting logic:
+- [x] Implement sorting logic:
   - Alphabetical: case-insensitive by player name
   - Experience Level: Match Ready → Getting There → New Player
   - Maintain original order as fallback
-- [ ] Update UI to show current sort selection
-- [ ] Ensure sort persists during session (useState)
-- [ ] Test with 15+ players to verify performance
-- [ ] Mobile: ensure dropdown is touch-friendly
+- [x] Update UI to show current sort selection
+- [x] Ensure sort persists during session (useState)
+- [x] Test with 15+ players to verify performance
+- [x] Mobile: ensure dropdown is touch-friendly
 
 **Success Criteria:**
-- Coaches can find specific players quickly in large squads
-- Sort controls don't interfere with adding players
-- Sorting feels instant (no lag)
+- Coaches can find specific players quickly in large squads ✓
+- Sort controls don't interfere with adding players ✓
+- Sorting feels instant (no lag) ✓
 
 **Time Estimate:** 1 hour
 
