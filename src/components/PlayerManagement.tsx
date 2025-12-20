@@ -4,6 +4,8 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Player } from '@/types/rotation';
 import { UserPlus, X, Award, User } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { z } from 'zod';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,6 +16,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+
+const playerNameSchema = z.string()
+  .trim()
+  .min(1, 'Name cannot be empty')
+  .max(50, 'Name must be less than 50 characters')
+  .regex(/^[a-zA-Z0-9\s'-]+$/, 'Name contains invalid characters');
 
 interface PlayerManagementProps {
   players: Player[];
@@ -37,13 +45,23 @@ export const PlayerManagement = ({
   const [newPlayerName, setNewPlayerName] = useState('');
   const [newPlayerExperience, setNewPlayerExperience] = useState<'experienced' | 'novice'>('novice');
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
+  const { toast } = useToast();
 
   const handleAddPlayer = () => {
-    if (newPlayerName.trim()) {
-      onAddPlayer(newPlayerName.trim(), newPlayerExperience);
-      setNewPlayerName('');
-      setNewPlayerExperience('novice');
+    const result = playerNameSchema.safeParse(newPlayerName);
+    
+    if (!result.success) {
+      toast({
+        title: "Invalid name",
+        description: result.error.errors[0].message,
+        variant: "destructive"
+      });
+      return;
     }
+    
+    onAddPlayer(result.data, newPlayerExperience);
+    setNewPlayerName('');
+    setNewPlayerExperience('novice');
   };
 
   const confirmRemove = (player: Player) => {
@@ -70,14 +88,30 @@ export const PlayerManagement = ({
             onKeyDown={(e) => e.key === 'Enter' && handleAddPlayer()}
             className="flex-1"
           />
-          <Button
-            onClick={() => setNewPlayerExperience(prev => prev === 'novice' ? 'experienced' : 'novice')}
-            variant={newPlayerExperience === 'experienced' ? 'default' : 'outline'}
-            size="icon"
-            className="shrink-0"
-          >
-            {newPlayerExperience === 'experienced' ? <Award className="h-4 w-4" /> : <User className="h-4 w-4" />}
-          </Button>
+          <div className="flex items-center gap-1 border rounded-md p-1 shrink-0">
+            <button
+              type="button"
+              onClick={() => setNewPlayerExperience('novice')}
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                newPlayerExperience === 'novice'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Nov
+            </button>
+            <button
+              type="button"
+              onClick={() => setNewPlayerExperience('experienced')}
+              className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
+                newPlayerExperience === 'experienced'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Exp
+            </button>
+          </div>
           <Button onClick={handleAddPlayer} size="icon" className="shrink-0">
             <UserPlus className="h-4 w-4" />
           </Button>

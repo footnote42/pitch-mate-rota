@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Player, Assignment, RotationState } from '@/types/rotation';
+import { AgeGroup, AGE_GROUP_CONFIGS, DEFAULT_AGE_GROUP, AGE_GROUP_PREFERENCE_KEY } from '@/types/ageGroup';
 
 const STORAGE_KEY = 'squad-rotation-state';
-const PLAYERS_ON_FIELD = 8;
 const DEFAULT_NUMBER_OF_GAMES = 5;
 const MIN_GAMES = 3;
 const MAX_GAMES = 8;
@@ -11,7 +11,26 @@ export const useRotationState = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [numberOfGames, setNumberOfGames] = useState<number>(DEFAULT_NUMBER_OF_GAMES);
+  const [gameLabels, setGameLabels] = useState<Record<number, string>>({});
   const [lastSaved, setLastSaved] = useState<Date>(new Date());
+  const [ageGroup, setAgeGroup] = useState<AgeGroup>(DEFAULT_AGE_GROUP);
+  
+  const playersOnField = AGE_GROUP_CONFIGS[ageGroup].playersOnField;
+
+  // Load age group preference from localStorage on mount
+  useEffect(() => {
+    const savedAgeGroup = localStorage.getItem(AGE_GROUP_PREFERENCE_KEY);
+    if (savedAgeGroup) {
+      try {
+        const parsed = savedAgeGroup as AgeGroup;
+        if (AGE_GROUP_CONFIGS[parsed]) {
+          setAgeGroup(parsed);
+        }
+      } catch (error) {
+        console.warn('Error loading age group preference');
+      }
+    }
+  }, []);
 
   // Load state from localStorage on mount
   useEffect(() => {
@@ -22,18 +41,24 @@ export const useRotationState = () => {
         setPlayers(parsed.players || []);
         setAssignments(parsed.assignments || []);
         setNumberOfGames(parsed.numberOfGames || DEFAULT_NUMBER_OF_GAMES);
+        setGameLabels(parsed.gameLabels || {});
       } catch (error) {
         console.error('Error loading saved state:', error);
       }
     }
   }, []);
 
+  // Save age group preference to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem(AGE_GROUP_PREFERENCE_KEY, ageGroup);
+  }, [ageGroup]);
+
   // Save state to localStorage whenever it changes
   useEffect(() => {
-    const state: RotationState = { players, assignments, numberOfGames };
+    const state: RotationState = { players, assignments, numberOfGames, gameLabels };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     setLastSaved(new Date());
-  }, [players, assignments, numberOfGames]);
+  }, [players, assignments, numberOfGames, gameLabels]);
 
   const addPlayer = (name: string, experienceLevel: 'experienced' | 'novice') => {
     const newPlayer: Player = {
@@ -68,7 +93,7 @@ export const useRotationState = () => {
     } else {
       // Check if half is full
       const halfAssignments = assignments.filter(a => a.game === game && a.half === half);
-      if (halfAssignments.length >= PLAYERS_ON_FIELD) {
+      if (halfAssignments.length >= playersOnField) {
         return false; // Cannot assign - half is full
       }
       // Add assignment
@@ -92,6 +117,14 @@ export const useRotationState = () => {
   const resetAll = () => {
     setPlayers([]);
     setAssignments([]);
+    setGameLabels({});
+  };
+  
+  const updateGameLabel = (game: number, label: string) => {
+    setGameLabels(prev => ({
+      ...prev,
+      [game]: label
+    }));
   };
 
   const isAssigned = (playerId: string, game: number, half: number) => {
@@ -116,7 +149,7 @@ export const useRotationState = () => {
 
   const getFairShare = () => {
     if (players.length === 0) return 0;
-    return Math.round((getTotalHalves() * PLAYERS_ON_FIELD) / players.length);
+    return Math.round((getTotalHalves() * playersOnField) / players.length);
   };
 
   const getExperienceBalance = (game: number, half: number) => {
@@ -153,11 +186,30 @@ export const useRotationState = () => {
     setNumberOfGames(newNumber);
   };
 
+  const changeAgeGroup = (newAgeGroup: AgeGroup): boolean => {
+    // Check if there are any assignments
+    if (assignments.length > 0) {
+      // Return false to trigger confirmation dialog in component
+      return false;
+    }
+    
+    setAgeGroup(newAgeGroup);
+    return true;
+  };
+
+  const confirmChangeAgeGroup = (newAgeGroup: AgeGroup) => {
+    // Clear all assignments and update age group
+    setAssignments([]);
+    setAgeGroup(newAgeGroup);
+  };
+
   return {
     players,
     assignments,
     lastSaved,
     numberOfGames,
+    ageGroup,
+    playersOnField,
     addPlayer,
     removePlayer,
     toggleExperience,
@@ -175,7 +227,10 @@ export const useRotationState = () => {
     getExperienceBalance,
     changeNumberOfGames,
     confirmChangeNumberOfGames,
-    PLAYERS_ON_FIELD,
+    changeAgeGroup,
+    confirmChangeAgeGroup,
+    gameLabels,
+    updateGameLabel,
     MIN_GAMES,
     MAX_GAMES,
   };
