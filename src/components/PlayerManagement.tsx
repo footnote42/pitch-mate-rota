@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -57,6 +57,7 @@ export const PlayerManagement = ({
   const [playerToRemove, setPlayerToRemove] = useState<Player | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('order-added');
   const { toast } = useToast();
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleAddPlayer = () => {
     const result = playerNameSchema.safeParse(newPlayerName);
@@ -73,6 +74,8 @@ export const PlayerManagement = ({
     onAddPlayer(result.data, newPlayerExperience);
     setNewPlayerName('');
     setNewPlayerExperience(2);
+    // Refocus input for rapid player entry
+    setTimeout(() => inputRef.current?.focus(), 0);
   };
 
   const confirmRemove = (player: Player) => {
@@ -128,6 +131,7 @@ export const PlayerManagement = ({
 
         <div className="space-y-2">
           <Input
+            ref={inputRef}
             placeholder="Player name"
             value={newPlayerName}
             onChange={(e) => setNewPlayerName(e.target.value)}

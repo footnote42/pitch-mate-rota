@@ -99,6 +99,33 @@ const Index = () => {
         onOpenTutorial={() => setShowTutorial(true)}
       />
 
+      {/* Sticky Stats Bar */}
+      {players.length > 0 && (
+        <div className="sticky top-0 z-30 bg-primary text-primary-foreground shadow-md">
+          <div className="container mx-auto px-4 py-2">
+            <div className="flex justify-around items-center text-xs sm:text-sm font-medium gap-2">
+              <div className="flex items-center gap-1">
+                <span className="hidden min-[320px]:inline">Squad:</span>
+                <span className="min-[320px]:hidden">S:</span>
+                <span className="font-bold">{players.length}</span>
+              </div>
+              <div className="text-primary-foreground/30">|</div>
+              <div className="flex items-center gap-1">
+                <span className="hidden min-[320px]:inline">Min:</span>
+                <span className="min-[320px]:hidden">M:</span>
+                <span className="font-bold">{getMinimumHalves()}</span>
+              </div>
+              <div className="text-primary-foreground/30">|</div>
+              <div className="flex items-center gap-1">
+                <span className="hidden min-[320px]:inline">Target:</span>
+                <span className="min-[320px]:hidden">T:</span>
+                <span className="font-bold">{getFairShare()}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       <main className="container mx-auto px-4 py-6 space-y-6">
         <div className="bg-card border rounded-lg p-4 space-y-3">
           <AgeGroupSelector
