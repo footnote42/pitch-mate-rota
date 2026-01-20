@@ -95,6 +95,23 @@ export const RotationGrid = ({
         />
       )}
 
+      {/* Icon Legend */}
+      {players.length > 0 && (
+        <div className="relative z-10 bg-muted/50 border-b px-4 py-2">
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <Eraser className="h-3 w-3" />
+              <span>Clear assignments</span>
+            </div>
+            <div className="text-muted-foreground/50">•</div>
+            <div className="flex items-center gap-1">
+              <span className="font-semibold text-foreground">Experience Mix</span>
+              <span>= Balance indicator</span>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="overflow-x-auto relative z-10">
         <div className="inline-block min-w-full">
           {/* Game label row */}
@@ -134,10 +151,10 @@ export const RotationGrid = ({
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-5 w-5 hover:bg-destructive/10"
+                          className="min-h-[44px] min-w-[44px] hover:bg-destructive/10 p-0"
                           onClick={() => handleClearHalf(game, half)}
                         >
-                          <Eraser className="h-3 w-3" />
+                          <Eraser className="h-4 w-4" />
                         </Button>
                       </div>
                       <span className={`text-xs font-semibold ${isFull ? 'text-warning' : 'text-muted-foreground'}`}>
@@ -211,7 +228,7 @@ export const RotationGrid = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  className="text-xs"
+                  className="text-xs min-h-[44px]"
                   onClick={() => handleClearGame(game)}
                 >
                   <Eraser className="h-3 w-3 mr-1" />

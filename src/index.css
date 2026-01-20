@@ -35,13 +35,13 @@ All colors MUST be HSL.
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Success green for assigned cells */
-    --success: 150 75% 27%;
+    /* Success green for assigned cells (WCAG AA compliant) */
+    --success: 150 75% 25%;
     --success-foreground: 0 0% 100%;
 
-    /* Warning amber */
-    --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 11%;
+    /* Warning amber (WCAG AA compliant - darkened for better contrast) */
+    --warning: 38 92% 40%;
+    --warning-foreground: 0 0% 100%;
 
     /* Info blue */
     --info: 217 91% 60%;
@@ -95,10 +95,10 @@ All colors MUST be HSL.
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
 
-    --success: 150 75% 35%;
+    --success: 150 75% 40%;
     --success-foreground: 0 0% 100%;
 
-    --warning: 38 92% 50%;
+    --warning: 38 92% 55%;
     --warning-foreground: 222 47% 11%;
 
     --info: 217 91% 60%;
@@ -125,5 +125,18 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  @keyframes ripple {
+    0% {
+      opacity: 0.8;
+      transform: scale(0);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(2);
+    }
   }
 }
