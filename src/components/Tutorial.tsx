@@ -24,7 +24,7 @@ const tutorialSteps = [
   },
   {
     title: "Build Your Rotations",
-    description: "Click cells to assign players to game halves. Each half needs exactly 8 players on the pitch.",
+    description: "Click cells to assign players to game halves. Fill each half with the required number of players for your selected age group.",
     icon: Grid3x3,
     color: "text-green-500",
   },

@@ -8,7 +8,7 @@ A rugby player rotation management tool designed for festival games, helping coa
 ## Features
 
 ### 🏉 Smart Squad Management
-- **3-Level Experience System**: Classify players as New (⭐), Getting There (⭐⭐), or Match Ready (⭐⭐⭐)
+- **3-Level Experience System**: Classify players as Novice, Intermediate, or Experienced
 - **Flexible Sorting**: Sort your squad by order added, alphabetically, or by experience level
 - **Real-Time Fairness Tracking**: Visual indicators show playing time distribution and RFU compliance
 
@@ -90,12 +90,6 @@ Built with:
 - **shadcn-ui**: Beautiful, accessible components
 - **Tailwind CSS**: Utility-first styling
 - **Lucide Icons**: Consistent iconography
-
-## Deployment
-
-This project is deployed via [Lovable](https://lovable.dev/projects/85439aaf-2942-47b5-bb0e-f9d395f63df6).
-
-Push to GitHub and Lovable auto-deploys to production.
 
 ## License
 

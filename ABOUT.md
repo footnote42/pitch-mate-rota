@@ -28,13 +28,13 @@ This project serves dual purposes:
 1. **Practical utility**: Solve a real coaching problem I face regularly
 2. **Learning journey**: Develop programming skills through a meaningful, self-directed project
 
-### Why Lovable?
+### Technology Stack Choice
 
-Rather than hand-coding from scratch, I chose Lovable (an AI-powered app builder) because:
-- Faster time-to-working-prototype for a hobbyist developer
-- Generates production-quality React/TypeScript code
-- Allows iteration through natural language instructions
-- Provides immediate visual feedback
+This project uses modern web development tools to balance rapid prototyping with production quality:
+- React/TypeScript for type-safe component development
+- Vite for fast development and optimized builds
+- shadcn-ui for consistent, accessible components
+- AI-assisted development to accelerate iteration
 - Reduces barrier to entry while still offering learning opportunities
 
 ### Why GitHub?
