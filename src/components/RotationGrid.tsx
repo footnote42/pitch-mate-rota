@@ -120,7 +120,7 @@ export const RotationGrid = ({
               <span className="text-sm font-semibold text-foreground">Opposition & Kick-off</span>
             </div>
             {games.map(game => (
-              <div key={`label-${game}`} className="border-r last:border-r-0 min-w-[176px] px-2 py-2">
+              <div key={`label-${game}`} className="border-r last:border-r-0 min-w-[176px] py-2">
                 <input
                   type="text"
                   value={gameLabels[game] || ''}
@@ -143,20 +143,18 @@ export const RotationGrid = ({
                   const isFull = count >= playersOnField;
 
                   return (
-                    <div key={half} className="flex flex-col min-w-[88px] px-2 py-1 border-r last:border-r-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-foreground">
-                          G{game}-{half === 1 ? '1st' : '2nd'}
-                        </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="min-h-[44px] min-w-[44px] hover:bg-destructive/10 p-0"
-                          onClick={() => handleClearHalf(game, half)}
-                        >
-                          <Eraser className="h-4 w-4" />
-                        </Button>
-                      </div>
+                    <div key={half} className="flex flex-col min-w-[88px] px-2 py-1 border-r last:border-r-0 items-center gap-0.5">
+                      <span className="text-xs font-medium text-foreground">
+                        G{game}-{half === 1 ? '1st' : '2nd'}
+                      </span>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="min-h-[44px] min-w-[44px] hover:bg-destructive/10 p-0"
+                        onClick={() => handleClearHalf(game, half)}
+                      >
+                        <Eraser className="h-4 w-4" />
+                      </Button>
                       <span className={`text-xs font-semibold ${isFull ? 'text-warning' : 'text-muted-foreground'}`}>
                         {count}/{playersOnField} {isFull && 'FULL'}
                       </span>

@@ -39,7 +39,7 @@ export const GridCell = ({ assigned, disabled, onClick }: GridCellProps) => {
       onClick={handleClick}
       disabled={disabled && !assigned}
       className={`
-        min-w-[88px] h-12 border-r last:border-r-0
+        min-w-[88px] h-12 px-2 border-r last:border-r-0
         flex items-center justify-center
         transition-all duration-200 ease-in-out relative overflow-hidden
         ${assigned
