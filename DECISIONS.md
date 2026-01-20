@@ -113,9 +113,9 @@ This document captures key architectural and design choices made during developm
 
 ## Technology Stack
 
-### Why React + TypeScript via Lovable
+### Why React + TypeScript
 
-**Decision**: Generated React/TypeScript application using Lovable AI builder.
+**Decision**: Built React/TypeScript application with AI-assisted development tools.
 
 **Alternatives Considered**:
 1. Hand-coded vanilla JavaScript/HTML
@@ -124,7 +124,7 @@ This document captures key architectural and design choices made during developm
 
 **Rationale**:
 
-**Lovable chosen because**:
+**AI-assisted development chosen because**:
 - Rapid prototyping for hobbyist with limited time
 - Generates modern, maintainable code
 - Natural language iteration reduces coding barrier
@@ -156,7 +156,7 @@ This document captures key architectural and design choices made during developm
 - **Future-proofing**: Enables collaboration if other coaches want to contribute
 - **Backup**: Cloud-based code protection
 
-**Implementation**: Using Lovable as source of truth, GitHub as archive, VS Code for documentation.
+**Implementation**: Using GitHub for version control and collaboration, VS Code for development and documentation.
 
 ---
 
@@ -203,7 +203,7 @@ This document captures key architectural and design choices made during developm
 **Alternative Considered**: Single comprehensive README.
 
 **Rationale**:
-- **README.md**: Technical quick-start (Lovable-generated, preserved)
+- **README.md**: Technical quick-start and setup instructions
 - **ABOUT.md**: Project context for non-technical readers
 - **REQUIREMENTS.md**: Detailed specification for development reference
 - **DECISIONS.md**: Rationale capture for future decisions

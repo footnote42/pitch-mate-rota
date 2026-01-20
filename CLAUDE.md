@@ -234,9 +234,9 @@ Add calculation functions to `useRotationState` hook rather than computing in co
   - `'tutorial-completed'` - tutorial tracking
 - **No API calls** - all data is local to the browser
 - **RFU rules** encoded in fairness calculations (50% minimum playing time)
-- **Experience point system**: New (1pt) + Getting There (2pts) + Match Ready (3pts) = target 12-16pts per half
+- **Experience point system**: Novice (1pt) + Intermediate (2pts) + Experienced (3pts) = target 12-16pts per half
 - **Trojans RFC branding**: Logo at `/trojans_logo.png`, primary blue color scheme
-- This is a **Lovable-generated codebase** but fully editable/customizable
+- This is an **AI-assisted codebase** but fully editable/customizable
 
 ## Testing
 

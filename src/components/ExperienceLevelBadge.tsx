@@ -1,9 +1,9 @@
-import { ExperienceLevel, EXPERIENCE_LABELS, EXPERIENCE_STARS } from '@/types/rotation';
+import { ExperienceLevel, EXPERIENCE_LABELS, EXPERIENCE_ABBREVIATIONS, EXPERIENCE_FULL_LABELS } from '@/types/rotation';
 import { cn } from '@/lib/utils';
 
 interface ExperienceLevelBadgeProps {
     level: ExperienceLevel;
-    showLabel?: boolean;
+    displayMode?: 'full' | 'abbreviated';
     size?: 'sm' | 'md' | 'lg';
     className?: string;
 }
@@ -16,21 +16,22 @@ const sizeClasses = {
 
 export const ExperienceLevelBadge = ({
     level,
-    showLabel = false,
+    displayMode = 'abbreviated',
     size = 'md',
     className
 }: ExperienceLevelBadgeProps) => {
-    const stars = EXPERIENCE_STARS[level];
-    const label = EXPERIENCE_LABELS[level];
+    const label = displayMode === 'full'
+        ? EXPERIENCE_FULL_LABELS[level]
+        : EXPERIENCE_ABBREVIATIONS[level];
+    const fullLabel = EXPERIENCE_LABELS[level];
 
     return (
         <span
             className={cn("inline-flex items-center gap-1", sizeClasses[size], className)}
-            aria-label={label}
-            title={label}
+            aria-label={fullLabel}
+            title={fullLabel}
         >
-            <span>{stars}</span>
-            {showLabel && <span className="text-muted-foreground">{label}</span>}
+            <span>{label}</span>
         </span>
     );
 };

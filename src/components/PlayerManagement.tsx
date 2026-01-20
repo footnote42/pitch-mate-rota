@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Player, ExperienceLevel, EXPERIENCE_LABELS } from '@/types/rotation';
+import { Player, ExperienceLevel, EXPERIENCE_LABELS, EXPERIENCE_FULL_LABELS } from '@/types/rotation';
 import { UserPlus, X, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
@@ -94,7 +94,7 @@ export const PlayerManagement = ({
         return playersCopy.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
 
       case 'experience':
-        // Sort by experience level: 3 (Match Ready) → 2 (Getting There) → 1 (New Player)
+        // Sort by experience level: 3 (Experienced) → 2 (Intermediate) → 1 (Novice)
         return playersCopy.sort((a, b) => b.experienceLevel - a.experienceLevel);
 
       case 'order-added':
@@ -144,7 +144,7 @@ export const PlayerManagement = ({
                   : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
-                ⭐ New
+                {EXPERIENCE_FULL_LABELS[1]}
               </button>
               <button
                 type="button"
@@ -154,7 +154,7 @@ export const PlayerManagement = ({
                   : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
-                ⭐⭐ Getting There
+                {EXPERIENCE_FULL_LABELS[2]}
               </button>
               <button
                 type="button"
@@ -164,7 +164,7 @@ export const PlayerManagement = ({
                   : 'text-muted-foreground hover:text-foreground'
                   }`}
               >
-                ⭐⭐⭐ Ready
+                {EXPERIENCE_FULL_LABELS[3]}
               </button>
             </div>
             <Button onClick={handleAddPlayer} size="icon" className="shrink-0">
@@ -192,27 +192,18 @@ export const PlayerManagement = ({
               >
                 <SelectTrigger className="w-32 h-8 shrink-0">
                   <SelectValue>
-                    <ExperienceLevelBadge level={player.experienceLevel} size="sm" />
+                    <ExperienceLevelBadge level={player.experienceLevel} size="sm" displayMode="abbreviated" />
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="1">
-                    <div className="flex items-center gap-2">
-                      <span>⭐</span>
-                      <span>New Player</span>
-                    </div>
+                    <ExperienceLevelBadge level={1} size="sm" displayMode="full" />
                   </SelectItem>
                   <SelectItem value="2">
-                    <div className="flex items-center gap-2">
-                      <span>⭐⭐</span>
-                      <span>Getting There</span>
-                    </div>
+                    <ExperienceLevelBadge level={2} size="sm" displayMode="full" />
                   </SelectItem>
                   <SelectItem value="3">
-                    <div className="flex items-center gap-2">
-                      <span>⭐⭐⭐</span>
-                      <span>Match Ready</span>
-                    </div>
+                    <ExperienceLevelBadge level={3} size="sm" displayMode="full" />
                   </SelectItem>
                 </SelectContent>
               </Select>
