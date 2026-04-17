@@ -66,3 +66,10 @@ No testing infrastructure is currently set up. When adding tests:
 - Vitest for unit tests (already compatible with Vite)
 - React Testing Library for component tests
 - Focus on `useRotationState` hook logic (business rules)
+
+## Active Technologies
+- TypeScript (relaxed config — `noImplicitAny: false`, `strictNullChecks: false`) + React 18, Vite, shadcn-ui, Tailwind CSS (001-preserve-assignments-on-game-change)
+- localStorage (`squad-rotation-state`) (001-preserve-assignments-on-game-change)
+
+## Recent Changes
+- 001-preserve-assignments-on-game-change: Added TypeScript (relaxed config — `noImplicitAny: false`, `strictNullChecks: false`) + React 18, Vite, shadcn-ui, Tailwind CSS
