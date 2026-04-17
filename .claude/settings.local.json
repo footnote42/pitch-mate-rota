@@ -14,7 +14,26 @@
       "Bash(ping:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push)"
+      "Bash(git push)",
+      "Bash(git fetch:*)",
+      "Bash(.specify/scripts/bash/create-new-feature.sh:*)",
+      "Bash(npm run build)",
+      "Bash(npm run lint:*)",
+      "Bash(npm run build:dev:*)",
+      "Bash(git push:*)",
+      "Bash(gh pr create:*)",
+      "Bash(timeout 5 tail:*)",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_evaluate",
+      "Bash(git checkout:*)",
+      "Bash(git merge:*)",
+      "Bash(git pull:*)",
+      "Skill(claude-md-management:revise-claude-md)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('lockfile version:', d.get\\('lockfileVersion'\\)\\); print\\('name:', d.get\\('name'\\)\\)\")",
+      "Read(//c/Users/kenho/.claude/plans/**)",
+      "Bash(git -C C:/Users/kenho/Projects/pitch-mate-rota diff --stat HEAD)",
+      "Bash(rm -rf specs/ .playwright-mcp/ nul)",
+      "Bash(npm i *)"
     ]
   }
 }
