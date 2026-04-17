@@ -7,6 +7,8 @@ const DEFAULT_NUMBER_OF_GAMES = 5;
 const MIN_GAMES = 3;
 const MAX_GAMES = 8;
 
+export type ChangeGamesResult = { proceed: true } | { proceed: false; affectedGames: number[] };
+
 export const useRotationState = () => {
   const [players, setPlayers] = useState<Player[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -188,28 +190,33 @@ export const useRotationState = () => {
     return { totalPoints, playerCount, isBalanced, targetPoints };
   };
 
-  const changeNumberOfGames = (newNumber: number): boolean => {
+  const changeNumberOfGames = (newNumber: number): ChangeGamesResult => {
     if (newNumber < MIN_GAMES || newNumber > MAX_GAMES) {
-      return false;
+      return { proceed: true };
     }
-
-    // Check if there are any assignments
-    if (assignments.length > 0) {
-      // Return false to trigger confirmation dialog in component
-      return false;
+    if (newNumber === numberOfGames) {
+      return { proceed: true };
     }
+    if (newNumber > numberOfGames) {
+      setNumberOfGames(newNumber);
+      return { proceed: true };
+    }
+    const affectedGames = assignments
+      .filter(a => a.game > newNumber)
+      .map(a => a.game)
+      .filter((g, i, arr) => arr.indexOf(g) === i)
+      .sort((a, b) => a - b);
 
-    setNumberOfGames(newNumber);
-    return true;
+    if (affectedGames.length === 0) {
+      setNumberOfGames(newNumber);
+      return { proceed: true };
+    }
+    return { proceed: false, affectedGames };
   };
 
   const confirmChangeNumberOfGames = (newNumber: number) => {
-    if (newNumber < MIN_GAMES || newNumber > MAX_GAMES) {
-      return;
-    }
-
-    // Clear all assignments and update game count
-    setAssignments([]);
+    if (newNumber < MIN_GAMES || newNumber > MAX_GAMES) return;
+    setAssignments(prev => prev.filter(a => a.game <= newNumber));
     setNumberOfGames(newNumber);
   };
 

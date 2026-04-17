@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import type { ChangeGamesResult } from '@/hooks/useRotationState';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -22,7 +23,7 @@ interface GameCountSelectorProps {
   numberOfGames: number;
   minGames: number;
   maxGames: number;
-  onChangeGames: (count: number) => boolean;
+  onChangeGames: (count: number) => ChangeGamesResult;
   onConfirmChange: (count: number) => void;
 }
 
@@ -34,13 +35,13 @@ export const GameCountSelector = ({
   onConfirmChange,
 }: GameCountSelectorProps) => {
   const [pendingChange, setPendingChange] = useState<number | null>(null);
+  const [affectedGames, setAffectedGames] = useState<number[]>([]);
 
   const handleValueChange = (value: string) => {
     const newCount = parseInt(value, 10);
-    const success = onChangeGames(newCount);
-    
-    if (!success) {
-      // Show confirmation dialog
+    const result = onChangeGames(newCount);
+    if (!result.proceed) {
+      setAffectedGames(result.affectedGames);
       setPendingChange(newCount);
     }
   };
@@ -49,6 +50,7 @@ export const GameCountSelector = ({
     if (pendingChange !== null) {
       onConfirmChange(pendingChange);
       setPendingChange(null);
+      setAffectedGames([]);
     }
   };
 
@@ -80,15 +82,19 @@ export const GameCountSelector = ({
       <AlertDialog open={pendingChange !== null} onOpenChange={(open) => !open && setPendingChange(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Change number of games?</AlertDialogTitle>
+            <AlertDialogTitle>Remove games from festival?</AlertDialogTitle>
             <AlertDialogDescription>
-              Changing the number of games will clear all current player assignments. Your player list will be kept. Do you want to continue?
+              {affectedGames.length === 1
+                ? `Game ${affectedGames[0]} has`
+                : `Games ${affectedGames.join(', ')} have`}{' '}
+              assignments that will be removed. All other assignments will be kept.
+              Do you want to continue?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={confirmChange}>
-              Clear Assignments and Change
+              Remove and Change
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
