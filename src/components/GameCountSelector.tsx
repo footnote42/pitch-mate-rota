@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import type { ChangeGamesResult } from '@/hooks/useRotationState';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -26,6 +25,8 @@ interface GameCountSelectorProps {
   onChangeGames: (count: number) => ChangeGamesResult;
   onConfirmChange: (count: number) => void;
 }
+
+const displayFont = '"Big Shoulders Display", system-ui, sans-serif';
 
 export const GameCountSelector = ({
   numberOfGames,
@@ -54,25 +55,25 @@ export const GameCountSelector = ({
     }
   };
 
-  const gameOptions = Array.from(
-    { length: maxGames - minGames + 1 },
-    (_, i) => minGames + i
-  );
+  const gameOptions = Array.from({ length: maxGames - minGames + 1 }, (_, i) => minGames + i);
 
   return (
     <>
-      <div className="flex items-center gap-3">
-        <Label htmlFor="game-count" className="text-sm font-semibold text-foreground whitespace-nowrap">
-          Number of Games in Festival:
-        </Label>
+      <div className="flex items-center gap-2">
+        <span
+          className="text-[0.62rem] font-semibold uppercase text-muted-foreground whitespace-nowrap"
+          style={{ letterSpacing: '0.15em', fontFamily: displayFont }}
+        >
+          Games in Festival
+        </span>
         <Select value={numberOfGames.toString()} onValueChange={handleValueChange}>
-          <SelectTrigger id="game-count" className="w-[100px]">
+          <SelectTrigger id="game-count" className="w-[90px] h-8 text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {gameOptions.map(num => (
               <SelectItem key={num} value={num.toString()}>
-                {num} {num === 1 ? 'game' : 'games'}
+                {num}
               </SelectItem>
             ))}
           </SelectContent>
@@ -88,14 +89,11 @@ export const GameCountSelector = ({
                 ? `Game ${affectedGames[0]} has`
                 : `Games ${affectedGames.join(', ')} have`}{' '}
               assignments that will be removed. All other assignments will be kept.
-              Do you want to continue?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmChange}>
-              Remove and Change
-            </AlertDialogAction>
+            <AlertDialogAction onClick={confirmChange}>Remove and Change</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

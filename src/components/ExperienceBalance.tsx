@@ -1,4 +1,4 @@
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { Check } from 'lucide-react';
 
 interface ExperienceBalanceProps {
   totalPoints: number;
@@ -7,27 +7,28 @@ interface ExperienceBalanceProps {
   targetPoints: number;
 }
 
-export const ExperienceBalance = ({ totalPoints, playerCount, isBalanced, targetPoints }: ExperienceBalanceProps) => {
+export const ExperienceBalance = ({
+  totalPoints,
+  playerCount,
+  isBalanced,
+  targetPoints,
+}: ExperienceBalanceProps) => {
   if (playerCount === 0) {
     return (
       <div className="min-w-[88px] px-2 py-2 border-r last:border-r-0 flex items-center justify-center">
-        <span className="text-xs text-muted-foreground">-</span>
+        <span className="text-muted-foreground/30 text-xs">—</span>
       </div>
     );
   }
 
-  // Determine color based on balance
-  const colorClass = isBalanced
-    ? 'text-success bg-success/10'
-    : 'text-warning bg-warning/10';
-
-  const Icon = isBalanced ? CheckCircle2 : AlertCircle;
-
   return (
-    <div className={`min-w-[88px] px-2 py-2 border-r last:border-r-0 ${colorClass}`} title={`Target: ${targetPoints} pts`}>
-      <div className="flex items-center justify-center gap-1 text-xs font-medium">
-        <Icon className="h-3 w-3" />
-        <span>{totalPoints} pts</span>
+    <div
+      className={`min-w-[88px] px-2 py-2 border-r last:border-r-0 ${isBalanced ? 'bg-success/10' : 'bg-warning/10'}`}
+      title={`Balance: ${totalPoints} pts · target ${targetPoints} pts`}
+    >
+      <div className={`flex items-center justify-center gap-1 text-[0.65rem] font-semibold ${isBalanced ? 'text-success' : 'text-warning'}`}>
+        {isBalanced && <Check className="h-3 w-3 stroke-[2.5] flex-shrink-0" />}
+        <span>{totalPoints}pt</span>
       </div>
     </div>
   );

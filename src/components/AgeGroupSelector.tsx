@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { Label } from '@/components/ui/label';
 import {
   Select,
   SelectContent,
@@ -25,6 +24,8 @@ interface AgeGroupSelectorProps {
   onConfirmChange: (ageGroup: AgeGroup) => void;
 }
 
+const displayFont = '"Big Shoulders Display", system-ui, sans-serif';
+
 export const AgeGroupSelector = ({
   ageGroup,
   onChangeAgeGroup,
@@ -35,11 +36,7 @@ export const AgeGroupSelector = ({
   const handleValueChange = (value: string) => {
     const newAgeGroup = value as AgeGroup;
     const success = onChangeAgeGroup(newAgeGroup);
-    
-    if (!success) {
-      // Show confirmation dialog
-      setPendingChange(newAgeGroup);
-    }
+    if (!success) setPendingChange(newAgeGroup);
   };
 
   const confirmChange = () => {
@@ -53,12 +50,15 @@ export const AgeGroupSelector = ({
 
   return (
     <>
-      <div className="flex items-center gap-3">
-        <Label htmlFor="age-group" className="text-sm font-semibold text-foreground whitespace-nowrap">
-          Age Group:
-        </Label>
+      <div className="flex items-center gap-2">
+        <span
+          className="text-[0.62rem] font-semibold uppercase text-muted-foreground whitespace-nowrap"
+          style={{ letterSpacing: '0.15em', fontFamily: displayFont }}
+        >
+          Age Group
+        </span>
         <Select value={ageGroup} onValueChange={handleValueChange}>
-          <SelectTrigger id="age-group" className="w-[160px]">
+          <SelectTrigger id="age-group" className="w-[130px] h-8 text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -76,7 +76,8 @@ export const AgeGroupSelector = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Change age group?</AlertDialogTitle>
             <AlertDialogDescription>
-              Changing the number of players on field will clear all current player assignments. Your player list and team/time labels will be kept. Do you want to continue?
+              Changing the number of players on field will clear all current player assignments.
+              Your player list and team/time labels will be kept.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

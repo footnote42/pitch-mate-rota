@@ -13,24 +13,18 @@ export const GridCell = ({ assigned, disabled, onClick }: GridCellProps) => {
   const lastClickTime = useRef<number>(0);
 
   const handleClick = () => {
-    // Debouncing: prevent rapid toggles (max 1 per 100ms)
     const now = Date.now();
-    if (now - lastClickTime.current < 100) {
-      return;
-    }
+    if (now - lastClickTime.current < 100) return;
     lastClickTime.current = now;
 
     if (disabled && !assigned) {
-      // Flash red when trying to click a full half
       setFlash(true);
       setTimeout(() => setFlash(false), 200);
       return;
     }
 
-    // Ripple effect
     setRipple(true);
     setTimeout(() => setRipple(false), 300);
-
     onClick();
   };
 
@@ -38,22 +32,22 @@ export const GridCell = ({ assigned, disabled, onClick }: GridCellProps) => {
     <button
       onClick={handleClick}
       disabled={disabled && !assigned}
-      className={`
-        min-w-[88px] h-12 px-2 border-r last:border-r-0
-        flex items-center justify-center
-        transition-all duration-200 ease-in-out relative overflow-hidden
-        ${assigned
-          ? 'bg-success hover:bg-success/80 cursor-pointer'
-          : disabled
-            ? 'bg-muted/50 cursor-not-allowed'
-            : 'bg-card hover:bg-accent hover:shadow-sm cursor-pointer'
-        }
-        ${flash ? 'bg-destructive' : ''}
-        ${ripple ? 'after:absolute after:inset-0 after:bg-white/30 after:animate-[ripple_300ms_ease-out]' : ''}
-        active:scale-95
-      `}
+      className={[
+        'min-w-[88px] h-12 px-2 border-r last:border-r-0',
+        'flex items-center justify-center',
+        'transition-colors duration-150 relative overflow-hidden',
+        'active:scale-95',
+        flash
+          ? 'bg-destructive/15'
+          : assigned
+            ? 'bg-success hover:bg-success/85 cursor-pointer'
+            : disabled
+              ? 'bg-muted/40 cursor-not-allowed opacity-50'
+              : 'bg-background hover:bg-accent cursor-pointer',
+        ripple ? 'after:absolute after:inset-0 after:bg-white/25 after:animate-[ripple_300ms_ease-out]' : '',
+      ].filter(Boolean).join(' ')}
     >
-      {assigned && <Check className="h-5 w-5 text-success-foreground" />}
+      {assigned && <Check className="h-4 w-4 text-success-foreground stroke-[2.5]" />}
     </button>
   );
 };

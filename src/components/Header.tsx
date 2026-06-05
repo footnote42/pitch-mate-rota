@@ -26,61 +26,99 @@ export const Header = ({ lastSaved, onClearAll, onResetAll, onOpenTutorial }: He
   const formatLastSaved = (date: Date) => {
     const now = new Date();
     const diff = Math.floor((now.getTime() - date.getTime()) / 1000);
-
     if (diff < 60) return 'Just now';
-    if (diff < 3600) return `${Math.floor(diff / 60)} min ago`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)} hr ago`;
+    if (diff < 3600) return `${Math.floor(diff / 60)}m ago`;
+    if (diff < 86400) return `${Math.floor(diff / 3600)}h ago`;
     return date.toLocaleDateString();
   };
 
   return (
     <>
-      <header className="bg-primary text-primary-foreground shadow-md">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
-              <h1 className="text-2xl font-bold">Your Squad Planner</h1>
-              <p className="text-sm text-primary-foreground/80 mt-0.5">
-                Last saved: {formatLastSaved(lastSaved)}
-              </p>
-            </div>
+      <header className="bg-primary border-b-[3px] border-trojans-gold">
+        <div className="container mx-auto px-4 py-3">
+          <div className="flex items-center justify-between gap-3">
+
             <div className="flex items-center gap-3">
               <img
                 src="/trojans_logo.png"
-                alt="Trojans FC Logo"
-                className="h-10 w-10 sm:h-12 sm:w-12 md:h-14 md:w-14 object-contain"
-                title="Trojans FC"
+                alt="Trojans RFC"
+                className="h-11 w-11 sm:h-13 sm:w-13 object-contain flex-shrink-0"
               />
-              <div className="flex gap-2">
-                {onOpenTutorial && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={onOpenTutorial}
-                    className="bg-primary-foreground/10 hover:bg-primary-foreground/20"
-                    title="Show Tutorial"
-                  >
-                    <HelpCircle className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Help</span>
-                  </Button>
-                )}
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => setShowClearDialog(true)}
+              <div>
+                <div
+                  className="text-primary-foreground uppercase leading-none tracking-wide"
+                  style={{
+                    fontFamily: '"Big Shoulders Display", system-ui, sans-serif',
+                    fontSize: 'clamp(1.3rem, 4.5vw, 1.85rem)',
+                    fontWeight: 900,
+                  }}
                 >
-                  <RotateCcw className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">New Festival</span>
-                </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => setShowResetDialog(true)}
+                  Trojans RFC
+                </div>
+                <div
+                  className="text-primary-foreground/50 mt-0.5 uppercase"
+                  style={{
+                    fontFamily: '"Big Shoulders Display", system-ui, sans-serif',
+                    fontSize: '0.58rem',
+                    letterSpacing: '0.22em',
+                    fontWeight: 600,
+                  }}
                 >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  <span className="hidden sm:inline">Reset All</span>
-                </Button>
+                  Pitch Mate · Rota
+                </div>
               </div>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <span className="hidden lg:inline text-[0.62rem] text-primary-foreground/30 tracking-wide mr-2">
+                Saved {formatLastSaved(lastSaved)}
+              </span>
+              {onOpenTutorial && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onOpenTutorial}
+                  className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:w-auto sm:px-3"
+                  title="Help"
+                >
+                  <HelpCircle className="h-4 w-4" />
+                  <span
+                    className="hidden sm:inline ml-1.5 text-[0.7rem] uppercase tracking-wider"
+                    style={{ fontFamily: '"Big Shoulders Display", system-ui, sans-serif', fontWeight: 700 }}
+                  >
+                    Help
+                  </span>
+                </Button>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setShowClearDialog(true)}
+                className="text-primary-foreground/60 hover:text-primary-foreground hover:bg-primary-foreground/10 h-9 w-9 sm:w-auto sm:px-3"
+                title="New Festival"
+              >
+                <RotateCcw className="h-4 w-4" />
+                <span
+                  className="hidden sm:inline ml-1.5 text-[0.7rem] uppercase tracking-wider"
+                  style={{ fontFamily: '"Big Shoulders Display", system-ui, sans-serif', fontWeight: 700 }}
+                >
+                  New Festival
+                </span>
+              </Button>
+              <Button
+                size="sm"
+                onClick={() => setShowResetDialog(true)}
+                className="bg-primary-foreground/10 hover:bg-primary-foreground/20 text-primary-foreground h-9 w-9 sm:w-auto sm:px-3"
+                title="Reset All"
+              >
+                <Trash2 className="h-4 w-4" />
+                <span
+                  className="hidden sm:inline ml-1.5 text-[0.7rem] uppercase tracking-wider"
+                  style={{ fontFamily: '"Big Shoulders Display", system-ui, sans-serif', fontWeight: 700 }}
+                >
+                  Reset
+                </span>
+              </Button>
             </div>
           </div>
         </div>

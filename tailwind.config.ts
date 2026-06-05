@@ -13,7 +13,13 @@ export default {
       },
     },
     extend: {
+      fontFamily: {
+        headings: ['"Big Shoulders Display"', 'system-ui', 'sans-serif'],
+        body: ['Figtree', 'system-ui', 'sans-serif'],
+      },
       colors: {
+        'trojans-gold': 'hsl(var(--trojans-gold))',
+        'trojans-gold-light': 'hsl(var(--trojans-gold-light))',
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",

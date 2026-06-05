@@ -60,6 +60,12 @@ The project uses a **relaxed TypeScript config** (`noImplicitAny: false`, `stric
 - **Trojans RFC branding**: Logo at `/trojans_logo.png`, primary blue color scheme
 - **Players per half and RFU fairness rules** are age-group dependent and computed in `useRotationState.ts` — not hardcoded constants
 
+## Status
+Active. Feature 001 (preserve assignments on game change) complete.
+
+## Active Priorities
+- No current active feature — check git log and any open issues before starting work.
+
 ## Testing
 
 No testing infrastructure is currently set up. When adding tests:

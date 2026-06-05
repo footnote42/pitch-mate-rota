@@ -3,7 +3,7 @@ import { GridCell } from './GridCell';
 import { ExperienceBalance } from './ExperienceBalance';
 import { ExperienceLevelBadge } from './ExperienceLevelBadge';
 import { Button } from '@/components/ui/button';
-import { Eraser, Users } from 'lucide-react';
+import { Eraser } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,8 @@ interface RotationGridProps {
   updateGameLabel: (game: number, label: string) => void;
 }
 
+const displayFont = '"Big Shoulders Display", system-ui, sans-serif';
+
 export const RotationGrid = ({
   players,
   numberOfGames,
@@ -45,17 +47,8 @@ export const RotationGrid = ({
 }: RotationGridProps) => {
   const [clearAction, setClearAction] = useState<{ type: 'half' | 'game'; game: number; half?: number } | null>(null);
 
-  const handleClearHalf = (game: number, half: number) => {
-    setClearAction({ type: 'half', game, half });
-  };
-
-  const handleClearGame = (game: number) => {
-    setClearAction({ type: 'game', game });
-  };
-
   const confirmClear = () => {
     if (!clearAction) return;
-
     if (clearAction.type === 'half' && clearAction.half !== undefined) {
       clearHalf(clearAction.game, clearAction.half);
     } else if (clearAction.type === 'game') {
@@ -66,17 +59,9 @@ export const RotationGrid = ({
 
   if (players.length === 0) {
     return (
-      <div className="bg-card rounded-lg border p-12 text-center">
-        <div className="flex flex-col items-center gap-3 max-w-md mx-auto">
-          <div className="rounded-full bg-primary/10 p-4">
-            <Users className="h-8 w-8 text-primary" />
-          </div>
-          <div className="space-y-1">
-            <p className="text-base font-medium text-foreground">Ready to build your game plan?</p>
-            <p className="text-sm text-muted-foreground">Add players to your squad, then click cells to build rotations</p>
-          </div>
-        </div>
-      </div>
+      <p className="py-6 text-sm text-muted-foreground">
+        Add players to your squad to start building rotations.
+      </p>
     );
   }
 
@@ -84,79 +69,95 @@ export const RotationGrid = ({
   const halves = [1, 2];
 
   return (
-    <div className="bg-card rounded-lg border overflow-hidden relative">
-      {/* Trojans Logo Watermark */}
-      {players.length > 0 && (
-        <img
-          src="/trojans_logo.png"
-          alt=""
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.06] pointer-events-none w-64 h-64 object-contain z-0"
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Icon Legend */}
-      {players.length > 0 && (
-        <div className="relative z-10 bg-muted/50 border-b px-4 py-2">
-          <div className="flex flex-wrap items-center justify-center gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <Eraser className="h-3 w-3" />
-              <span>Clear assignments</span>
-            </div>
-            <div className="text-muted-foreground/50">•</div>
-            <div className="flex items-center gap-1">
-              <span className="font-semibold text-foreground">Experience Mix</span>
-              <span>= Balance indicator</span>
-            </div>
-          </div>
-        </div>
-      )}
+    <div className="rounded-lg border overflow-hidden relative bg-background">
+      {/* Trojans logo watermark */}
+      <img
+        src="/trojans_logo.png"
+        alt=""
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.04] pointer-events-none w-72 h-72 object-contain z-0"
+        aria-hidden="true"
+      />
 
       <div className="overflow-x-auto relative z-10">
         <div className="inline-block min-w-full">
-          {/* Game label row */}
-          <div className="flex border-b bg-muted">
-            <div className="sticky left-0 z-20 bg-muted border-r min-w-[140px] px-3 py-2">
-              <span className="text-sm font-semibold text-foreground">Opposition & Kick-off</span>
+
+          {/* Row 1 — opponent / kick-off label inputs */}
+          <div className="flex bg-muted/50 border-b border-border">
+            <div className="sticky left-0 z-20 bg-muted/50 border-r border-border min-w-[140px] px-3 py-2 flex items-end">
+              <span
+                className="text-[0.58rem] font-semibold uppercase text-muted-foreground"
+                style={{ letterSpacing: '0.18em' }}
+              >
+                vs · Time
+              </span>
             </div>
             {games.map(game => (
-              <div key={`label-${game}`} className="border-r last:border-r-0 min-w-[176px] py-2">
+              <div key={`label-${game}`} className="min-w-[176px] py-2 border-r border-border last:border-r-0">
                 <input
                   type="text"
                   value={gameLabels[game] || ''}
                   onChange={(e) => updateGameLabel(game, e.target.value)}
-                  placeholder="e.g. Tigers - 10:00"
-                  className="w-full text-center text-xs font-medium bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 placeholder:text-muted-foreground/50"
+                  placeholder="e.g. Tigers · 10:00"
+                  className="w-full text-center text-xs font-medium bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 placeholder:text-muted-foreground/35"
                 />
               </div>
             ))}
           </div>
-          {/* Header row */}
-          <div className="flex border-b bg-muted">
-            <div className="sticky left-0 z-20 bg-muted border-r min-w-[140px] px-3 py-2">
-              <span className="text-sm font-semibold text-foreground">Player</span>
+
+          {/* Row 2 — game/half column headers */}
+          <div
+            className="flex bg-primary text-primary-foreground"
+            style={{ borderBottom: '2px solid hsl(var(--trojans-gold))' }}
+          >
+            <div
+              className="sticky left-0 z-20 bg-primary min-w-[140px] px-3 py-2 flex items-center"
+              style={{ borderRight: '1px solid hsl(var(--primary-foreground) / 0.15)' }}
+            >
+              <span
+                className="text-primary-foreground/75 uppercase"
+                style={{ fontFamily: displayFont, fontSize: '0.8rem', fontWeight: 800, letterSpacing: '0.06em' }}
+              >
+                Player
+              </span>
             </div>
             {games.map(game => (
-              <div key={game} className="flex border-r last:border-r-0">
+              <div
+                key={game}
+                className="flex"
+                style={{ borderRight: '1px solid hsl(var(--primary-foreground) / 0.15)' }}
+              >
                 {halves.map(half => {
                   const count = getHalfCount(game, half);
                   const isFull = count >= playersOnField;
 
                   return (
-                    <div key={half} className="flex flex-col min-w-[88px] px-2 py-1 border-r last:border-r-0 items-center gap-0.5">
-                      <span className="text-xs font-medium text-foreground">
-                        G{game}-{half === 1 ? '1st' : '2nd'}
-                      </span>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="min-h-[44px] min-w-[44px] hover:bg-destructive/10 p-0"
-                        onClick={() => handleClearHalf(game, half)}
+                    <div
+                      key={half}
+                      className="flex flex-col min-w-[88px] px-2 py-1.5 items-center gap-0.5"
+                      style={half === 1 ? { borderRight: '1px solid hsl(var(--primary-foreground) / 0.10)' } : undefined}
+                    >
+                      <div className="flex items-center gap-1">
+                        <span
+                          className="text-primary-foreground/90 uppercase leading-none"
+                          style={{ fontFamily: displayFont, fontSize: '0.75rem', fontWeight: 900 }}
+                        >
+                          G{game} {half === 1 ? '1st' : '2nd'}
+                        </span>
+                        <button
+                          className="text-primary-foreground/35 hover:text-primary-foreground/80 transition-colors min-h-[28px] min-w-[28px] flex items-center justify-center rounded"
+                          onClick={() => setClearAction({ type: 'half', game, half })}
+                          title={`Clear G${game} ${half === 1 ? '1st' : '2nd'} half`}
+                        >
+                          <Eraser className="h-3 w-3" />
+                        </button>
+                      </div>
+                      <span
+                        className="text-[0.6rem] font-bold uppercase tracking-wide"
+                        style={{
+                          color: isFull ? 'hsl(var(--trojans-gold))' : 'hsl(var(--primary-foreground) / 0.45)',
+                        }}
                       >
-                        <Eraser className="h-4 w-4" />
-                      </Button>
-                      <span className={`text-xs font-semibold ${isFull ? 'text-warning' : 'text-muted-foreground'}`}>
-                        {count}/{playersOnField} {isFull && 'FULL'}
+                        {count}/{playersOnField}{isFull ? ' FULL' : ''}
                       </span>
                     </div>
                   );
@@ -166,24 +167,25 @@ export const RotationGrid = ({
           </div>
 
           {/* Player rows */}
-          {players.map(player => (
-            <div key={player.id} className="flex border-b last:border-b-0 hover:bg-accent/50 transition-colors">
-              <div className="sticky left-0 z-10 bg-card border-r min-w-[140px] px-3 py-2 flex items-center gap-1">
+          {players.map((player, idx) => (
+            <div
+              key={player.id}
+              className={`flex hover:bg-accent/70 transition-colors ${idx < players.length - 1 ? 'border-b border-border' : ''}`}
+            >
+              <div className="sticky left-0 z-10 bg-background min-w-[140px] px-3 py-2 flex items-center gap-1.5 border-r border-border">
                 <ExperienceLevelBadge level={player.experienceLevel} size="sm" />
-                <span className="text-sm font-medium text-foreground truncate">{player.name}</span>
+                <span className="text-sm font-medium text-foreground truncate leading-tight">{player.name}</span>
               </div>
               {games.map(game => (
-                <div key={game} className="flex border-r last:border-r-0">
+                <div key={game} className="flex border-r border-border last:border-r-0">
                   {halves.map(half => {
                     const assigned = isAssigned(player.id, game, half);
                     const count = getHalfCount(game, half);
-                    const isFull = count >= playersOnField;
-
                     return (
                       <GridCell
                         key={half}
                         assigned={assigned}
-                        disabled={!assigned && isFull}
+                        disabled={!assigned && count >= playersOnField}
                         onClick={() => toggleAssignment(player.id, game, half)}
                       />
                     );
@@ -194,12 +196,17 @@ export const RotationGrid = ({
           ))}
 
           {/* Experience balance row */}
-          <div className="flex border-t bg-muted/50">
-            <div className="sticky left-0 z-10 bg-muted/50 border-r min-w-[140px] px-3 py-2">
-              <span className="text-xs font-semibold text-foreground">Experience Mix</span>
+          <div className="flex bg-muted/40 border-t border-border">
+            <div className="sticky left-0 z-10 bg-muted/40 min-w-[140px] px-3 py-2 flex items-center border-r border-border">
+              <span
+                className="text-[0.58rem] font-semibold uppercase text-muted-foreground"
+                style={{ letterSpacing: '0.18em' }}
+              >
+                Exp. Mix
+              </span>
             </div>
             {games.map(game => (
-              <div key={game} className="flex border-r last:border-r-0">
+              <div key={game} className="flex border-r border-border last:border-r-0">
                 {halves.map(half => {
                   const balance = getExperienceBalance(game, half);
                   return (
@@ -216,25 +223,31 @@ export const RotationGrid = ({
             ))}
           </div>
 
-          {/* Clear game buttons */}
-          <div className="flex border-t">
-            <div className="sticky left-0 z-10 bg-card border-r min-w-[140px] px-3 py-2">
-              <span className="text-xs font-semibold text-muted-foreground">Clear Game</span>
+          {/* Clear game row */}
+          <div className="flex border-t border-border">
+            <div className="sticky left-0 z-10 bg-background min-w-[140px] px-3 py-2 flex items-center border-r border-border">
+              <span
+                className="text-[0.58rem] font-semibold uppercase text-muted-foreground/55"
+                style={{ letterSpacing: '0.18em' }}
+              >
+                Clear
+              </span>
             </div>
             {games.map(game => (
-              <div key={game} className="flex items-center justify-center border-r last:border-r-0 min-w-[176px] px-2 py-1">
+              <div key={game} className="flex items-center justify-center min-w-[176px] px-2 py-1.5 border-r border-border last:border-r-0">
                 <Button
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="text-xs min-h-[44px]"
-                  onClick={() => handleClearGame(game)}
+                  className="text-[0.7rem] text-muted-foreground hover:text-foreground hover:bg-accent h-8 px-3"
+                  onClick={() => setClearAction({ type: 'game', game })}
                 >
-                  <Eraser className="h-3 w-3 mr-1" />
-                  Clear Game {game}
+                  <Eraser className="h-3 w-3 mr-1.5" />
+                  Game {game}
                 </Button>
               </div>
             ))}
           </div>
+
         </div>
       </div>
 
@@ -243,15 +256,13 @@ export const RotationGrid = ({
           <AlertDialogHeader>
             <AlertDialogTitle>
               {clearAction?.type === 'half'
-                ? `Clear this half?`
-                : `Clear both halves of Game ${clearAction?.game}?`
-              }
+                ? 'Clear this half?'
+                : `Clear both halves of Game ${clearAction?.game}?`}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {clearAction?.type === 'half'
                 ? 'All assignments for this half will be removed.'
-                : 'All assignments for this game will be removed.'
-              }
+                : 'All assignments for this game will be removed.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

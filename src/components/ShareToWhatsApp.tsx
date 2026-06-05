@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Share2, Copy } from 'lucide-react';
-import { Player, Assignment, EXPERIENCE_STARS } from '@/types/rotation';
+import { Player, Assignment } from '@/types/rotation';
 import { useToast } from '@/hooks/use-toast';
 
 interface ShareToWhatsAppProps {
@@ -18,122 +18,85 @@ export const ShareToWhatsApp = ({
     numberOfGames,
     ageGroup,
     gameLabels,
-    playersOnField,
 }: ShareToWhatsAppProps) => {
     const { toast } = useToast();
     const hasAssignments = assignments.length > 0;
 
     const getPlayersForHalf = (game: number, half: number): Player[] => {
-        const halfAssignments = assignments.filter(
-            (a) => a.game === game && a.half === half
-        );
-        return players.filter((p) =>
-            halfAssignments.some((a) => a.playerId === p.id)
-        );
-    };
-
-    const formatPlayerList = (playerList: Player[]): string => {
-        if (playerList.length === 0) return '(empty)';
-
-        return playerList
-            .map((p) => p.name)
-            .join(', ');
+        const ids = new Set(assignments.filter(a => a.game === game && a.half === half).map(a => a.playerId));
+        return players.filter(p => ids.has(p.id));
     };
 
     const getPlaytimeStats = () => {
-        // Count how many halves each player is assigned to
-        const playerHalfCounts = new Map<string, number>();
-
-        players.forEach(player => {
-            const count = assignments.filter(a => a.playerId === player.id).length;
-            playerHalfCounts.set(player.id, count);
-        });
-
-        const halfCounts = Array.from(playerHalfCounts.values());
-        const totalHalves = halfCounts.reduce((sum, count) => sum + count, 0);
-        const averageHalves = players.length > 0 ? totalHalves / players.length : 0;
-        const minHalves = halfCounts.length > 0 ? Math.min(...halfCounts) : 0;
-
-        return { minHalves, averageHalves };
+        const counts = players.map(p => assignments.filter(a => a.playerId === p.id).length);
+        const total = counts.reduce((s, c) => s + c, 0);
+        return {
+            minHalves: counts.length > 0 ? Math.min(...counts) : 0,
+            averageHalves: players.length > 0 ? total / players.length : 0,
+        };
     };
 
     const formatRotationPlan = (): string => {
-        const lines: string[] = [];
-
-        // Header
-        lines.push(`Squad Rotation Plan - ${ageGroup}`);
-        lines.push('');
-
-        // Games
+        const lines: string[] = [`Squad Rotation Plan - ${ageGroup}`, ''];
         for (let game = 1; game <= numberOfGames; game++) {
-            const gameLabel = gameLabels[game] || `Game ${game}`;
-            lines.push(gameLabel);
-
-            // Half 1
-            const half1Players = getPlayersForHalf(game, 1);
-            lines.push(`Half 1: ${formatPlayerList(half1Players)}`);
-
-            // Half 2
-            const half2Players = getPlayersForHalf(game, 2);
-            lines.push(`Half 2: ${formatPlayerList(half2Players)}`);
-
+            lines.push(gameLabels[game] || `Game ${game}`);
+            lines.push(`Half 1: ${getPlayersForHalf(game, 1).map(p => p.name).join(', ') || '(empty)'}`);
+            lines.push(`Half 2: ${getPlayersForHalf(game, 2).map(p => p.name).join(', ') || '(empty)'}`);
             lines.push('');
         }
-
-        // Playtime stats
         const { minHalves, averageHalves } = getPlaytimeStats();
         lines.push('---');
         lines.push(`Minimum playing time: ${minHalves} ${minHalves === 1 ? 'half' : 'halves'}`);
         lines.push(`Average playing time: ${averageHalves.toFixed(1)} halves per player`);
-
         return lines.join('\n');
     };
 
     const handleShare = () => {
-        const message = formatRotationPlan();
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/?text=${encodedMessage}`;
-        window.open(whatsappUrl, '_blank');
+        window.open(`https://wa.me/?text=${encodeURIComponent(formatRotationPlan())}`, '_blank');
     };
 
     const handleCopyToClipboard = async () => {
         try {
-            const message = formatRotationPlan();
-            await navigator.clipboard.writeText(message);
-            toast({
-                title: 'Copied to clipboard!',
-                description: 'Rotation plan copied. Paste it anywhere you like.',
-            });
-        } catch (error) {
-            toast({
-                title: 'Copy failed',
-                description: 'Please try again or use the WhatsApp button.',
-                variant: 'destructive',
-            });
+            await navigator.clipboard.writeText(formatRotationPlan());
+            toast({ title: 'Copied to clipboard', description: 'Paste it anywhere you like.' });
+        } catch {
+            toast({ title: 'Copy failed', description: 'Try the WhatsApp button instead.', variant: 'destructive' });
         }
     };
 
     return (
-        <div className="flex flex-col sm:flex-row gap-2 items-center justify-center">
-            <Button
-                onClick={handleShare}
-                disabled={!hasAssignments}
-                className="bg-[#25D366] hover:bg-[#25D366]/90 text-white disabled:bg-muted disabled:text-muted-foreground w-full sm:w-auto"
-                title={!hasAssignments ? 'Add player assignments to share your plan' : 'Share to WhatsApp'}
+        <div className="pt-1">
+            <h3
+                className="text-foreground uppercase mb-3"
+                style={{
+                    fontFamily: '"Big Shoulders Display", system-ui, sans-serif',
+                    fontSize: '1.05rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.04em',
+                }}
             >
-                <Share2 className="h-4 w-4 mr-2" />
-                Share to WhatsApp
-            </Button>
-            <Button
-                variant="outline"
-                onClick={handleCopyToClipboard}
-                disabled={!hasAssignments}
-                title={!hasAssignments ? 'Add player assignments first' : 'Copy to clipboard'}
-                className="w-full sm:w-auto"
-            >
-                <Copy className="h-4 w-4 mr-2" />
-                <span className="sm:inline">Copy to Clipboard</span>
-            </Button>
+                Share Plan
+            </h3>
+            <div className="flex flex-wrap gap-2">
+                <Button
+                    onClick={handleShare}
+                    disabled={!hasAssignments}
+                    className="bg-[hsl(142_71%_35%)] hover:bg-[hsl(142_71%_30%)] text-white disabled:opacity-50"
+                    title={!hasAssignments ? 'Add assignments first' : 'Share to WhatsApp'}
+                >
+                    <Share2 className="h-4 w-4 mr-2" />
+                    WhatsApp
+                </Button>
+                <Button
+                    variant="outline"
+                    onClick={handleCopyToClipboard}
+                    disabled={!hasAssignments}
+                    title={!hasAssignments ? 'Add assignments first' : 'Copy to clipboard'}
+                >
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy to Clipboard
+                </Button>
+            </div>
         </div>
     );
 };
