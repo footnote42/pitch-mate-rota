@@ -64,13 +64,13 @@ npm run build
 
 - **Minimum Playing Time**: 50% rule automatically tracked (minimum halves calculated per squad size)
 - **Fair Distribution**: Visual indicators show when players are below, at, or above fair share
-- **8-Player Standard**: Hard limit enforced for U7-U18 age groups
+- **8-Player Standard**: Hard limit enforced according to Age Grade Reg 15 rules of play
 
 ## Configuration
 
 - **Games**: 3-8 games per festival (default: 5)
 - **Age Groups**: U7, U8, U9, U10, U11, U12, U13, U14, U15, U16, U17, U18
-- **Players on Field**: Auto-configured per age group (U7-U18 = 8 players)
+- **Players on Field**: Auto-configured per age group
 
 ## Data Storage
 

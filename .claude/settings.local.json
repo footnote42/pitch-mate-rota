@@ -33,7 +33,15 @@
       "Read(//c/Users/kenho/.claude/plans/**)",
       "Bash(git -C C:/Users/kenho/Projects/pitch-mate-rota diff --stat HEAD)",
       "Bash(rm -rf specs/ .playwright-mcp/ nul)",
-      "Bash(npm i *)"
+      "Bash(npm i *)",
+      "Bash(.specify/scripts/bash/setup-plan.sh --json)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh claude *)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json)",
+      "Bash(.specify/scripts/bash/check-prerequisites.sh --json --require-tasks --include-tasks)",
+      "Bash(npm install *)",
+      "Bash(npx vitest *)",
+      "Skill(run)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)"
     ]
   }
 }
