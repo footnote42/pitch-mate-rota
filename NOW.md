@@ -7,6 +7,7 @@ QUEUED — UI rework so other Trojans coaches can use it unaided, then host on p
 Rework the UI to be more intuitive and presentable for coaches using it for the first time (first-run experience, empty state, comprehension without explanation).
 
 ## Context
+- **Housekeeping on return (flagged 2026-09-25):** review the untracked `.claude/commands/` (speckit command defs), then commit or delete it. Delete `.playwright-mcp/` and `docs/screenshots/Screenshot_20260417-202119.png`, or add them to `.gitignore`.
 - Obsidian: `C:/Users/kenho/Obsidian/Second Brain/Projects/pitch-mate-rota/` — vault note says `status: active` and slot 2 for November. It is now top priority, so the slate is out of date.
 - Active roadmap: `polish-plan.md` (Stages 1–2 done). Its stated goal is "portfolio-ready", but the real goal is adoption by other coaches.
 - Decisions: repo `DECISIONS.md` (ADR shape) — append here, do not use `/decide`
