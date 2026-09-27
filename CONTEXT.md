@@ -49,14 +49,14 @@ Whether the combined experience of a half's players sits in an acceptable range.
 ### Fairness
 
 **Half Game Rule**:
-RFU Regulation 15.12: every player selected in a match day squad plays at least half of the Available Playing Time. Waived only for a player permanently removed through injury, risk of injury or a red card.
+RFU Regulation 15.13 (2026-27): every player selected in a match day squad plays at least half of the Available Playing Time. Waived only for a player permanently removed (injury, genuine risk of injury, red card) or a match abandoned or shortened.
 _Avoid_: RFU minimum, fair play rule
 
 **Available Playing Time**:
-The total time allocated to all of a team's matches on the day (Reg 15.12.3), so at a festival it spans every game, not each game separately.
+The total time allocated to all of a team's matches on the day (Reg 15.13(3)(b)), so at a festival it spans every game, not each game separately.
 
 **Minimum**:
-Half of the Available Playing Time, expressed in halves; the least any squad member may play.
+Half of the Available Playing Time, expressed in halves; the least any squad member may play. The regulation calls it the Half Game Threshold.
 
 **Fair share**:
 An even split of available places across the squad; a target above the minimum, not a rule.
@@ -74,7 +74,7 @@ _Avoid_: Dropout
 A player who joins the festival after its first game. As with an early leaver, their minimum is unchanged and a shortfall is flagged.
 
 **Permanent removal**:
-A player taken out for the rest of the festival through injury, risk of injury or a red card; the one case where the Half Game Rule is waived (Reg 15.12.4).
+A player taken out for the rest of the festival through injury, risk of injury or a red card; the one player-level case where the Half Game Rule is waived (Reg 15.13(5)).
 _Avoid_: Withdrawal, retired
 
 ### Recording
