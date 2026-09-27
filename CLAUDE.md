@@ -79,3 +79,17 @@ No testing infrastructure is currently set up. When adding tests:
 
 ## Recent Changes
 - 001-preserve-assignments-on-game-change: Added TypeScript (relaxed config — `noImplicitAny: false`, `strictNullChecks: false`) + React 18, Vite, shadcn-ui, Tailwind CSS
+
+## Agent skills
+
+### Issue tracker
+
+Issues tracked in GitHub Issues (footnote42/pitch-mate-rota) via `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Default five canonical labels (needs-triage, needs-info, ready-for-agent, ready-for-human, wontfix). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: root `CONTEXT.md` + `docs/adr/`. See `docs/agents/domain.md`.
