@@ -10,7 +10,7 @@ Rework the UI to be more intuitive and presentable for coaches using it for the 
 - **Housekeeping on return (flagged 2026-09-25):** review the untracked `.claude/commands/` (speckit command defs), then commit or delete it. Delete `.playwright-mcp/` and `docs/screenshots/Screenshot_20260417-202119.png`, or add them to `.gitignore`.
 - Obsidian: `C:/Users/kenho/Obsidian/Second Brain/Projects/pitch-mate-rota/` — vault note says `status: active` and slot 2 for November. It is now top priority, so the slate is out of date.
 - Active roadmap: `polish-plan.md` (Stages 1–2 done). Its stated goal is "portfolio-ready", but the real goal is adoption by other coaches.
-- Decisions: repo `DECISIONS.md` (ADR shape) — append here, do not use `/decide`
+- Decisions: `docs/adr/` (from 2026-09-27). `DECISIONS.md` is frozen history — do not append, do not use `/decide`
 - Purpose: festival-day squad rotation — experience balance on pitch + RFU Half Game Rule playing time. Used through the 2025-26 season, and will be used again this season.
 - History: began as a Lovable project, later deployed on Vercel. Target hosting: portfolio site, rugby subdomain.
 - Uncommitted at triage: `README.md` Reg 15 wording, `.claude/settings.local.json`, untracked `.claude/commands/`, `.playwright-mcp/`, `docs/screenshots/Screenshot_20260417-202119.png`

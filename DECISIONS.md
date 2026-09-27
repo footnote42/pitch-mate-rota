@@ -1,5 +1,7 @@
 # Design Decisions
 
+> **Frozen 2026-09-27.** New decisions go in `docs/adr/`. This file is kept as history.
+
 This document captures key architectural and design choices made during development, along with the rationale behind them.
 
 ## Interface Design
