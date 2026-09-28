@@ -46,6 +46,12 @@ An unbroken run of halves played by one player across games. Auto-fill avoids mo
 **Balance**:
 Whether the combined experience of a half's players sits in an acceptable range. A soft indicator, never a block.
 
+**Balance target**:
+The experience total auto-fill aims each half at: the squad's average experience times the side size, give or take two points. Distinct from the wider range that flags a half as unbalanced.
+
+**Shuffle**:
+Re-running auto-fill over the same empty places for a different suggestion, varying only between choices that stay within the balance target and still meet minimums and an even share.
+
 ### Fairness
 
 **Half Game Rule**:
