@@ -8,6 +8,7 @@ import { SquadTab } from '@/components/SquadTab';
 import { PlanTab } from '@/components/PlanTab';
 import { RecordTab } from '@/components/RecordTab';
 import { GuideTab } from '@/components/GuideTab';
+import { UpdateBar } from '@/components/UpdateBar';
 import { useToast } from '@/hooks/use-toast';
 
 const readDark = () => document.documentElement.dataset.theme === 'dark';
@@ -80,6 +81,7 @@ const Index = () => {
         {tab === 'guide' && <GuideTab />}
       </main>
 
+      <UpdateBar />
       <TabBar tab={tab} onChange={setTab} />
     </div>
   );

@@ -1,0 +1,29 @@
+{
+  "outputDirectory": "dist",
+  "redirects": [{ "source": "/", "destination": "/rota", "permanent": false }],
+  "rewrites": [
+    { "source": "/rota", "destination": "/rota/index.html" },
+    { "source": "/rota/:path*", "destination": "/rota/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/rota/sw.js",
+      "headers": [
+        { "key": "Service-Worker-Allowed", "value": "/rota" },
+        { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
+      ]
+    },
+    {
+      "source": "/rota/(index.html|manifest.webmanifest|registerSW.js)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/rota",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/rota/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    }
+  ]
+}

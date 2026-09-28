@@ -39,7 +39,7 @@ A festival-day tool built around the Half Game Rule and one coach's real pitchsi
 
 ## Evidence on Hand
 
-- `public/trojans_logo.png` (crest, 2607x3000), `public/trojans-badge.png`.
+- `docs/images/trojans_logo.png` (crest, 2607x3000), `docs/images/trojans-badge.png`. The app itself uses the H-posts mark and ships neither.
 - RFU Reg 15 research: `docs/research/reg15-age-groups.md`.
 - No real squad-selection messages collected yet (ticket "Collect real squad-selection messages"). No testimonials or usage data; do not invent any.
 
