@@ -6,7 +6,6 @@ import { AppHeader } from '@/components/AppHeader';
 import { TabBar, Tab } from '@/components/TabBar';
 import { SquadTab } from '@/components/SquadTab';
 import { PlanTab } from '@/components/PlanTab';
-import { ShareToWhatsApp } from '@/components/ShareToWhatsApp';
 import { useToast } from '@/hooks/use-toast';
 
 const RFU_LINKS = [
@@ -30,8 +29,8 @@ const Index = () => {
   const [celebrationShown, setCelebrationShown] = useState<string | null>(null);
   const { toast } = useToast();
   const { state, dispatch, preview, undo, canUndo, recovered } = useRotationState();
-  const { squad: players, festival } = state;
-  const { games: numberOfGames, ageGroup, labels: gameLabels, picks: assignments } = festival;
+  const { festival } = state;
+  const { games: numberOfGames, ageGroup, picks: assignments } = festival;
   const assessment = assess(state);
   const playersOnField = AGE_GROUP_CONFIGS[ageGroup].playersOnField;
 
@@ -84,18 +83,7 @@ const Index = () => {
         )}
 
         {tab === 'plan' && (
-          <PlanTab state={state} assessment={assessment} dispatch={dispatch} undo={undo} canUndo={canUndo} onGoTo={setTab}>
-            {assignments.length > 0 && (
-              <ShareToWhatsApp
-                players={players}
-                assignments={assignments}
-                numberOfGames={numberOfGames}
-                ageGroup={ageGroup}
-                gameLabels={gameLabels}
-                playersOnField={playersOnField}
-              />
-            )}
-          </PlanTab>
+          <PlanTab state={state} assessment={assessment} dispatch={dispatch} undo={undo} canUndo={canUndo} onGoTo={setTab} />
         )}
 
         {tab === 'record' && (

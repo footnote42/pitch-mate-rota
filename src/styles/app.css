@@ -494,6 +494,21 @@ select.field {
   gap: 10px;
 }
 
+.message {
+  margin: 0;
+  padding: 12px 14px;
+  max-height: 50vh;
+  overflow-y: auto;
+  background: var(--seg-bg);
+  border-radius: 10px;
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
 /* ---------- guide stub ---------- */
 .links {
   display: grid;
@@ -529,7 +544,7 @@ select.field {
 }
 .bar-top {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: 1fr auto auto;
   gap: 8px;
   align-items: center;
 }

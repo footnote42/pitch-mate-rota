@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, Info, Undo2 } from 'lucide-react';
 import { Action, Assessment, Half, halfKey, MAX_RUN, PlayerAssessment, State, toHalves } from '@/rota';
+import { SharePlan } from './SharePlan';
 
 const LEVEL = { 1: 'N', 2: 'I', 3: 'E' } as const;
 const HALVES: Half[] = [1, 2];
@@ -27,10 +28,9 @@ interface PlanTabProps {
   undo: () => void;
   canUndo: boolean;
   onGoTo: (tab: 'squad' | 'guide') => void;
-  children?: React.ReactNode; // shown under the plan (share)
 }
 
-export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo, children }: PlanTabProps) => {
+export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: PlanTabProps) => {
   const { squad, festival } = state;
   const [view, setView] = useState<'game' | 'overview'>('game');
   const [game, setGame] = useState(1);
@@ -87,6 +87,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo, ch
           <button className="iconbtn undo" onClick={undo} disabled={!canUndo} aria-label="Undo last change" title="Undo">
             <Undo2 size={22} strokeWidth={2} aria-hidden="true" />
           </button>
+          <SharePlan state={state} />
         </div>
         <div className="hgr">
           <span>
@@ -271,7 +272,6 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo, ch
         </div>
       )}
 
-      {children && <div className="page">{children}</div>}
     </>
   );
 };
