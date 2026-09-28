@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rota Plan tab</title>
+<!-- Prototype for "How does the phone Plan tab work?" (#27). Throwaway; seeded data, nothing saved.
+     Look from "What does the mixed Chalk & Turf / Trojans look feel like?" (#26). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root { --page: #d9d6cc; --page-ink: #2b2f3a; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --page: #1b1d22; --page-ink: #d8d6cf; } }
+  :root[data-theme="dark"] { --page: #1b1d22; --page-ink: #d8d6cf; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--page-ink); font: 16px/1.5 'Atkinson Hyperlegible', Verdana, sans-serif; padding: 24px 16px 48px; }
+  .intro { max-width: 390px; margin: 0 auto 16px; }
+  .intro h1 { font: 800 1.5rem/1.15 'Bricolage Grotesque', sans-serif; margin: 0 0 6px; letter-spacing: -.02em; }
+  .intro p { margin: 0 0 10px; font-size: 15px; }
+  .intro button { font: 700 14px/1 'Atkinson Hyperlegible', sans-serif; padding: 10px 14px; border-radius: 8px; border: 1px solid currentColor; background: transparent; color: inherit; cursor: pointer; min-height: 44px; }
+  .stage { display: flex; justify-content: center; }
+  @media (max-width: 430px) { body { padding-inline: 0; } .intro { padding-inline: 16px; } .app { border-radius: 0 !important; } }
+
+  /* ---------- app tokens (light default, dark mode) ---------- */
+  .app {
+    --bg: #f5f2e8; --surface: #fffdf6; --ink: #14213d; --muted: #4b5570;
+    --accent: #e7bd45; --accent-ink: #14213d; --scarlet: #c8200e; --pad-blue: #14213d;
+    --flag: #8a4a0c; --flag-bg: #fbeedd; --tag: #e3e7f0;
+    --line: rgba(20, 33, 61, .38); --chalk: 2px dashed var(--line); --hair: 1px dashed var(--line);
+    --seg-bg: rgba(20, 33, 61, .07); --shadow: 0 14px 30px -18px rgba(20, 33, 61, .35);
+    color-scheme: light;
+    width: min(390px, 100%); height: 820px; overflow: hidden;
+    display: grid; grid-template-rows: auto 1fr auto;
+    background: var(--bg); color: var(--ink); border-radius: 28px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.55);
+    font: 17px/1.45 'Atkinson Hyperlegible', Verdana, sans-serif;
+  }
+  .app.dark {
+    --bg: #14213d; --surface: rgba(6, 12, 28, .42); --ink: #f3f0e4; --muted: #c3c8d4;
+    --scarlet: #d62b14; --pad-blue: #6f8fd8; --flag: #f2b27a; --flag-bg: rgba(242, 178, 122, .14); --tag: #2c4270;
+    --line: rgba(243, 240, 228, .5); --seg-bg: rgba(243, 240, 228, .08); --shadow: 0 18px 40px -18px rgba(0,0,0,.6);
+    color-scheme: dark;
+  }
+  .app ::selection { background: var(--accent); color: var(--accent-ink); }
+  .app :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .app h1, .app h2, .brand b { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; letter-spacing: -.02em; margin: 0; }
+  .app button { font-family: inherit; color: inherit; }
+
+  .top { padding: 14px 16px 12px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; border-bottom: 2px dashed var(--scarlet); }
+  .brand { display: flex; align-items: center; gap: 8px; }
+  .brand svg { width: 30px; height: 30px; }
+  .brand b { font-size: 1.45rem; font-weight: 800; line-height: 1; }
+  .fest { font-size: 13px; color: var(--muted); line-height: 1.3; text-align: right; }
+  .fest strong { color: var(--ink); display: block; font-size: 14px; }
+  .iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; border-radius: 10px; cursor: pointer; }
+  .iconbtn:hover { background: var(--seg-bg); }
+  .iconbtn:disabled { opacity: .3; cursor: default; background: transparent; }
+
+  .main { overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .bar { position: sticky; top: 0; z-index: 2; background: var(--bg); padding: 12px 16px 10px; display: grid; gap: 10px; border-bottom: var(--hair); }
+  .toggle { display: grid; grid-template-columns: 1fr 1fr; background: var(--seg-bg); border-radius: 10px; padding: 3px; }
+  .toggle button { min-height: 40px; border: 0; background: transparent; border-radius: 8px; font-weight: 700; font-size: 15px; color: var(--muted); cursor: pointer; }
+  .toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .hgr { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); min-height: 24px; }
+  .hgr b { color: var(--ink); }
+  .hgr .flag { margin-left: auto; }
+  .flag { display: inline-flex; align-items: center; gap: 5px; color: var(--flag); font-weight: 700; font-size: 13px; white-space: nowrap; }
+  .flag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; flex: none; }
+  .ok { display: inline-flex; align-items: center; gap: 4px; color: var(--muted); font-size: 13px; }
+  .ok svg { color: var(--ink); }
+
+  /* game pager + carousel */
+  .pager { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; }
+  .pager h2 { font-size: 1.5rem; font-weight: 800; text-align: center; line-height: 1; }
+  .pager h2 small { display: block; font: 400 13px/1.4 'Atkinson Hyperlegible', sans-serif; color: var(--muted); margin-top: 4px; letter-spacing: 0; }
+  .dots { display: flex; gap: 6px; justify-content: center; margin-top: 6px; }
+  .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--line); }
+  .dots i.on { background: var(--scarlet); width: 18px; border-radius: 4px; }
+  .carousel { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+  .carousel::-webkit-scrollbar { display: none; }
+  .page { flex: 0 0 100%; scroll-snap-align: start; padding: 12px 16px 24px; display: grid; gap: 12px; align-content: start; }
+
+  .halves { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .half { background: var(--surface); border-radius: 12px; padding: 10px 12px; display: grid; gap: 2px; }
+  .app:not(.dark) .half, .app:not(.dark) .list { box-shadow: var(--shadow); }
+  .half .t { font-size: 13px; color: var(--muted); font-weight: 700; }
+  .half .n { font: 800 1.5rem/1.1 'Bricolage Grotesque', sans-serif; font-variant-numeric: tabular-nums; }
+  .half .n small { font: 400 13px 'Atkinson Hyperlegible', sans-serif; color: var(--muted); margin-left: 4px; }
+  .half .mix { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; }
+
+  .list { list-style: none; margin: 0; padding: 0; background: var(--surface); border-radius: 12px; }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 2px 10px; align-items: center; padding: 8px 10px 8px 14px; min-height: 64px; }
+  .row + .row { border-top: var(--hair); }
+  .who { font-weight: 700; font-size: 17px; display: flex; align-items: baseline; gap: 6px; }
+  .lvl { font-size: 11px; font-weight: 700; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 1px 4px; line-height: 1.2; }
+  .meta { grid-column: 1; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); flex-wrap: wrap; }
+  .ticks { display: inline-flex; gap: 3px; align-items: center; }
+  .ticks i { width: 9px; height: 9px; border-radius: 2px; border: 1.5px solid var(--line); }
+  .ticks i.f { background: var(--ink); border-color: var(--ink); }
+  .ticks span { margin-left: 3px; font-variant-numeric: tabular-nums; }
+  .picks { grid-row: 1 / span 2; grid-column: 2; display: grid; grid-template-columns: 58px 58px; gap: 6px; }
+  .pick { height: 48px; border-radius: 10px; border: 2px solid var(--line); background: transparent; font-weight: 700; font-size: 14px; cursor: pointer; color: var(--muted); }
+  @media (hover: hover) { .pick:hover:not(:disabled):not([aria-pressed="true"]) { border-color: var(--ink); color: var(--ink); } }
+  .pick[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: var(--bg); }
+  .pick:disabled { border-style: dashed; opacity: .45; cursor: not-allowed; }
+  .row.out .who { color: var(--muted); }
+  .out-note { grid-row: 1 / span 2; grid-column: 2; font-size: 13px; color: var(--muted); text-align: right; width: 122px; }
+
+  /* overview */
+  .ov { padding: 12px 12px 24px; display: grid; gap: 12px; }
+  .ov p { margin: 0 4px; font-size: 13px; color: var(--muted); }
+  table { border-collapse: separate; border-spacing: 0; width: 100%; background: var(--surface); border-radius: 12px; font-variant-numeric: tabular-nums; }
+  .app:not(.dark) table { box-shadow: var(--shadow); }
+  th, td { padding: 0; text-align: center; font-size: 12px; height: 34px; }
+  thead th { color: var(--muted); font-weight: 700; height: 26px; }
+  thead tr:first-child th { padding-top: 6px; font-size: 12px; color: var(--ink); }
+  th.nm, td.nm { text-align: left; padding-left: 10px; font-size: 14px; font-weight: 700; white-space: nowrap; }
+  td.g2, th.g2 { border-left: var(--hair); }
+  tbody tr + tr td { border-top: 1px solid var(--seg-bg); }
+  .c { display: inline-block; width: 14px; height: 14px; border-radius: 4px; background: var(--ink); vertical-align: middle; }
+  .c.na { background: transparent; border: 1px dashed var(--line); width: 12px; height: 12px; }
+  td.tot { font-weight: 700; font-size: 13px; padding-right: 8px; text-align: right; white-space: nowrap; }
+  td.tot.warn { color: var(--flag); }
+  tfoot td { color: var(--muted); height: 30px; border-top: var(--hair); font-size: 12px; }
+  tfoot td.warn { color: var(--flag); font-weight: 700; }
+  .key { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin: 0 4px; }
+  .key span { display: inline-flex; gap: 6px; align-items: center; }
+
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-top: var(--chalk); padding: 6px 8px 14px; }
+  .tabs button { min-height: 52px; border: 0; background: transparent; color: var(--muted); display: grid; justify-items: center; align-content: center; gap: 3px; font-weight: 700; font-size: 12px; cursor: pointer; border-radius: 10px; position: relative; }
+  .tabs button[aria-current="page"] { color: var(--ink); }
+  .tabs button[aria-current="page"]::before { content: ""; position: absolute; top: -7px; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--scarlet); }
+  .tabs svg { width: 24px; height: 24px; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="intro">
+  <h1>Plan tab</h1>
+  <p>Seeded U9 festival: 7 a side, 4 games, minimum 4 halves each. Swipe between games (or use the arrows), tap 1st / 2nd to pick. Nothing is saved.</p>
+  <button id="theme" type="button">Switch to dark</button>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="posts" viewBox="0 0 32 32">
+    <path d="M9 3v26M23 3v26M9 17h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M9 22.5v2.2M23 22.5v2.2" stroke="var(--scarlet)" stroke-width="5"/>
+    <path d="M9 24.7v2.2M23 24.7v2.2" stroke="var(--pad-blue)" stroke-width="5"/>
+    <path d="M9 26.9v2.2M23 26.9v2.2" stroke="var(--accent)" stroke-width="5"/>
+  </symbol>
+  <symbol id="i-squad" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.6"/><path d="M16 14.2c2.4 0 4 1.5 4.5 4.3"/></g></symbol>
+  <symbol id="i-plan" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M9.5 9.5v10M15 9.5v10"/></g></symbol>
+  <symbol id="i-record" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V9.5M10 3h4M18.2 6.8l1.3-1.3"/></g></symbol>
+  <symbol id="i-guide" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.6 4 5v13.5c3-.4 6 0 8 1.5 2-1.5 5-1.9 8-1.5V5c-3-.4-6 0-8 1.5Z"/><path d="M12 6.5V20"/></g></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
+
+<div class="stage">
+  <div class="app" id="app">
+    <header class="top">
+      <div class="brand"><svg aria-hidden="true"><use href="#posts"/></svg><b>Rota</b></div>
+      <div class="fest"><strong>U9 festival · Sun 4 Oct</strong>4 games · 7 a side</div>
+      <button class="iconbtn" aria-label="Festival menu"><svg width="24" height="24"><use href="#i-menu"/></svg></button>
+    </header>
+
+    <section class="main" id="main" aria-label="Plan">
+      <div class="bar">
+        <div class="toggle" role="group" aria-label="Plan view">
+          <button aria-pressed="true" data-view="game">Game</button>
+          <button aria-pressed="false" data-view="overview">Overview</button>
+        </div>
+        <div class="hgr" id="hgr"></div>
+        <div class="pager" id="pager">
+          <button class="iconbtn" id="prev" aria-label="Previous game"><svg width="24" height="24"><use href="#i-prev"/></svg></button>
+          <div><h2 id="gtitle"></h2><div class="dots" id="dots"></div></div>
+          <button class="iconbtn" id="next" aria-label="Next game"><svg width="24" height="24"><use href="#i-next"/></svg></button>
+        </div>
+      </div>
+      <div class="carousel" id="carousel"></div>
+      <div class="ov" id="ovw" hidden></div>
+    </section>
+
+    <nav class="tabs" aria-label="Sections">
+      <button><svg><use href="#i-squad"/></svg>Squad</button>
+      <button aria-current="page"><svg><use href="#i-plan"/></svg>Plan</button>
+      <button><svg><use href="#i-record"/></svg>Record</button>
+      <button><svg><use href="#i-guide"/></svg>Guide</button>
+    </nav>
+  </div>
+</div>
+
+<script>
+// ---------- seeded festival (made up) ----------
+const GAMES = 4, SIDE = 7, HALVES = GAMES * 2;
+const MIN = Math.ceil(HALVES / 2);           // Half Game Rule: half the available playing time
+const LV = { N: 1, I: 2, E: 3 };
+// name, level, first game available, last game available
+const squad = [
+  ['Alfie','E'], ['Ava','I'], ['Ben','N',2,4], ['Charlie','I'], ['Freya','E'], ['Isla','I'],
+  ['Leo','N'], ['Noah','I'], ['Oscar','E'], ['Sam B','I',1,2], ['Sam K','N'], ['Theo','I'],
+].map(([name, lvl, from = 1, to = GAMES]) => ({ name, lvl, from, to }));
+const seed = [
+  ['Alfie','Ava','Charlie','Isla','Leo','Sam B','Oscar'],
+  ['Freya','Noah','Sam B','Sam K','Theo','Ava','Leo'],
+  ['Alfie','Sam B','Ben','Charlie','Freya','Isla','Theo'],
+  ['Charlie','Oscar','Noah','Sam K','Ben','Leo'],
+  ['Freya','Oscar','Isla','Noah','Theo','Sam K','Charlie'],
+  ['Alfie','Charlie','Ben'],
+  [], [],
+];
+const plan = seed.map(h => new Set(h));    // index = (game-1)*2 + half
+
+// ---------- assessment (what the rota module's assess() would answer) ----------
+const avail = (p, h) => { const g = Math.floor(h / 2) + 1; return g >= p.from && g <= p.to; };
+function playerStatus(p) {
+  const planned = plan.filter(s => s.has(p.name)).length;
+  const open = plan.filter((s, h) => avail(p, h) && !s.has(p.name) && s.size < SIDE).length;
+  let run = 0, best = 0;
+  plan.forEach(s => { run = s.has(p.name) ? run + 1 : 0; best = Math.max(best, run); });
+  const need = MIN - planned;
+  const hgr = need <= 0 ? 'met' : open < need ? 'short' : open === need ? 'tight' : 'track';
+  return { planned, open, need, hgr, streak: best };
+}
+function halfStatus(h) {
+  const ps = squad.filter(p => plan[h].has(p.name));
+  const pts = ps.reduce((a, p) => a + LV[p.lvl], 0);
+  const mix = { E: 0, I: 0, N: 0 }; ps.forEach(p => mix[p.lvl]++);
+  // ponytail: current 1.5x-2.5x range, only judged once the half is full (thresholds are fog on the map)
+  const full = ps.length === SIDE;
+  const bal = !full ? null : pts < SIDE * 1.5 ? 'light' : pts > SIDE * 2.5 ? 'heavy' : 'ok';
+  return { n: ps.length, mix, bal };
+}
+
+// ---------- render ----------
+const $ = id => document.getElementById(id);
+const carousel = $('carousel');
+let game = 0, view = 'game';
+const svg = id => `<svg width="16" height="16" aria-hidden="true"><use href="#${id}"/></svg>`;
+const hgrLabel = s => ({ short: 'Short', tight: 'Tight' })[s.hgr];
+
+function ticks(s) {
+  let t = '';
+  for (let i = 0; i < MIN; i++) t += `<i class="${i < s.planned ? 'f' : ''}"></i>`;
+  if (s.planned > MIN) t += `<span>+${s.planned - MIN}</span>`;
+  return `<span class="ticks" title="${s.planned} of ${MIN} halves">${t}</span>`;
+}
+
+function renderHgr() {
+  const st = squad.map(p => [p, playerStatus(p)]);
+  const watch = st.filter(([, s]) => s.hgr === 'short' || s.hgr === 'tight');
+  const fine = st.length - watch.length;
+  $('hgr').innerHTML = `<span>Half Game Rule: <b>${fine}</b> of ${squad.length} on track for ${MIN} halves</span>` +
+    (watch.length ? `<span class="flag">${watch.length} to watch</span>` : `<span class="ok">${svg('i-check')}</span>`);
+}
+
+function renderPages() {
+  carousel.innerHTML = '';
+  for (let g = 0; g < GAMES; g++) {
+    const page = document.createElement('div');
+    page.className = 'page';
+    page.setAttribute('aria-label', `Game ${g + 1}`);
+    const hs = [0, 1].map(k => halfStatus(g * 2 + k));
+    page.innerHTML = `<div class="halves">${hs.map((s, k) => `
+      <div class="half"><span class="t">${k ? '2nd' : '1st'} half</span>
+        <span class="n">${s.n}/${SIDE}<small>${s.n < SIDE ? `${SIDE - s.n} to pick` : 'full'}</small></span>
+        <span class="mix">${s.mix.E} Exp · ${s.mix.I} Int · ${s.mix.N} Nov</span>
+        ${s.bal === 'light' ? '<span class="flag">Light on experience</span>' : s.bal === 'heavy' ? '<span class="flag">Heavy on experience</span>' : s.bal === 'ok' ? `<span class="ok">${svg('i-check')}Balanced</span>` : ''}
+      </div>`).join('')}</div>`;
+    const ul = document.createElement('ul');
+    ul.className = 'list';
+    for (const p of squad) {
+      const s = playerStatus(p);
+      const inGame = g + 1 >= p.from && g + 1 <= p.to;
+      const li = document.createElement('li');
+      li.className = 'row' + (inGame ? '' : ' out');
+      const flags = [hgrLabel(s), s.streak > 3 ? `${s.streak} in a row` : null].filter(Boolean)
+        .map(f => `<span class="flag">${f}</span>`).join('');
+      li.innerHTML = `<span class="who">${p.name}<span class="lvl">${p.lvl}</span></span>
+        <span class="meta">${ticks(s)}${flags}</span>` + (inGame
+        ? `<span class="picks">${[0, 1].map(k => {
+            const h = g * 2 + k, on = plan[h].has(p.name), full = plan[h].size >= SIDE;
+            return `<button class="pick" data-h="${h}" data-p="${p.name}" aria-pressed="${on}" ${!on && full ? 'disabled' : ''}
+              aria-label="${p.name}, game ${g + 1} ${k ? 'second' : 'first'} half">${k ? '2nd' : '1st'}</button>`;
+          }).join('')}</span>`
+        : `<span class="out-note">${g + 1 < p.from ? `Arrives game ${p.from}` : `Left after game ${p.to}`}</span>`);
+      ul.append(li);
+    }
+    page.append(ul);
+    carousel.append(page);
+  }
+}
+
+function renderPager() {
+  $('gtitle').innerHTML = `Game ${game + 1}<small>of ${GAMES}${game < GAMES - 1 ? ' · swipe for the next' : ''}</small>`;
+  $('dots').innerHTML = Array.from({ length: GAMES }, (_, i) => `<i class="${i === game ? 'on' : ''}"></i>`).join('');
+  $('prev').disabled = game === 0;
+  $('next').disabled = game === GAMES - 1;
+}
+
+function renderOverview() {
+  const head1 = Array.from({ length: GAMES }, (_, g) => `<th colspan="2" class="${g ? 'g2' : ''}">G${g + 1}</th>`).join('');
+  const head2 = Array.from({ length: HALVES }, (_, h) => `<th class="${h % 2 === 0 && h ? 'g2' : ''}">${h % 2 ? '2' : '1'}</th>`).join('');
+  const rows = squad.map(p => {
+    const s = playerStatus(p);
+    const cells = plan.map((set, h) => `<td class="${h % 2 === 0 && h ? 'g2' : ''}">${set.has(p.name) ? '<span class="c"></span>' : avail(p, h) ? '' : '<span class="c na"></span>'}</td>`).join('');
+    const warn = s.hgr === 'short' || s.hgr === 'tight';
+    return `<tr><td class="nm">${p.name}</td>${cells}<td class="tot ${warn ? 'warn' : ''}">${s.planned}/${MIN}</td></tr>`;
+  }).join('');
+  const foot = plan.map((_, h) => {
+    const s = halfStatus(h);
+    return `<td class="${h % 2 === 0 && h ? 'g2' : ''} ${s.bal && s.bal !== 'ok' ? 'warn' : ''}">${s.n}</td>`;
+  }).join('');
+  $('ovw').innerHTML = `
+    <table aria-label="Festival overview">
+      <thead><tr><th></th>${head1}<th></th></tr><tr><th class="nm">Player</th>${head2}<th>Halves</th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot><tr><td class="nm">Picked</td>${foot}<td></td></tr></tfoot>
+    </table>
+    <div class="key"><span><span class="c"></span>Planned</span><span><span class="c na"></span>Not there</span><span style="color:var(--flag)">Orange: worth a look</span></div>
+    <p>Read only. Tap Game to change picks. Orange totals are players who could miss ${MIN} halves; orange counts are halves light or heavy on experience.</p>`;
+}
+
+function render() { renderHgr(); renderPages(); renderPager(); renderOverview(); }
+
+// ---------- interaction ----------
+carousel.addEventListener('click', e => {
+  const b = e.target.closest('.pick');
+  if (!b || b.disabled) return;
+  const set = plan[+b.dataset.h];
+  set.has(b.dataset.p) ? set.delete(b.dataset.p) : set.add(b.dataset.p);
+  const x = carousel.scrollLeft;
+  render();
+  carousel.scrollLeft = x;
+});
+carousel.addEventListener('scroll', () => {
+  const g = Math.round(carousel.scrollLeft / carousel.clientWidth);
+  if (g !== game) { game = g; renderPager(); }
+}, { passive: true });
+const go = g => carousel.scrollTo({ left: g * carousel.clientWidth, behavior: 'smooth' });
+$('prev').onclick = () => go(game - 1);
+$('next').onclick = () => go(game + 1);
+document.querySelectorAll('.toggle button').forEach(b => b.onclick = () => {
+  view = b.dataset.view;
+  document.querySelectorAll('.toggle button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  $('pager').hidden = carousel.hidden = view !== 'game';
+  $('ovw').hidden = view !== 'overview';
+  if (view === 'game') carousel.scrollLeft = game * carousel.clientWidth;
+});
+$('theme').onclick = () => {
+  const dark = $('app').classList.toggle('dark');
+  $('theme').textContent = dark ? 'Switch to light' : 'Switch to dark';
+};
+render();
+if (location.hash.includes('dark')) $('theme').click();
+if (location.hash.includes('overview')) document.querySelector('[data-view=overview]').click();
+</script>
+</body>
+</html>
