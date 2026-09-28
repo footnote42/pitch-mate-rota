@@ -89,6 +89,9 @@ _Avoid_: Withdrawal, retired
 Quarters actually played by each player, recorded pitchside as a check against the plan. It never alters the plan.
 _Avoid_: Actuals, tracking
 
+**Recorded game**:
+A game the coach has confirmed as played. From then on its match record, not the plan, counts toward each player's time, and auto-fill leaves it alone; the record itself stays editable.
+
 ### Squad
 
 **Squad**:
