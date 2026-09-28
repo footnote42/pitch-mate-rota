@@ -1111,3 +1111,19 @@ select.field {
     transition: none;
   }
 }
+
+/* ---------- squad import ---------- */
+.field.paste {
+  min-height: 140px;
+  padding: 10px 12px;
+  line-height: 1.4;
+  resize: vertical;
+}
+.found {
+  display: grid;
+  gap: 4px;
+  font-size: 15px;
+}
+.found p {
+  margin: 0;
+}

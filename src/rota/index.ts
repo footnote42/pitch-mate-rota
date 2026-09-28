@@ -3,6 +3,9 @@
 import { AgeGroup, AGE_GROUP_CONFIGS, DEFAULT_AGE_GROUP } from '@/types/ageGroup';
 import { ExperienceLevel, Player } from '@/types/rotation';
 import { autoFill } from './autofill';
+import { nameKey } from './squad';
+
+export { parseSquad, matchSquad } from './squad';
 
 export const MIN_GAMES = 3;
 export const MAX_GAMES = 8;
@@ -61,6 +64,7 @@ export interface State {
 
 export type Action =
   | { type: 'addPlayer'; id: string; name: string; experienceLevel: ExperienceLevel }
+  | { type: 'addPlayers'; players: { id: string; name: string }[] } // squad import: new names only, at Intermediate
   | { type: 'removePlayer'; playerId: string }
   | { type: 'renamePlayer'; playerId: string; name: string }
   | { type: 'setExperienceLevel'; playerId: string; level: ExperienceLevel }
@@ -151,6 +155,17 @@ export function reduce(state: State, action: Action): State {
     case 'addPlayer': {
       const player: Player = { id: action.id, name: action.name.trim(), experienceLevel: action.experienceLevel };
       return { ...state, squad: [...state.squad, player].sort(byName) };
+    }
+    case 'addPlayers': {
+      const have = new Set(state.squad.map(p => nameKey(p.name)));
+      const fresh: Player[] = [];
+      for (const { id, name } of action.players) {
+        const key = nameKey(name);
+        if (!key || have.has(key)) continue;
+        have.add(key);
+        fresh.push({ id, name: name.trim().replace(/\s+/g, ' '), experienceLevel: 2 });
+      }
+      return fresh.length === 0 ? state : { ...state, squad: [...state.squad, ...fresh].sort(byName) };
     }
     case 'removePlayer':
       return {

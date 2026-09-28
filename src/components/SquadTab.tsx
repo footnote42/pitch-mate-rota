@@ -5,6 +5,7 @@ import { ExperienceLevel, EXPERIENCE_LABELS, Player } from '@/types/rotation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FestivalSetup } from './FestivalSetup';
 import { presenceLabel } from './presence';
+import { ImportSquad } from './ImportSquad';
 
 const LEVELS: [ExperienceLevel, string][] = [[1, 'N'], [2, 'I'], [3, 'E']];
 const MAX_NAME = 50;
@@ -73,13 +74,14 @@ export const SquadTab = ({ state, assessment, dispatch, preview, onOpenGuide }: 
         <button className="go" type="submit">Add</button>
       </form>
       {error && <p className="error" id="name-error" role="alert">{error}</p>}
+      <ImportSquad squad={squad} dispatch={dispatch} />
 
       {squad.length === 0 ? (
         <div className="empty">
           <h2>Add your players</h2>
           <p>
-            Type each name and tap Add. Then set each player as Novice, Intermediate or Experienced, so every half
-            gets a fair mix.
+            Type each name and tap Add, or paste the squad message. Then set each player as Novice, Intermediate or
+            Experienced, so every half gets a fair mix.
           </p>
           <button className="linkish" onClick={onOpenGuide}>How a festival day works</button>
         </div>
