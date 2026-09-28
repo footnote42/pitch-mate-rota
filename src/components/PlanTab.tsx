@@ -183,7 +183,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
               </ul>
               {festival.picks.length === 0 && g === 1 && (
                 <p className="hint">
-                  Tap 1st or 2nd beside a player to put them in that half.{' '}
+                  Tap 1st or 2nd beside a player to put them in that half, or tap Auto-fill.{' '}
                   <button className="linkish" onClick={() => onGoTo('guide')}>How picking works</button>
                 </p>
               )}

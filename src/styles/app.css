@@ -1053,3 +1053,61 @@ select.field {
   gap: 4px 12px;
   font-size: 14px;
 }
+
+/* ---------- guide ---------- */
+.guide {
+  border-top: var(--hair);
+}
+.guide:last-child {
+  border-bottom: var(--hair);
+}
+.guide summary {
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font: 800 1.15rem/1.2 var(--display);
+  letter-spacing: -0.01em;
+  cursor: pointer;
+  list-style: none;
+}
+.guide summary::-webkit-details-marker {
+  display: none;
+}
+.guide summary svg {
+  flex: none;
+  color: var(--soft);
+  transition: transform 0.2s ease-out;
+}
+.guide[open] summary svg {
+  transform: rotate(180deg);
+}
+.guide-body {
+  padding: 0 0 18px;
+  display: grid;
+  gap: 10px;
+  max-width: 62ch;
+}
+.guide-body p,
+.guide-body ol,
+.guide-body ul:not(.links) {
+  margin: 0;
+}
+.guide-body ol,
+.guide-body ul:not(.links) {
+  padding-left: 22px;
+  display: grid;
+  gap: 6px;
+}
+.guide-body ol {
+  list-style: decimal;
+}
+.guide-body ul:not(.links) {
+  list-style: disc;
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide summary svg {
+    transition: none;
+  }
+}

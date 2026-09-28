@@ -7,20 +7,8 @@ import { TabBar, Tab } from '@/components/TabBar';
 import { SquadTab } from '@/components/SquadTab';
 import { PlanTab } from '@/components/PlanTab';
 import { RecordTab } from '@/components/RecordTab';
+import { GuideTab } from '@/components/GuideTab';
 import { useToast } from '@/hooks/use-toast';
-
-const RFU_LINKS = [
-  {
-    href: 'https://rfu.widen.net/s/fcvtlrnlqb/rfu-regulation-15-2026-27',
-    title: 'RFU Regulation 15: Age Grade Rugby',
-    note: '2026-27 season (PDF)',
-  },
-  {
-    href: 'https://www.englandrugby.com/run/rules-governance/rfu-rules-and-regulations/regulation-15-age-grade-rugby',
-    title: 'Rules of Play for age grade rugby',
-    note: '2026-27 season, U7 to U12 appendices',
-  },
-];
 
 const readDark = () => document.documentElement.dataset.theme === 'dark';
 
@@ -89,27 +77,7 @@ const Index = () => {
 
         {tab === 'record' && <RecordTab state={state} assessment={assessment} dispatch={dispatch} onGoTo={setTab} />}
 
-        {tab === 'guide' && (
-          <div className="page">
-            <div className="head"><h1>Guide</h1></div>
-            <p>
-              Every player must play at least half of the day's total playing time: the RFU Half Game Rule. This app
-              counts it for you across every game of the festival.
-            </p>
-            <p className="hint">The full guide is being written. Until then, go to the source:</p>
-            <ul className="links">
-              {RFU_LINKS.map(l => (
-                <li key={l.href}>
-                  <a href={l.href} target="_blank" rel="noreferrer">
-                    {l.title}
-                  </a>
-                  <small>{l.note}</small>
-                </li>
-              ))}
-            </ul>
-            <p className="hint">The RFU regulations are the authority; this app helps you follow them.</p>
-          </div>
-        )}
+        {tab === 'guide' && <GuideTab />}
       </main>
 
       <TabBar tab={tab} onChange={setTab} />
