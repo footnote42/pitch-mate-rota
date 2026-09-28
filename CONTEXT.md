@@ -20,6 +20,13 @@ One of the two periods of a game; the unit of the plan.
 **Quarter**:
 Half of a half; the unit of the match record, reflecting substitutions made mid-half.
 
+**Half length**:
+The minutes in every half at a festival, set by the organiser and optionally entered by the coach. When known, halves and quarters also read as minutes; it is the same for every game.
+
+**Day cap**:
+RFU maximum playing minutes per day for the age group, across all matches and festivals. Checked against the festival's total minutes, which also bounds any one player's minutes.
+_Avoid_: Day limit
+
 ### Planning
 
 **Festival overview**:
