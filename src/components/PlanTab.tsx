@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, Info, Undo2 } from 'lucide-react';
-import { Action, Assessment, Half, halfKey, MAX_RUN, PlayerAssessment, State, toHalves } from '@/rota';
+import { Check, ChevronLeft, ChevronRight, Info, Shuffle, Undo2, Wand2 } from 'lucide-react';
+import { Action, Assessment, Half, halfKey, MAX_RUN, Pick, PlayerAssessment, State, toHalves } from '@/rota';
 import { SharePlan } from './SharePlan';
 import { presenceLabel } from './presence';
 
@@ -28,10 +28,13 @@ interface PlanTabProps {
   dispatch: (action: Action) => void;
   undo: () => void;
   canUndo: boolean;
+  autoFill: () => void;
+  shuffle: () => void;
+  filled: Pick[] | null; // picks the last auto-fill added, outlined until the next change
   onGoTo: (tab: 'squad' | 'guide') => void;
 }
 
-export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: PlanTabProps) => {
+export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, shuffle, filled, onGoTo }: PlanTabProps) => {
   const { squad, festival } = state;
   const [view, setView] = useState<'game' | 'overview'>('game');
   const [game, setGame] = useState(1);
@@ -58,6 +61,13 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
   const isPicked = (playerId: string, g: number, h: Half) =>
     festival.picks.some(k => k.playerId === playerId && k.game === g && k.half === h);
   const games = Array.from({ length: festival.games }, (_, i) => i + 1);
+  const isNew = (playerId: string, g: number, h: Half) =>
+    !!filled?.some(k => k.playerId === playerId && k.game === g && k.half === h);
+  const allHalves = Object.values(assessment.halves);
+  const openPlaces = allHalves.reduce((n, h) => n + h.capacity - h.count, 0);
+  const toWatch =
+    assessment.flags.filter(f => (f.kind === 'belowMinimum' && f.impossible) || f.kind === 'unbalanced' || f.kind === 'consecutive').length +
+    allHalves.filter(h => !h.full).length;
 
   const goTo = (g: number) => {
     const el = carousel.current;
@@ -99,6 +109,27 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
           </span>
           {watch > 0 ? <Flag>{watch} to watch</Flag> : <span className="ok"><Check size={16} strokeWidth={2.6} aria-label="All on track" /></span>}
         </div>
+        {filled ? (
+          <div className="fillbar" role="status">
+            <span>
+              <span>Filled <b>{filled.length}</b> {filled.length === 1 ? 'place' : 'places'}</span>
+              {toWatch > 0 && <Flag>{toWatch} to watch</Flag>}
+            </span>
+            <button className="ghost" onClick={shuffle}>
+              <Shuffle size={18} strokeWidth={2} aria-hidden="true" />Shuffle
+            </button>
+            <button className="ghost" onClick={undo}>Undo</button>
+          </div>
+        ) : (
+          openPlaces > 0 && (
+            <div className="fillbar">
+              <span>{openPlaces} {openPlaces === 1 ? 'place' : 'places'} to fill</span>
+              <button className="go" onClick={autoFill}>
+                <Wand2 size={18} strokeWidth={2} aria-hidden="true" />Auto-fill
+              </button>
+            </div>
+          )
+        )}
         {view === 'game' && (
           <div className="pager">
             <button className="iconbtn" onClick={() => goTo(game - 1)} disabled={game === 1} aria-label="Previous game">
@@ -171,7 +202,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
                           return (
                             <button
                               key={h}
-                              className="pick"
+                              className={isNew(player.id, g, h) ? 'pick new' : 'pick'}
                               aria-pressed={on}
                               disabled={!on && full}
                               aria-label={`${player.name}, game ${g} ${h === 1 ? 'first' : 'second'} half`}
@@ -240,7 +271,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
                         const here = g >= a.arrives && g <= a.leaves;
                         return (
                           <td key={`${g}-${h}`} className={[g > 1 && h === 1 ? 'g2' : '', here ? '' : 'away'].join(' ').trim() || undefined}>
-                            {isPicked(player.id, g, h) && <span className="c" aria-label="planned" />}
+                            {isPicked(player.id, g, h) && <span className={isNew(player.id, g, h) ? 'c new' : 'c'} aria-label="planned" />}
                             {!here && <span className="sr-only">not there</span>}
                           </td>
                         );

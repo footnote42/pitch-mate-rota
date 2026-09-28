@@ -2,6 +2,7 @@
 // The UI talks to it only through reduce and assess; saving lives in ./storage.
 import { AgeGroup, AGE_GROUP_CONFIGS, DEFAULT_AGE_GROUP } from '@/types/ageGroup';
 import { ExperienceLevel, Player } from '@/types/rotation';
+import { autoFill } from './autofill';
 
 export const MIN_GAMES = 3;
 export const MAX_GAMES = 8;
@@ -50,6 +51,7 @@ export type Action =
   | { type: 'setLabel'; game: number; label: string }
   | { type: 'setHalfLength'; minutes: number | null }
   | { type: 'setAvailability'; playerId: string; arrives: number; leaves: number }
+  | { type: 'autoFill'; seed: number } // seed from the caller, like ids
   | { type: 'newFestival'; keepSquad: boolean };
 
 export const newFestival = (ageGroup: AgeGroup = DEFAULT_AGE_GROUP): Festival => ({
@@ -150,6 +152,8 @@ export function reduce(state: State, action: Action): State {
       if (!valid || !state.squad.some(p => p.id === playerId)) return state;
       return { ...state, festival: withAvailability(festival, playerId, { arrives, leaves }) };
     }
+    case 'autoFill':
+      return autoFill(state, action.seed);
     case 'newFestival':
       return action.keepSquad
         ? { ...state, festival: newFestival(festival.ageGroup) }
@@ -213,6 +217,13 @@ export interface Assessment {
 }
 
 export const halfKey = (game: number, half: Half) => `${game}-${half}`;
+
+// The squad's average experience times the side size: what an even half adds up to.
+export const balanceTarget = ({ squad, festival }: State) => {
+  const cap = AGE_GROUP_CONFIGS[festival.ageGroup].playersOnField;
+  const average = squad.length === 0 ? 2 : squad.reduce((sum, p) => sum + p.experienceLevel, 0) / squad.length;
+  return average * cap;
+};
 export const toHalves = (quarters: number) => quarters / QUARTERS_PER_HALF;
 
 // Forename, plus surname letters only until unique among players sharing that forename.
@@ -249,13 +260,14 @@ export function assess(state: State): Assessment {
   const flags: Flag[] = [];
 
   const halves: Record<string, HalfAssessment> = {};
+  const target = balanceTarget(state);
   for (let game = 1; game <= festival.games; game++) {
     for (const half of [1, 2] as Half[]) {
       const inHalf = picks.filter(p => p.game === game && p.half === half);
       const total = inHalf.reduce((sum, p) => sum + level.get(p.playerId), 0);
-      // Soft indicator: 2 points per player is the ideal mix, +/- 0.5 per player.
+      // Soft indicator: a half as strong as the squad on average, +/- 0.5 per player.
       const full = inHalf.length >= cap;
-      const verdict = !full ? null : total < cap * 1.5 ? 'light' : total > cap * 2.5 ? 'heavy' : 'ok';
+      const verdict = !full ? null : total < target - cap / 2 ? 'light' : total > target + cap / 2 ? 'heavy' : 'ok';
       const balanced = verdict !== 'light' && verdict !== 'heavy';
       const mix = { 1: 0, 2: 0, 3: 0 } as Record<ExperienceLevel, number>;
       inHalf.forEach(p => mix[level.get(p.playerId)]++);
@@ -265,7 +277,7 @@ export function assess(state: State): Assessment {
         count: inHalf.length,
         capacity: cap,
         full,
-        balance: { total, target: cap * 2, balanced, verdict, mix },
+        balance: { total, target, balanced, verdict, mix },
       };
       if (!balanced) flags.push({ kind: 'unbalanced', game, half });
     }

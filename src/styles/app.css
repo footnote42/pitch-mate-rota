@@ -796,6 +796,36 @@ select.field {
   border-color: var(--ink);
   color: var(--bg);
 }
+.fillbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--soft);
+}
+.fillbar > span {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+}
+.fillbar b {
+  color: var(--ink);
+}
+.fillbar .go,
+.fillbar .ghost {
+  min-height: 44px;
+  font-size: 15px;
+  padding: 0 12px;
+  gap: 6px;
+}
+/* Picks auto-fill just added: a gold ring until the next change. */
+.pick.new,
+.ov .c.new {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
 .picks.away {
   grid-template-columns: 1fr;
   width: 122px;

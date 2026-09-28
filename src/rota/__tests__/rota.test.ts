@@ -118,12 +118,20 @@ describe('assess: tight and consecutive halves', () => {
 
 describe('assess: balance', () => {
   it('flags a half whose experience is outside the range', () => {
+    // squad of 4 Experienced and 4 Novice: average 2, target 8 +/- 2
     const ids = ['a', 'b', 'c', 'd'];
-    const s = run({ type: 'setAgeGroup', ageGroup: 'U7' }, ...ids.map(id => add(id, id, 3)), ...ids.map(id => pick(id, 1, 1)));
+    const novices = ['w', 'x', 'y', 'z'].map(id => add(id, id, 1));
+    const s = run({ type: 'setAgeGroup', ageGroup: 'U7' }, ...novices, ...ids.map(id => add(id, id, 3)), ...ids.map(id => pick(id, 1, 1)));
     expect(assess(s).halves[halfKey(1, 1)].balance).toEqual({
       total: 12, target: 8, balanced: false, verdict: 'heavy', mix: { 1: 0, 2: 0, 3: 4 },
     });
     expect(assess(s).flags).toContainEqual({ kind: 'unbalanced', game: 1, half: 1 });
+  });
+
+  it('centres the range on the squad: a half as strong as the squad is balanced', () => {
+    const ids = ['a', 'b', 'c', 'd'];
+    const s = run({ type: 'setAgeGroup', ageGroup: 'U7' }, ...ids.map(id => add(id, id, 1)), ...ids.map(id => pick(id, 1, 1)));
+    expect(assess(s).halves[halfKey(1, 1)].balance).toMatchObject({ total: 4, target: 4, verdict: 'ok' });
   });
 
   it('judges balance only once the half is full', () => {

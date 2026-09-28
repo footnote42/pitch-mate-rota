@@ -28,7 +28,7 @@ const Index = () => {
   const [dark, setDark] = useState(readDark);
   const [celebrationShown, setCelebrationShown] = useState<string | null>(null);
   const { toast } = useToast();
-  const { state, dispatch, preview, undo, canUndo, recovered } = useRotationState();
+  const { state, dispatch, preview, undo, canUndo, autoFill, shuffle, filled, recovered } = useRotationState();
   const { festival } = state;
   const { games: numberOfGames, ageGroup, picks: assignments } = festival;
   const assessment = assess(state);
@@ -83,7 +83,7 @@ const Index = () => {
         )}
 
         {tab === 'plan' && (
-          <PlanTab state={state} assessment={assessment} dispatch={dispatch} undo={undo} canUndo={canUndo} onGoTo={setTab} />
+          <PlanTab state={state} assessment={assessment} dispatch={dispatch} undo={undo} canUndo={canUndo} autoFill={autoFill} shuffle={shuffle} filled={filled} onGoTo={setTab} />
         )}
 
         {tab === 'record' && (
