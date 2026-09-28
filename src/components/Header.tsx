@@ -129,13 +129,13 @@ export const Header = ({ lastSaved, onClearAll, onResetAll, onOpenTutorial }: He
           <AlertDialogHeader>
             <AlertDialogTitle>Ready for a new festival?</AlertDialogTitle>
             <AlertDialogDescription>
-              All game assignments will be cleared, but your squad stays intact.
+              All picks and game labels will be cleared, but your squad stays intact.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction onClick={() => { onClearAll(); setShowClearDialog(false); }}>
-              Clear Assignments
+              Start New Festival
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

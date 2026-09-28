@@ -1,11 +1,12 @@
 import { Button } from '@/components/ui/button';
 import { Share2, Copy } from 'lucide-react';
-import { Player, Assignment } from '@/types/rotation';
+import { Player } from '@/types/rotation';
+import type { Pick } from '@/rota';
 import { useToast } from '@/hooks/use-toast';
 
 interface ShareToWhatsAppProps {
     players: Player[];
-    assignments: Assignment[];
+    assignments: Pick[];
     numberOfGames: number;
     ageGroup: string;
     gameLabels: Record<number, string>;

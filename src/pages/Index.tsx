@@ -1,5 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useRotationState } from '@/hooks/useRotationState';
+import { assess, halfKey, toHalves, Half, MIN_GAMES, MAX_GAMES } from '@/rota';
+import { AgeGroup } from '@/types/ageGroup';
+import { ExperienceLevel } from '@/types/rotation';
 import { Header } from '@/components/Header';
 import { PlayerManagement } from '@/components/PlayerManagement';
 import { RotationGrid } from '@/components/RotationGrid';
@@ -15,63 +18,53 @@ const Index = () => {
   const [showTutorial, setShowTutorial] = useState(false);
   const [celebrationShown, setCelebrationShown] = useState<string | null>(null);
   const { toast } = useToast();
-  const {
-    players,
-    lastSaved,
-    numberOfGames,
-    ageGroup,
-    playersOnField,
-    addPlayer,
-    removePlayer,
-    setExperienceLevel,
-    toggleAssignment,
-    clearHalf,
-    clearGame,
-    clearAllAssignments,
-    resetAll,
-    isAssigned,
-    getHalfCount,
-    getPlayerHalfCount,
-    getMinimumHalves,
-    getFairShare,
-    getExperienceBalance,
-    changeNumberOfGames,
-    confirmChangeNumberOfGames,
-    changeAgeGroup,
-    confirmChangeAgeGroup,
-    gameLabels,
-    updateGameLabel,
-    MIN_GAMES,
-    MAX_GAMES,
-    assignments,
-  } = useRotationState();
+  const { state, dispatch, preview, recovered, lastSaved } = useRotationState();
+  const { squad: players, festival } = state;
+  const { games: numberOfGames, ageGroup, labels: gameLabels, picks: assignments } = festival;
+  const assessment = assess(state);
+  const half = (game: number, h: Half) => assessment.halves[halfKey(game, h)];
 
   useEffect(() => {
     if (!localStorage.getItem('tutorial-completed')) setShowTutorial(true);
   }, []);
 
   useEffect(() => {
-    const isComplete = () => {
-      if (players.length === 0) return false;
-      if (assignments.length < numberOfGames * 2 * playersOnField) return false;
-      for (let game = 1; game <= numberOfGames; game++) {
-        for (let half = 1; half <= 2; half++) {
-          if (!getExperienceBalance(game, half).isBalanced) return false;
-        }
-      }
-      return true;
-    };
+    if (recovered) {
+      toast({
+        title: 'Saved data could not be read',
+        description: 'Starting fresh. A copy of the old data was kept on this phone.',
+        variant: 'destructive',
+      });
+    }
+  }, [recovered, toast]);
 
-    const complete = isComplete();
+  useEffect(() => {
     const key = `${numberOfGames}-${assignments.length}`;
-
-    if (complete && celebrationShown !== key) {
+    if (assessment.complete && celebrationShown !== key) {
       toast({ title: "Looking good, Coach!", description: "Your squad is match-ready.", duration: 4000 });
       setCelebrationShown(key);
-    } else if (!complete && celebrationShown) {
+    } else if (!assessment.complete && celebrationShown) {
       setCelebrationShown(null);
     }
-  }, [assignments, numberOfGames, players, playersOnField, getExperienceBalance, celebrationShown, toast]);
+  }, [assessment.complete, numberOfGames, assignments.length, celebrationShown, toast]);
+
+  // Confirmation dialogs get their wording from a dry run of the change.
+  const changeNumberOfGames = (games: number): number[] => {
+    const kept = preview({ type: 'setGames', games }).festival.picks;
+    const dropped = assignments.filter(p => !kept.includes(p)).map(p => p.game);
+    const affected = [...new Set(dropped)].sort((a, b) => a - b);
+    if (affected.length === 0) dispatch({ type: 'setGames', games });
+    return affected;
+  };
+
+  const changeAgeGroup = (next: AgeGroup): boolean => {
+    if (preview({ type: 'setAgeGroup', ageGroup: next }).festival.picks.length < assignments.length) return false;
+    dispatch({ type: 'setAgeGroup', ageGroup: next });
+    return true;
+  };
+
+  const playersOnField = half(1, 1).capacity;
+  const minimumHalves = toHalves(assessment.minimum);
 
   return (
     <div className="min-h-screen bg-background">
@@ -79,8 +72,8 @@ const Index = () => {
 
       <Header
         lastSaved={lastSaved}
-        onClearAll={clearAllAssignments}
-        onResetAll={resetAll}
+        onClearAll={() => dispatch({ type: 'newFestival', keepSquad: true })}
+        onResetAll={() => dispatch({ type: 'newFestival', keepSquad: false })}
         onOpenTutorial={() => setShowTutorial(true)}
       />
 
@@ -97,8 +90,8 @@ const Index = () => {
             >
               {[
                 { value: players.length,     label: 'Squad'      },
-                { value: getMinimumHalves(), label: 'Min Halves' },
-                { value: getFairShare(),     label: 'Target'     },
+                { value: minimumHalves,      label: 'Min Halves' },
+                { value: assessment.fairShare, label: 'Target'   },
               ].map(({ value, label }) => (
                 <div
                   key={label}
@@ -131,7 +124,7 @@ const Index = () => {
           <AgeGroupSelector
             ageGroup={ageGroup}
             onChangeAgeGroup={changeAgeGroup}
-            onConfirmChange={confirmChangeAgeGroup}
+            onConfirmChange={(next) => dispatch({ type: 'setAgeGroup', ageGroup: next })}
           />
           <span className="text-border hidden sm:inline" aria-hidden="true">·</span>
           <GameCountSelector
@@ -139,18 +132,19 @@ const Index = () => {
             minGames={MIN_GAMES}
             maxGames={MAX_GAMES}
             onChangeGames={changeNumberOfGames}
-            onConfirmChange={confirmChangeNumberOfGames}
+            onConfirmChange={(games) => dispatch({ type: 'setGames', games })}
           />
         </div>
 
         <PlayerManagement
           players={players}
-          onAddPlayer={addPlayer}
-          onRemovePlayer={removePlayer}
-          onSetExperienceLevel={setExperienceLevel}
-          getPlayerHalfCount={getPlayerHalfCount}
-          minimumHalves={getMinimumHalves()}
-          fairShare={getFairShare()}
+          onAddPlayer={(name: string, experienceLevel: ExperienceLevel) =>
+            dispatch({ type: 'addPlayer', id: crypto.randomUUID(), name, experienceLevel })}
+          onRemovePlayer={(playerId) => dispatch({ type: 'removePlayer', playerId })}
+          onSetExperienceLevel={(playerId, level) => dispatch({ type: 'setExperienceLevel', playerId, level })}
+          getPlayerHalfCount={(playerId) => toHalves(assessment.players[playerId]?.planned ?? 0)}
+          minimumHalves={minimumHalves}
+          fairShare={assessment.fairShare}
         />
 
         {/* Rotation grid heading */}
@@ -167,14 +161,17 @@ const Index = () => {
           players={players}
           numberOfGames={numberOfGames}
           playersOnField={playersOnField}
-          isAssigned={isAssigned}
-          toggleAssignment={toggleAssignment}
-          getHalfCount={getHalfCount}
-          getExperienceBalance={getExperienceBalance}
-          clearHalf={clearHalf}
-          clearGame={clearGame}
+          isAssigned={(playerId, game, h) => assignments.some(p => p.playerId === playerId && p.game === game && p.half === h)}
+          toggleAssignment={(playerId, game, h) => dispatch({ type: 'togglePick', playerId, game, half: h })}
+          getHalfCount={(game, h) => half(game, h).count}
+          getExperienceBalance={(game, h) => {
+            const { count, balance } = half(game, h);
+            return { totalPoints: balance.total, playerCount: count, isBalanced: balance.balanced, targetPoints: balance.target };
+          }}
+          clearHalf={(game, h) => dispatch({ type: 'clearHalf', game, half: h })}
+          clearGame={(game) => dispatch({ type: 'clearGame', game })}
           gameLabels={gameLabels}
-          updateGameLabel={updateGameLabel}
+          updateGameLabel={(game, label) => dispatch({ type: 'setLabel', game, label })}
         />
 
         {players.length > 0 && assignments.length > 0 && (

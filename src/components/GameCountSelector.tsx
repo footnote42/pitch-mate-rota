@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import type { ChangeGamesResult } from '@/hooks/useRotationState';
 import {
   Select,
   SelectContent,
@@ -22,7 +21,7 @@ interface GameCountSelectorProps {
   numberOfGames: number;
   minGames: number;
   maxGames: number;
-  onChangeGames: (count: number) => ChangeGamesResult;
+  onChangeGames: (count: number) => number[]; // games that would lose picks; empty when applied
   onConfirmChange: (count: number) => void;
 }
 
@@ -40,9 +39,9 @@ export const GameCountSelector = ({
 
   const handleValueChange = (value: string) => {
     const newCount = parseInt(value, 10);
-    const result = onChangeGames(newCount);
-    if (!result.proceed) {
-      setAffectedGames(result.affectedGames);
+    const affected = onChangeGames(newCount);
+    if (affected.length > 0) {
+      setAffectedGames(affected);
       setPendingChange(newCount);
     }
   };

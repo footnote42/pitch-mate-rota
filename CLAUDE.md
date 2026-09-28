@@ -23,13 +23,13 @@ npm preview            # Preview production build
 
 ### State Management
 
-Core logic lives in `src/hooks/useRotationState.ts` with localStorage persistence. No Redux, Context API, or other state management libraries — props drilling only.
+Every rule lives in the pure `src/rota/` module (no React, no storage): `reduce(state, action)` and `assess(state)`; saving, validation and migration in `src/rota/storage.ts`. `src/hooks/useRotationState.ts` is only `useReducer`, localStorage read/write and one-step undo. No Redux, Context API, or other state management libraries — props drilling only.
 
-State flows from `Index.tsx` down to child components. All state updates go through functions returned by `useRotationState`, passed as props.
+State flows from `Index.tsx` down to child components. All changes are `dispatch`ed actions; confirmations use a dry run (`preview(action)`) to word the dialog. The UI computes no rules itself.
 
 ### Important Architectural Decisions
 
-1. **Normalized Data Model**: Players and assignments are separate arrays. Assignments reference players by `playerId`, allowing independent clearing/filtering.
+1. **State shape**: `{version, squad, festival}`. The festival holds age group, games, labels, optional half length and picks; picks reference players by `playerId`. Time is counted in quarters internally.
 
 2. **No Restrictions on Consecutive Halves**: Players can play both halves of the same game. The system tracks total halves played, not games, reflecting real-world coaching flexibility.
 
@@ -56,9 +56,9 @@ The project uses a **relaxed TypeScript config** (`noImplicitAny: false`, `stric
 
 ## Important Notes
 
-- **localStorage keys**: `'squad-rotation-state'` (main state), `'tutorial-completed'` (tutorial tracking)
+- **localStorage keys**: `'pitch-mate-rota'` (versioned state), `'pitch-mate-rota-backup'` (unreadable data kept on load), `'tutorial-completed'`. Old `squad-rotation-state` / `squad-rotation-age-group` keys are migrated then removed
 - **Trojans RFC branding**: Logo at `/trojans_logo.png`, primary blue color scheme
-- **Players per half and RFU fairness rules** are age-group dependent and computed in `useRotationState.ts` — not hardcoded constants
+- **Players per half and RFU fairness rules** are age-group dependent and computed in `src/rota/` from `src/types/ageGroup.ts` — not hardcoded constants
 
 ## Status
 Active. Feature 001 (preserve assignments on game change) complete.
@@ -68,9 +68,9 @@ Active. Feature 001 (preserve assignments on game change) complete.
 
 ## Testing
 
-Vitest + React Testing Library, configured in `vite.config.ts` (`test` block). No `npm test` script — run `npx vitest run`.
-- Tests live in `src/hooks/__tests__/`
-- Focus on `useRotationState` hook logic (business rules)
+Vitest + React Testing Library, configured in `vite.config.ts` (`test` block). Run `npm test`.
+- Tests live in `src/rota/__tests__/`
+- Test only through `reduce`, `assess` and `serialize`/`deserialize`
 
 ## Active Technologies
 - TypeScript (relaxed config — `noImplicitAny: false`, `strictNullChecks: false`) + React 18, Vite, shadcn-ui, Tailwind CSS (001-preserve-assignments-on-game-change)

@@ -20,11 +20,11 @@ interface RotationGridProps {
   players: Player[];
   numberOfGames: number;
   playersOnField: number;
-  isAssigned: (playerId: string, game: number, half: number) => boolean;
-  toggleAssignment: (playerId: string, game: number, half: number) => boolean;
-  getHalfCount: (game: number, half: number) => number;
-  getExperienceBalance: (game: number, half: number) => { totalPoints: number; playerCount: number; isBalanced: boolean; targetPoints: number };
-  clearHalf: (game: number, half: number) => void;
+  isAssigned: (playerId: string, game: number, half: 1 | 2) => boolean;
+  toggleAssignment: (playerId: string, game: number, half: 1 | 2) => void;
+  getHalfCount: (game: number, half: 1 | 2) => number;
+  getExperienceBalance: (game: number, half: 1 | 2) => { totalPoints: number; playerCount: number; isBalanced: boolean; targetPoints: number };
+  clearHalf: (game: number, half: 1 | 2) => void;
   clearGame: (game: number) => void;
   gameLabels: Record<number, string>;
   updateGameLabel: (game: number, label: string) => void;
@@ -45,7 +45,7 @@ export const RotationGrid = ({
   gameLabels,
   updateGameLabel,
 }: RotationGridProps) => {
-  const [clearAction, setClearAction] = useState<{ type: 'half' | 'game'; game: number; half?: number } | null>(null);
+  const [clearAction, setClearAction] = useState<{ type: 'half' | 'game'; game: number; half?: 1 | 2 } | null>(null);
 
   const confirmClear = () => {
     if (!clearAction) return;
@@ -66,7 +66,7 @@ export const RotationGrid = ({
   }
 
   const games = Array.from({ length: numberOfGames }, (_, i) => i + 1);
-  const halves = [1, 2];
+  const halves = [1, 2] as const;
 
   return (
     <div className="rounded-lg border overflow-hidden relative bg-background">
