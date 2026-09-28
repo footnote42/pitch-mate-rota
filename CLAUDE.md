@@ -31,7 +31,7 @@ State flows from `Index.tsx` down to child components. All changes are `dispatch
 
 1. **State shape**: `{version, squad, festival}`. The festival holds age group, games, labels, optional half length and picks; picks reference players by `playerId`. Time is counted in quarters internally.
 
-2. **No Restrictions on Consecutive Halves**: Players can play both halves of the same game. The system tracks total halves played, not games, reflecting real-world coaching flexibility.
+2. **Consecutive halves are allowed**: players can play both halves of a game. The rota tracks total halves across the festival; more than three in a row is flagged, never blocked.
 
 3. **Hard Limits vs Soft Indicators**:
    - Players per half is a **hard block** (cells disabled when full)

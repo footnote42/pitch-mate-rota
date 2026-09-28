@@ -98,12 +98,38 @@ describe('assess: minimum and status', () => {
   });
 });
 
+describe('assess: tight and consecutive halves', () => {
+  it('tight when exactly enough open places remain', () => {
+    // U7, 3 games: min 3 halves. Fill 3 of 6 halves with others: 'a' has exactly 3 left.
+    const others = ['b', 'c', 'd', 'e'];
+    const fills = [[1, 1], [1, 2], [2, 1]].flatMap(([g, h]) => others.map(id => pick(id, g, h as 1 | 2)));
+    const s = run({ type: 'setAgeGroup', ageGroup: 'U7' }, { type: 'setGames', games: 3 }, add('a'), ...others.map(id => add(id)), ...fills);
+    expect(assess(s).players.a.status).toBe('tight');
+  });
+
+  it('flags more than three halves in a row, across games', () => {
+    const three = run(add('a'), pick('a', 1, 2), pick('a', 2, 1), pick('a', 2, 2));
+    expect(assess(three).players.a.longestRun).toBe(3);
+    expect(assess(three).flags.some(f => f.kind === 'consecutive')).toBe(false);
+    const four = reduce(three, pick('a', 3, 1));
+    expect(assess(four).flags).toContainEqual({ kind: 'consecutive', playerId: 'a', run: 4 });
+  });
+});
+
 describe('assess: balance', () => {
   it('flags a half whose experience is outside the range', () => {
     const ids = ['a', 'b', 'c', 'd'];
     const s = run({ type: 'setAgeGroup', ageGroup: 'U7' }, ...ids.map(id => add(id, id, 3)), ...ids.map(id => pick(id, 1, 1)));
-    expect(assess(s).halves[halfKey(1, 1)].balance).toEqual({ total: 12, target: 8, balanced: false });
+    expect(assess(s).halves[halfKey(1, 1)].balance).toEqual({
+      total: 12, target: 8, balanced: false, verdict: 'heavy', mix: { 1: 0, 2: 0, 3: 4 },
+    });
     expect(assess(s).flags).toContainEqual({ kind: 'unbalanced', game: 1, half: 1 });
+  });
+
+  it('judges balance only once the half is full', () => {
+    const s = run({ type: 'setAgeGroup', ageGroup: 'U7' }, add('a', 'a', 3), pick('a', 1, 1));
+    expect(assess(s).halves[halfKey(1, 1)].balance).toMatchObject({ verdict: null, balanced: true, mix: { 1: 0, 2: 0, 3: 1 } });
+    expect(assess(s).flags.some(f => f.kind === 'unbalanced')).toBe(false);
   });
 
   it('complete when every half is full and balanced', () => {
@@ -127,6 +153,7 @@ describe('assess: minutes and caps', () => {
     const a = assess(s);
     expect(a.players.a.plannedMinutes).toBe(8);
     expect(a.totalMinutes).toBe(64);
+    expect(a.minimumMinutes).toBe(32);
     expect(a.flags).toContainEqual({ kind: 'dayOverCap', totalMinutes: 64, cap: 60 });
     expect(a.flags.some(f => f.kind === 'halfOverCap')).toBe(false);
     const long = assess(reduce(s, { type: 'setHalfLength', minutes: 16 }));

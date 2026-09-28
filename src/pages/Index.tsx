@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useRotationState } from '@/hooks/useRotationState';
-import { assess, halfKey, Half } from '@/rota';
+import { assess } from '@/rota';
 import { AGE_GROUP_CONFIGS } from '@/types/ageGroup';
 import { AppHeader } from '@/components/AppHeader';
 import { TabBar, Tab } from '@/components/TabBar';
 import { SquadTab } from '@/components/SquadTab';
-import { RotationGrid } from '@/components/RotationGrid';
+import { PlanTab } from '@/components/PlanTab';
 import { ShareToWhatsApp } from '@/components/ShareToWhatsApp';
 import { useToast } from '@/hooks/use-toast';
 
@@ -29,11 +29,10 @@ const Index = () => {
   const [dark, setDark] = useState(readDark);
   const [celebrationShown, setCelebrationShown] = useState<string | null>(null);
   const { toast } = useToast();
-  const { state, dispatch, preview, recovered } = useRotationState();
+  const { state, dispatch, preview, undo, canUndo, recovered } = useRotationState();
   const { squad: players, festival } = state;
   const { games: numberOfGames, ageGroup, labels: gameLabels, picks: assignments } = festival;
   const assessment = assess(state);
-  const half = (game: number, h: Half) => assessment.halves[halfKey(game, h)];
   const playersOnField = AGE_GROUP_CONFIGS[ageGroup].playersOnField;
 
   useEffect(() => {
@@ -85,54 +84,18 @@ const Index = () => {
         )}
 
         {tab === 'plan' && (
-          <div className="page">
-            <div className="head">
-              <h1>Plan</h1>
-              <span>Everyone needs {assessment.minimum / 2} halves</span>
-            </div>
-            {players.length === 0 ? (
-              <div className="empty">
-                <h2>Add your squad first</h2>
-                <p>Once your players are in, pick who plays each half of each game here.</p>
-                <button className="go" onClick={() => setTab('squad')}>Go to Squad</button>
-                <button className="linkish" onClick={() => setTab('guide')}>How a festival day works</button>
-              </div>
-            ) : (
-              <>
-                {assignments.length === 0 && (
-                  <p className="hint">
-                    Pick players for each half: tap a square to put a player in that half.{' '}
-                    <button className="linkish" onClick={() => setTab('guide')}>How picking works</button>
-                  </p>
-                )}
-                <RotationGrid
-                  players={players}
-                  numberOfGames={numberOfGames}
-                  playersOnField={playersOnField}
-                  isAssigned={(playerId, game, h) => assignments.some(p => p.playerId === playerId && p.game === game && p.half === h)}
-                  toggleAssignment={(playerId, game, h) => dispatch({ type: 'togglePick', playerId, game, half: h })}
-                  getHalfCount={(game, h) => half(game, h).count}
-                  getExperienceBalance={(game, h) => {
-                    const { count, balance } = half(game, h);
-                    return { totalPoints: balance.total, playerCount: count, isBalanced: balance.balanced, targetPoints: balance.target };
-                  }}
-                  clearHalf={(game, h) => dispatch({ type: 'clearHalf', game, half: h })}
-                  clearGame={game => dispatch({ type: 'clearGame', game })}
-                  gameLabels={gameLabels}
-                />
-                {assignments.length > 0 && (
-                  <ShareToWhatsApp
-                    players={players}
-                    assignments={assignments}
-                    numberOfGames={numberOfGames}
-                    ageGroup={ageGroup}
-                    gameLabels={gameLabels}
-                    playersOnField={playersOnField}
-                  />
-                )}
-              </>
+          <PlanTab state={state} assessment={assessment} dispatch={dispatch} undo={undo} canUndo={canUndo} onGoTo={setTab}>
+            {assignments.length > 0 && (
+              <ShareToWhatsApp
+                players={players}
+                assignments={assignments}
+                numberOfGames={numberOfGames}
+                ageGroup={ageGroup}
+                gameLabels={gameLabels}
+                playersOnField={playersOnField}
+              />
             )}
-          </div>
+          </PlanTab>
         )}
 
         {tab === 'record' && (

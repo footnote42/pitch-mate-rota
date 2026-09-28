@@ -119,7 +119,11 @@ export function reduce(state: State, action: Action): State {
 
 // ---- assess ----
 
-export type PlayerStatus = 'ok' | 'below' | 'impossible' | 'exempt';
+// ok: minimum planned. below: still reachable with room to spare. tight: exactly enough open places left.
+// impossible: can no longer reach the minimum (shown as Short).
+export type PlayerStatus = 'ok' | 'below' | 'tight' | 'impossible' | 'exempt';
+
+export const MAX_RUN = 3; // more consecutive halves than this is flagged
 
 export interface PlayerAssessment {
   id: string;
@@ -128,12 +132,15 @@ export interface PlayerAssessment {
   plannedMinutes: number | null;
   minimum: number; // quarters
   status: PlayerStatus;
+  longestRun: number; // most consecutive halves planned, across games
 }
 
 export interface Balance {
   total: number;
   target: number;
-  balanced: boolean;
+  balanced: boolean; // judged only once the half is full
+  verdict: 'light' | 'heavy' | 'ok' | null; // null until full
+  mix: Record<ExperienceLevel, number>;
 }
 
 export interface HalfAssessment {
@@ -148,6 +155,7 @@ export interface HalfAssessment {
 export type Flag =
   | { kind: 'belowMinimum'; playerId: string; impossible: boolean }
   | { kind: 'unbalanced'; game: number; half: Half }
+  | { kind: 'consecutive'; playerId: string; run: number }
   | { kind: 'halfOverCap'; halfLength: number; cap: number }
   | { kind: 'dayOverCap'; totalMinutes: number; cap: number };
 
@@ -155,6 +163,7 @@ export interface Assessment {
   players: Record<string, PlayerAssessment>;
   halves: Record<string, HalfAssessment>; // keyed by halfKey(game, half)
   minimum: number; // quarters
+  minimumMinutes: number | null;
   fairShare: number; // halves, rounded
   totalMinutes: number | null;
   flags: Flag[];
@@ -203,14 +212,18 @@ export function assess(state: State): Assessment {
       const inHalf = picks.filter(p => p.game === game && p.half === half);
       const total = inHalf.reduce((sum, p) => sum + level.get(p.playerId), 0);
       // Soft indicator: 2 points per player is the ideal mix, +/- 0.5 per player.
-      const balanced = inHalf.length === 0 || (total >= cap * 1.5 && total <= cap * 2.5);
+      const full = inHalf.length >= cap;
+      const verdict = !full ? null : total < cap * 1.5 ? 'light' : total > cap * 2.5 ? 'heavy' : 'ok';
+      const balanced = verdict !== 'light' && verdict !== 'heavy';
+      const mix = { 1: 0, 2: 0, 3: 0 } as Record<ExperienceLevel, number>;
+      inHalf.forEach(p => mix[level.get(p.playerId)]++);
       halves[halfKey(game, half)] = {
         game,
         half,
         count: inHalf.length,
         capacity: cap,
-        full: inHalf.length >= cap,
-        balance: { total, target: cap * 2, balanced },
+        full,
+        balance: { total, target: cap * 2, balanced, verdict, mix },
       };
       if (!balanced) flags.push({ kind: 'unbalanced', game, half });
     }
@@ -229,7 +242,16 @@ export function assess(state: State): Assessment {
       h => !h.full && !mine.some(k => k.game === h.game && k.half === h.half),
     ).length;
     const reachable = planned + openElsewhere * QUARTERS_PER_HALF;
-    const status: PlayerStatus = planned >= minimum ? 'ok' : reachable < minimum ? 'impossible' : 'below';
+    const status: PlayerStatus =
+      planned >= minimum ? 'ok' : reachable < minimum ? 'impossible' : reachable === minimum ? 'tight' : 'below';
+    let run = 0;
+    let longestRun = 0;
+    for (let game = 1; game <= festival.games; game++) {
+      for (const half of [1, 2] as Half[]) {
+        run = mine.some(k => k.game === game && k.half === half) ? run + 1 : 0;
+        longestRun = Math.max(longestRun, run);
+      }
+    }
     players[p.id] = {
       id: p.id,
       displayName: names[p.id],
@@ -237,10 +259,12 @@ export function assess(state: State): Assessment {
       plannedMinutes: minutesPerQuarter === null ? null : planned * minutesPerQuarter,
       minimum,
       status,
+      longestRun,
     };
-    if (status === 'below' || status === 'impossible') {
+    if (status === 'below' || status === 'tight' || status === 'impossible') {
       flags.push({ kind: 'belowMinimum', playerId: p.id, impossible: status === 'impossible' });
     }
+    if (longestRun > MAX_RUN) flags.push({ kind: 'consecutive', playerId: p.id, run: longestRun });
   }
 
   const totalMinutes = festival.halfLength ? festival.games * 2 * festival.halfLength : null;
@@ -256,6 +280,7 @@ export function assess(state: State): Assessment {
     players,
     halves,
     minimum,
+    minimumMinutes: minutesPerQuarter === null ? null : minimum * minutesPerQuarter,
     fairShare: squad.length === 0 ? 0 : Math.round((festival.games * 2 * cap) / squad.length),
     totalMinutes,
     flags,
