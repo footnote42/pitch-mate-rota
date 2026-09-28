@@ -7,7 +7,7 @@ Festival-day squad rotation for age-grade rugby: who plays which half of which g
 ### Festival and games
 
 **Festival**:
-A single day of several short games played by one squad, the unit a rota is built for.
+A single day of several short games played by one squad, the unit a rota is built for. Availability, the plan and the match record all belong to one festival and are cleared when a new one starts.
 _Avoid_: Tournament, event
 
 **Game**:
@@ -86,7 +86,7 @@ _Avoid_: Actuals, tracking
 ### Squad
 
 **Squad**:
-The players available to the coach for a festival.
+The players, with their experience levels, the coach has entered on this phone. It outlives a single festival only if the coach chooses to keep it when starting a new one; it never leaves the device.
 
 **Squad import**:
 Creating the squad from pasted text (typically a WhatsApp selection message), reducing each name to a display name.
