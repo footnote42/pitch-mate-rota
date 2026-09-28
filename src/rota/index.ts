@@ -16,12 +16,19 @@ export interface Pick {
   half: Half;
 }
 
+// The games a player is present for. Only players not there all day have an entry.
+export interface Availability {
+  arrives: number; // first game
+  leaves: number; // last game
+}
+
 export interface Festival {
   ageGroup: AgeGroup;
   games: number;
   labels: Record<number, string>;
   halfLength: number | null; // minutes, optional
   picks: Pick[];
+  availability: Record<string, Availability>; // by player id
 }
 
 export interface State {
@@ -42,6 +49,7 @@ export type Action =
   | { type: 'setAgeGroup'; ageGroup: AgeGroup }
   | { type: 'setLabel'; game: number; label: string }
   | { type: 'setHalfLength'; minutes: number | null }
+  | { type: 'setAvailability'; playerId: string; arrives: number; leaves: number }
   | { type: 'newFestival'; keepSquad: boolean };
 
 export const newFestival = (ageGroup: AgeGroup = DEFAULT_AGE_GROUP): Festival => ({
@@ -50,6 +58,7 @@ export const newFestival = (ageGroup: AgeGroup = DEFAULT_AGE_GROUP): Festival =>
   labels: {},
   halfLength: null,
   picks: [],
+  availability: {},
 });
 
 export const emptyState = (): State => ({ version: 1, squad: [], festival: newFestival() });
@@ -63,6 +72,22 @@ const withFestival = (state: State, changes: Partial<Festival>): State => ({
 
 const capacity = (state: State) => AGE_GROUP_CONFIGS[state.festival.ageGroup].playersOnField;
 
+const presence = (festival: Festival, playerId: string): Availability =>
+  festival.availability[playerId] ?? { arrives: 1, leaves: festival.games };
+
+const isPresent = (festival: Festival, playerId: string, game: number) => {
+  const { arrives, leaves } = presence(festival, playerId);
+  return game >= arrives && game <= leaves;
+};
+
+// Full-day entries are dropped, so availability only lists players who are not there all day.
+const withAvailability = (festival: Festival, playerId: string, a: Availability | null): Festival => {
+  const { [playerId]: _, ...rest } = festival.availability;
+  const availability = !a || (a.arrives <= 1 && a.leaves >= festival.games) ? rest : { ...rest, [playerId]: a };
+  const next = { ...festival, availability };
+  return { ...next, picks: next.picks.filter(p => isPresent(next, p.playerId, p.game)) };
+};
+
 export function reduce(state: State, action: Action): State {
   const { festival } = state;
   switch (action.type) {
@@ -72,7 +97,10 @@ export function reduce(state: State, action: Action): State {
     }
     case 'removePlayer':
       return {
-        ...withFestival(state, { picks: festival.picks.filter(p => p.playerId !== action.playerId) }),
+        ...withFestival(state, {
+          picks: festival.picks.filter(p => p.playerId !== action.playerId),
+          availability: withAvailability(festival, action.playerId, null).availability,
+        }),
         squad: state.squad.filter(p => p.id !== action.playerId),
       };
     case 'renamePlayer': {
@@ -91,6 +119,7 @@ export function reduce(state: State, action: Action): State {
       if (festival.picks.some(same)) return withFestival(state, { picks: festival.picks.filter(p => !same(p)) });
       const inHalf = festival.picks.filter(p => p.game === game && p.half === half).length;
       if (inHalf >= capacity(state) || game < 1 || game > festival.games) return state; // hard block
+      if (!isPresent(festival, playerId, game)) return state;
       return withFestival(state, { picks: [...festival.picks, { playerId, game, half }] });
     }
     case 'clearHalf':
@@ -101,7 +130,12 @@ export function reduce(state: State, action: Action): State {
       return withFestival(state, { picks: festival.picks.filter(p => p.game !== action.game) });
     case 'setGames': {
       if (action.games < MIN_GAMES || action.games > MAX_GAMES) return state;
-      return withFestival(state, { games: action.games, picks: festival.picks.filter(p => p.game <= action.games) });
+      const games = action.games;
+      let next: Festival = { ...festival, games, picks: festival.picks.filter(p => p.game <= games) };
+      for (const [id, a] of Object.entries(festival.availability)) {
+        next = withAvailability(next, id, { arrives: Math.min(a.arrives, games), leaves: Math.min(a.leaves, games) });
+      }
+      return { ...state, festival: next };
     }
     case 'setAgeGroup':
       if (action.ageGroup === festival.ageGroup) return state;
@@ -110,6 +144,12 @@ export function reduce(state: State, action: Action): State {
       return withFestival(state, { labels: { ...festival.labels, [action.game]: action.label } });
     case 'setHalfLength':
       return withFestival(state, { halfLength: action.minutes && action.minutes > 0 ? action.minutes : null });
+    case 'setAvailability': {
+      const { playerId, arrives, leaves } = action;
+      const valid = Number.isInteger(arrives) && Number.isInteger(leaves) && arrives >= 1 && arrives <= leaves && leaves <= festival.games;
+      if (!valid || !state.squad.some(p => p.id === playerId)) return state;
+      return { ...state, festival: withAvailability(festival, playerId, { arrives, leaves }) };
+    }
     case 'newFestival':
       return action.keepSquad
         ? { ...state, festival: newFestival(festival.ageGroup) }
@@ -133,6 +173,8 @@ export interface PlayerAssessment {
   minimum: number; // quarters
   status: PlayerStatus;
   longestRun: number; // most consecutive halves planned, across games
+  arrives: number; // first game present
+  leaves: number; // last game present
 }
 
 export interface Balance {
@@ -239,7 +281,7 @@ export function assess(state: State): Assessment {
     const mine = picks.filter(k => k.playerId === p.id);
     const planned = mine.length * QUARTERS_PER_HALF;
     const openElsewhere = Object.values(halves).filter(
-      h => !h.full && !mine.some(k => k.game === h.game && k.half === h.half),
+      h => !h.full && isPresent(festival, p.id, h.game) && !mine.some(k => k.game === h.game && k.half === h.half),
     ).length;
     const reachable = planned + openElsewhere * QUARTERS_PER_HALF;
     const status: PlayerStatus =
@@ -260,6 +302,7 @@ export function assess(state: State): Assessment {
       minimum,
       status,
       longestRun,
+      ...presence(festival, p.id),
     };
     if (status === 'below' || status === 'tight' || status === 'impossible') {
       flags.push({ kind: 'belowMinimum', playerId: p.id, impossible: status === 'impossible' });

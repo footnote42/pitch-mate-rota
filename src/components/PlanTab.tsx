@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import { Check, ChevronLeft, ChevronRight, Info, Undo2 } from 'lucide-react';
 import { Action, Assessment, Half, halfKey, MAX_RUN, PlayerAssessment, State, toHalves } from '@/rota';
 import { SharePlan } from './SharePlan';
+import { presenceLabel } from './presence';
 
 const LEVEL = { 1: 'N', 2: 'I', 3: 'E' } as const;
 const HALVES: Half[] = [1, 2];
@@ -149,6 +150,8 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
                 {players.map(({ player, a }) => {
                   const planned = toHalves(a.planned);
                   const label = watchLabel(a);
+                  const here = g >= a.arrives && g <= a.leaves;
+                  const away = presenceLabel(a, festival.games);
                   return (
                     <li key={player.id} className="row">
                       <span className="pname">
@@ -159,8 +162,9 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
                         <Ticks planned={planned} minimum={minimum} />
                         {label && <Flag>{label}</Flag>}
                         {a.longestRun > MAX_RUN && <Flag>{a.longestRun} in a row</Flag>}
+                        {away && <span className="nowrap">{away}</span>}
                       </span>
-                      <span className="picks">
+                      {here ? <span className="picks">
                         {HALVES.map(h => {
                           const on = isPicked(player.id, g, h);
                           const full = assessment.halves[halfKey(g, h)].full;
@@ -177,7 +181,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
                             </button>
                           );
                         })}
-                      </span>
+                      </span> : <span className="picks away">{g < a.arrives ? 'Not here yet' : 'Gone'}</span>}
                     </li>
                   );
                 })}
@@ -232,11 +236,15 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
                   return (
                     <tr key={player.id}>
                       <td className="nm">{a.displayName}</td>
-                      {games.flatMap(g => HALVES.map(h => (
-                        <td key={`${g}-${h}`} className={g > 1 && h === 1 ? 'g2' : undefined}>
-                          {isPicked(player.id, g, h) && <span className="c" aria-label="planned" />}
-                        </td>
-                      )))}
+                      {games.flatMap(g => HALVES.map(h => {
+                        const here = g >= a.arrives && g <= a.leaves;
+                        return (
+                          <td key={`${g}-${h}`} className={[g > 1 && h === 1 ? 'g2' : '', here ? '' : 'away'].join(' ').trim() || undefined}>
+                            {isPicked(player.id, g, h) && <span className="c" aria-label="planned" />}
+                            {!here && <span className="sr-only">not there</span>}
+                          </td>
+                        );
+                      }))}
                       <td className={warn ? 'tot warn' : 'tot'}>
                         {toHalves(a.planned)}/{minimum}
                         {a.plannedMinutes !== null && <small>{a.plannedMinutes}m</small>}
@@ -263,6 +271,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, onGoTo }: 
           </div>
           <div className="key">
             <span><span className="c" />Planned</span>
+            <span><span className="c away" />Not there</span>
             <span className="warn-text">Orange: worth a look</span>
           </div>
           <p>

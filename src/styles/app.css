@@ -410,8 +410,11 @@ select {
   color: var(--soft);
   font-variant-numeric: tabular-nums;
 }
+.when.away {
+  color: var(--ink);
+}
 .seg {
-  grid-row: 1 / span 2;
+  grid-row: 1 / span 3;
   grid-column: 2;
   display: inline-grid;
   grid-template-columns: repeat(3, 44px);
@@ -793,6 +796,13 @@ select.field {
   border-color: var(--ink);
   color: var(--bg);
 }
+.picks.away {
+  grid-template-columns: 1fr;
+  width: 122px;
+  place-items: center;
+  font-size: 13px;
+  color: var(--soft);
+}
 .pick:disabled {
   border-style: dashed;
   opacity: 0.45;
@@ -899,6 +909,11 @@ select.field {
   display: inline-flex;
   gap: 6px;
   align-items: center;
+}
+/* Not there: diagonal hatching, readable without colour. */
+.ov td.away,
+.key .c.away {
+  background: repeating-linear-gradient(135deg, var(--line) 0 1.5px, transparent 1.5px 6px);
 }
 .key .warn-text {
   color: var(--flag);

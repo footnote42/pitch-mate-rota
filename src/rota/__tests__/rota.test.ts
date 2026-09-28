@@ -198,6 +198,7 @@ describe('saving', () => {
       labels: { 1: 'Tigers' },
       halfLength: null,
       picks: [{ playerId: 'p1', game: 1, half: 1 }],
+      availability: {},
     });
   });
 
@@ -210,5 +211,52 @@ describe('saving', () => {
 
   it('nothing saved starts empty', () => {
     expect(deserialize(storage({}))).toEqual({ state: emptyState(), backup: null });
+  });
+});
+
+describe('availability', () => {
+  // U7 (4 a side), 4 games: minimum 4 halves (8 quarters).
+  const base = (...actions: Action[]) => run({ type: 'setAgeGroup', ageGroup: 'U7' }, { type: 'setGames', games: 4 }, add('a'), ...actions);
+  const avail = (arrives: number, leaves: number): Action => ({ type: 'setAvailability', playerId: 'a', arrives, leaves });
+
+  it('an early leaver cannot be picked after leaving, and keeps the full minimum', () => {
+    const s = base(avail(1, 2), pick('a', 3, 1));
+    expect(s.festival.picks).toEqual([]);
+    const a = assess(s).players.a;
+    expect(a).toMatchObject({ minimum: 8, arrives: 1, leaves: 2, status: 'tight' });
+  });
+
+  it('a late arrival cannot be picked before arriving', () => {
+    const s = base(avail(2, 4), pick('a', 1, 2), pick('a', 2, 1));
+    expect(s.festival.picks).toEqual([{ playerId: 'a', game: 2, half: 1 }]);
+    expect(assess(s).players.a.status).toBe('below');
+  });
+
+  it('setting availability drops picks outside it', () => {
+    const s = base(pick('a', 1, 1), pick('a', 4, 2), avail(1, 3));
+    expect(s.festival.picks).toEqual([{ playerId: 'a', game: 1, half: 1 }]);
+  });
+
+  it('impossible (Short) when available halves cannot reach the minimum', () => {
+    const a = assess(base(avail(1, 1)));
+    expect(a.players.a.status).toBe('impossible');
+    expect(a.flags).toContainEqual({ kind: 'belowMinimum', playerId: 'a', impossible: true });
+  });
+
+  it('full day is stored as no entry; fewer games clamps it; a new festival clears it', () => {
+    expect(base(avail(2, 3), avail(1, 4)).festival.availability).toEqual({});
+    expect(base(avail(2, 4), { type: 'setGames', games: 3 }).festival.availability).toEqual({ a: { arrives: 2, leaves: 3 } });
+    expect(base(avail(2, 3), { type: 'newFestival', keepSquad: true }).festival.availability).toEqual({});
+  });
+
+  it('ignores impossible ranges', () => {
+    const s = base(avail(1, 2));
+    expect(reduce(s, avail(3, 2))).toBe(s);
+    expect(reduce(s, avail(0, 2))).toBe(s);
+  });
+
+  it('survives saving', () => {
+    const s = base(avail(2, 3));
+    expect(deserialize(key => (key === STORAGE_KEY ? serialize(s) : null)).state).toEqual(s);
   });
 });

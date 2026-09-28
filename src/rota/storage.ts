@@ -1,7 +1,7 @@
 // Saved-state format, validation and migration. Pure: the caller does the reading and writing.
 import { AgeGroup, AGE_GROUP_CONFIGS, DEFAULT_AGE_GROUP } from '@/types/ageGroup';
 import { ExperienceLevel, Player } from '@/types/rotation';
-import { emptyState, Festival, Half, MAX_GAMES, MIN_GAMES, DEFAULT_GAMES, Pick, State } from './index';
+import { Availability, emptyState, Festival, Half, MAX_GAMES, MIN_GAMES, DEFAULT_GAMES, Pick, State } from './index';
 
 export const STORAGE_KEY = 'pitch-mate-rota';
 export const BACKUP_KEY = 'pitch-mate-rota-backup';
@@ -51,6 +51,19 @@ const toLabels = (v: unknown): Record<number, string> => {
   return Object.fromEntries(Object.entries(v).filter(([, label]) => typeof label === 'string'));
 };
 
+// Keeps entries for known players with a sensible range; anything else means there all day.
+const toAvailability = (v: unknown, squad: Player[], games: number): Record<string, Availability> => {
+  if (!isObject(v)) return {};
+  const ids = new Set(squad.map(p => p.id));
+  return Object.fromEntries(
+    Object.entries(v).filter(
+      ([id, a]) =>
+        ids.has(id) && isObject(a) && Number.isInteger(a.arrives) && Number.isInteger(a.leaves) &&
+        a.arrives >= 1 && a.arrives <= a.leaves && a.leaves <= games,
+    ).map(([id, a]) => [id, { arrives: a.arrives, leaves: a.leaves }]),
+  );
+};
+
 // Drops picks that point at missing players, games or halves, or repeat.
 const toPicks = (v: unknown, squad: Player[], games: number): Pick[] => {
   if (v === undefined) return [];
@@ -81,8 +94,13 @@ function fromCurrent(data: unknown): State {
     labels: toLabels(f.labels),
     halfLength,
     picks: toPicks(f.picks, squad, games),
+    availability: toAvailability(f.availability, squad, games),
   };
-  return { version: 1, squad, festival };
+  const present = (p: Pick) => {
+    const a = festival.availability[p.playerId];
+    return !a || (p.game >= a.arrives && p.game <= a.leaves);
+  };
+  return { version: 1, squad, festival: { ...festival, picks: festival.picks.filter(present) } };
 }
 
 // Old app: { players, assignments, numberOfGames, gameLabels } plus a separate age group key.
@@ -99,6 +117,7 @@ function fromLegacy(data: unknown, ageGroup: string | null): State {
       labels: toLabels(data.gameLabels),
       halfLength: null,
       picks: toPicks(data.assignments, squad, games),
+      availability: {},
     },
   };
 }

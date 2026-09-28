@@ -4,6 +4,7 @@ import { Action, Assessment, State, toHalves } from '@/rota';
 import { ExperienceLevel, EXPERIENCE_LABELS, Player } from '@/types/rotation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FestivalSetup } from './FestivalSetup';
+import { presenceLabel } from './presence';
 
 const LEVELS: [ExperienceLevel, string][] = [[1, 'N'], [2, 'I'], [3, 'E']];
 const MAX_NAME = 50;
@@ -87,7 +88,9 @@ export const SquadTab = ({ state, assessment, dispatch, preview, onOpenGuide }: 
           <p className="legend">Novice · Intermediate · Experienced</p>
           <ul className="list">
             {squad.map(p => {
-              const planned = toHalves(assessment.players[p.id]?.planned ?? 0);
+              const a = assessment.players[p.id];
+              const planned = toHalves(a?.planned ?? 0);
+              const away = a && presenceLabel(a, state.festival.games);
               return (
                 <li key={p.id} className="row">
                   <button className="who" onClick={() => setEditing(p)} aria-label={`Edit ${p.name}`}>
@@ -95,6 +98,7 @@ export const SquadTab = ({ state, assessment, dispatch, preview, onOpenGuide }: 
                     <Pencil size={14} strokeWidth={2} aria-hidden="true" />
                   </button>
                   <span className="when">{planned} of {minimum} halves planned</span>
+                  {away && <span className="when away">{away}</span>}
                   <LevelPicker
                     name={p.name}
                     level={p.experienceLevel}
@@ -111,9 +115,10 @@ export const SquadTab = ({ state, assessment, dispatch, preview, onOpenGuide }: 
 
       <EditPlayer
         player={editing}
-        pickCount={editing ? state.festival.picks.filter(k => k.playerId === editing.id).length : 0}
+        state={state}
         onClose={() => setEditing(null)}
         dispatch={dispatch}
+        preview={preview}
       />
     </div>
   );
@@ -121,14 +126,20 @@ export const SquadTab = ({ state, assessment, dispatch, preview, onOpenGuide }: 
 
 interface EditPlayerProps {
   player: Player | null;
-  pickCount: number;
+  state: State;
   onClose: () => void;
   dispatch: (action: Action) => void;
+  preview: (action: Action) => State;
 }
 
-const EditPlayer = ({ player, pickCount, onClose, dispatch }: EditPlayerProps) => {
+const EditPlayer = ({ player, state, onClose, dispatch, preview }: EditPlayerProps) => {
+  const { festival } = state;
+  const games = Array.from({ length: festival.games }, (_, i) => i + 1);
+  const pickCount = player ? festival.picks.filter(k => k.playerId === player.id).length : 0;
   const [name, setName] = useState('');
   const [level, setLevel] = useState<ExperienceLevel>(2);
+  const [arrives, setArrives] = useState(1);
+  const [leaves, setLeaves] = useState(1);
   const [removing, setRemoving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -141,6 +152,8 @@ const EditPlayer = ({ player, pickCount, onClose, dispatch }: EditPlayerProps) =
     setShownFor(player.id);
     setName(player.name);
     setLevel(player.experienceLevel);
+    setArrives(festival.availability[player.id]?.arrives ?? 1);
+    setLeaves(festival.availability[player.id]?.leaves ?? festival.games);
     setRemoving(false);
     setError(null);
   }
@@ -153,8 +166,13 @@ const EditPlayer = ({ player, pickCount, onClose, dispatch }: EditPlayerProps) =
     if (problem || !player) return;
     dispatch({ type: 'renamePlayer', playerId: player.id, name });
     dispatch({ type: 'setExperienceLevel', playerId: player.id, level });
+    dispatch(availability);
     onClose();
   };
+
+  const availability: Action = { type: 'setAvailability', playerId: player?.id, arrives, leaves };
+  const kept = player ? preview(availability).festival.picks.filter(k => k.playerId === player.id).length : 0;
+  const dropped = pickCount - kept;
 
   const remove = () => {
     if (player) dispatch({ type: 'removePlayer', playerId: player.id });
@@ -183,7 +201,7 @@ const EditPlayer = ({ player, pickCount, onClose, dispatch }: EditPlayerProps) =
           <form className="form" onSubmit={save} noValidate>
             <DialogHeader className="text-left">
               <DialogTitle>Edit player</DialogTitle>
-              <DialogDescription>Change the name or experience level.</DialogDescription>
+              <DialogDescription>Name, experience and which games they are here for.</DialogDescription>
             </DialogHeader>
             <label className="label">
               Name
@@ -201,6 +219,42 @@ const EditPlayer = ({ player, pickCount, onClose, dispatch }: EditPlayerProps) =
               Experience
               <LevelPicker name={name || 'Player'} level={level} onChange={setLevel} />
             </div>
+            <div className="pair">
+              <label className="label">
+                Arrives for
+                <select
+                  className="field"
+                  value={arrives}
+                  onChange={e => {
+                    const g = Number(e.target.value);
+                    setArrives(g);
+                    if (leaves < g) setLeaves(g);
+                  }}
+                >
+                  {games.map(g => <option key={g} value={g}>Game {g}</option>)}
+                </select>
+              </label>
+              <label className="label">
+                Leaves after
+                <select
+                  className="field"
+                  value={leaves}
+                  onChange={e => {
+                    const g = Number(e.target.value);
+                    setLeaves(g);
+                    if (arrives > g) setArrives(g);
+                  }}
+                >
+                  {games.map(g => <option key={g} value={g}>Game {g}</option>)}
+                </select>
+              </label>
+            </div>
+            {dropped > 0 && (
+              <p className="hint">
+                {dropped === 1 ? '1 half they are picked for is' : `${dropped} halves they are picked for are`} outside
+                these games and will be cleared.
+              </p>
+            )}
             <div className="sheet-actions">
               <button className="go" type="submit">Save</button>
               <button className="ghost" type="button" onClick={() => setRemoving(true)}>Remove from squad</button>
