@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rota look and feel</title>
+<!-- Prototype for "What does the mixed Chalk & Turf / Trojans look feel like?" (#26). Throwaway.
+     Google Fonts here for speed only; the real app self-hosts (hub CSP). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --page: #d9d6cc;
+    --page-ink: #2b2f3a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) { --page: #1b1d22; --page-ink: #d8d6cf; }
+  }
+  :root[data-theme="dark"] { --page: #1b1d22; --page-ink: #d8d6cf; }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--page-ink);
+    font: 16px/1.5 'Atkinson Hyperlegible', Verdana, sans-serif;
+    padding: 24px 16px 48px;
+  }
+  .stage { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; align-items: flex-start; }
+  figure { margin: 0; display: grid; gap: 10px; width: min(390px, 100%); }
+  figcaption { font-weight: 700; font-size: 14px; }
+  figcaption span { font-weight: 400; opacity: .75; }
+  .intro { max-width: 820px; margin: 0 auto 28px; }
+  .intro h1 { font: 800 1.6rem/1.15 'Bricolage Grotesque', sans-serif; margin: 0 0 6px; letter-spacing: -.02em; }
+  .intro p { margin: 0; max-width: 68ch; }
+
+  /* ---------- the app, two themes ---------- */
+  .app {
+    /* dark: Chalk & Turf structure, navy takes the turf role, gold the accent */
+    --bg: #14213d;
+    --surface: rgba(6, 12, 28, .42);
+    --ink: #f3f0e4;
+    --muted: #c3c8d4;
+    --accent: #e7bd45;
+    --accent-ink: #14213d;
+    --scarlet: #d62b14;
+    --flag: #f2b27a;
+    --flag-bg: rgba(242, 178, 122, .14);
+    --pad-blue: #6f8fd8;
+    --tag: #2c4270;
+    --line: rgba(243, 240, 228, .5);
+    --chalk: 2px dashed var(--line);
+    --seg-bg: rgba(243, 240, 228, .08);
+    --shadow: 0 18px 40px -18px rgba(0, 0, 0, .6);
+    color-scheme: dark;
+
+    width: 100%; height: 800px; overflow: hidden;
+    display: grid; grid-template-rows: auto 1fr auto;
+    background: var(--bg); color: var(--ink);
+    border-radius: 28px; box-shadow: 0 30px 60px -30px rgba(0,0,0,.55);
+    font: 17px/1.45 'Atkinson Hyperlegible', Verdana, sans-serif;
+  }
+  .app.light {
+    /* light: chalk on paper, for daylight. Navy is the ink, gold marks the one action */
+    --bg: #f5f2e8;
+    --surface: #fffdf6;
+    --ink: #14213d;
+    --muted: #4b5570;
+    --accent: #e7bd45;
+    --accent-ink: #14213d;
+    --scarlet: #c8200e;
+    --flag: #8a4a0c;
+    --flag-bg: #fbeedd;
+    --pad-blue: #14213d;
+    --tag: #e3e7f0;
+    --line: rgba(20, 33, 61, .38);
+    --seg-bg: rgba(20, 33, 61, .06);
+    --shadow: 0 14px 30px -18px rgba(20, 33, 61, .35);
+    color-scheme: light;
+  }
+  .app ::selection { background: var(--accent); color: var(--accent-ink); }
+  .app :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  .app h1, .app h2, .brand b { font-family: 'Bricolage Grotesque', 'Arial Black', sans-serif; letter-spacing: -.02em; margin: 0; }
+
+  /* header */
+  .top { padding: 14px 16px 12px; display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; position: relative; }
+  .top { border-bottom: 2px dashed var(--scarlet); }
+  .brand { display: flex; align-items: center; gap: 8px; }
+  .brand svg { width: 30px; height: 30px; }
+  .brand b { font-size: 1.45rem; font-weight: 800; line-height: 1; }
+  .fest { font-size: 13px; color: var(--muted); line-height: 1.3; text-align: right; }
+  .fest strong { color: var(--ink); display: block; font-size: 14px; }
+  .iconbtn { width: 44px; height: 44px; display: grid; place-items: center; border: 0; background: transparent; color: var(--ink); border-radius: 10px; cursor: pointer; }
+  .iconbtn:hover { background: var(--seg-bg); }
+
+  /* body */
+  .main { overflow: auto; padding: 18px 16px 24px; display: grid; gap: 16px; align-content: start; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+  .head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+  .head h1 { font-size: 2rem; font-weight: 800; line-height: 1.05; }
+  .head span { color: var(--muted); font-size: 15px; font-variant-numeric: tabular-nums; }
+  .actions { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+  .go, .ghost { min-height: 48px; border-radius: 10px; font: 700 16px/1 'Atkinson Hyperlegible', sans-serif; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; }
+  .go { background: var(--accent); color: var(--accent-ink); border: 0; box-shadow: var(--shadow); }
+  .go:hover { filter: brightness(1.06); }
+  .ghost { background: transparent; color: var(--ink); border: var(--chalk); }
+  .ghost:hover { background: var(--seg-bg); }
+
+  .note { background: var(--flag-bg); border-radius: 10px; padding: 10px 12px; font-size: 15px; color: var(--ink); display: flex; gap: 10px; align-items: flex-start; }
+  .note strong { color: var(--flag); }
+  .note svg { flex: none; margin-top: 2px; color: var(--flag); }
+  .flag { display: inline-flex; align-items: center; gap: 4px; color: var(--flag); font-weight: 700; }
+  .flag::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+
+  .list { list-style: none; margin: 0; padding: 0; background: var(--surface); border-radius: 12px; }
+  .light .list { box-shadow: var(--shadow); }
+  .row { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: center; padding: 10px 12px 10px 14px; }
+  .row + .row { border-top: var(--chalk); border-top-width: 1px; }
+  .who { font-weight: 700; font-size: 17px; }
+  .when { grid-column: 1; font-size: 13px; color: var(--muted); display: flex; gap: 6px; align-items: center; }
+  .when { white-space: nowrap; }
+  @media (max-width: 430px) { body { padding-inline: 0; } .intro, figcaption { padding-inline: 16px; } figure { width: 100%; } .app { border-radius: 0; } }
+  .tag { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; padding: 4px 7px; border-radius: 3px; background: var(--tag); color: var(--ink); line-height: 1; }
+  .tag.red { background: var(--scarlet); color: #fff; }
+  .seg { grid-row: 1 / span 2; grid-column: 2; display: inline-grid; grid-template-columns: repeat(3, 44px); background: var(--seg-bg); border-radius: 10px; padding: 2px; }
+  .seg button { height: 40px; border: 0; background: transparent; color: var(--muted); font: 700 14px/1 'Atkinson Hyperlegible', sans-serif; border-radius: 8px; cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+  .seg button:not([aria-pressed="true"]):hover { color: var(--ink); }
+  .legend { font-size: 13px; color: var(--muted); text-align: right; margin-top: -8px; }
+
+  /* tab bar */
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); border-top: var(--chalk); padding: 6px 8px 14px; }
+  .tabs button { min-height: 52px; border: 0; background: transparent; color: var(--muted); display: grid; justify-items: center; align-content: center; gap: 3px; font: 700 12px/1 'Atkinson Hyperlegible', sans-serif; cursor: pointer; border-radius: 10px; position: relative; }
+  .tabs button[aria-current="page"] { color: var(--ink); }
+  .tabs button[aria-current="page"]::before { content: ""; position: absolute; top: -7px; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--scarlet); }
+  .tabs svg { width: 24px; height: 24px; }
+</style>
+</head>
+<body>
+<header class="intro">
+  <h1>Rota: Chalk &amp; Turf with Trojans colours</h1>
+  <p>The same Squad screen in two bases. A keeps the hub's dark frame, with navy in place of turf green. B is chalk on paper, for daylight. Both use the hub's type, dashed chalk lines and H-posts mark, with hooped post pads in club colours, a scarlet chalk line under the header, scarlet for the active tab and early leavers, gold for the one main action. Potential problems are a soft orange, not an alarm. The squad is made up.</p>
+</header>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <!-- H-posts: front-on version of the hub's posts, hooped pads -->
+  <symbol id="posts" viewBox="0 0 32 32">
+    <path d="M9 3v26M23 3v26M9 17h14" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/>
+    <path d="M9 22.5v2.2M23 22.5v2.2" stroke="var(--scarlet)" stroke-width="5"/>
+    <path d="M9 24.7v2.2M23 24.7v2.2" stroke="var(--pad-blue)" stroke-width="5"/>
+    <path d="M9 26.9v2.2M23 26.9v2.2" stroke="var(--accent)" stroke-width="5"/>
+  </symbol>
+  <symbol id="i-squad" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.6-3.2 2.8-5 5.5-5s4.9 1.8 5.5 5"/><circle cx="16.5" cy="9" r="2.6"/><path d="M16 14.2c2.4 0 4 1.5 4.5 4.3"/></g></symbol>
+  <symbol id="i-plan" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M9.5 9.5v10M15 9.5v10"/></g></symbol>
+  <symbol id="i-record" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="13.5" r="7"/><path d="M12 13.5V9.5M10 3h4M18.2 6.8l1.3-1.3"/></g></symbol>
+  <symbol id="i-guide" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 6.5C10 5 7 4.6 4 5v13.5c3-.4 6 0 8 1.5 2-1.5 5-1.9 8-1.5V5c-3-.4-6 0-8 1.5Z"/><path d="M12 6.5V20"/></g></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M5 7h14M5 12h14M5 17h14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+  <symbol id="i-paste" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="6" y="4.5" width="12" height="16" rx="2"/><path d="M9.5 4.5V3h5v1.5M9 10h6M9 13.5h6M9 17h3.5" stroke-linecap="round"/></g></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.6v.1"/></g></symbol>
+</svg>
+
+<main class="stage">
+  <figure>
+    <figcaption>A · Turf, navy <span>(hub's dark frame)</span></figcaption>
+    <div class="app" data-screen></div>
+  </figure>
+  <figure>
+    <figcaption>B · Chalk on paper <span>(daylight)</span></figcaption>
+    <div class="app light" data-screen></div>
+  </figure>
+</main>
+
+<template id="screen">
+  <header class="top">
+    <div class="brand"><svg aria-hidden="true"><use href="#posts"/></svg><b>Rota</b></div>
+    <div class="fest"><strong>U9 festival · Sun 4 Oct</strong>4 games · 7 a side</div>
+    <button class="iconbtn" aria-label="Festival menu"><svg width="24" height="24"><use href="#i-menu"/></svg></button>
+  </header>
+  <section class="main" aria-label="Squad">
+    <div class="head"><h1>Squad</h1><span>12 players</span></div>
+    <div class="actions">
+      <button class="go"><svg width="20" height="20" aria-hidden="true"><use href="#i-paste"/></svg>Paste from WhatsApp</button>
+      <button class="ghost">Add</button>
+    </div>
+    <div class="note"><svg width="20" height="20" aria-hidden="true"><use href="#i-info"/></svg><span><strong>Worth a look:</strong> Sam B leaves after game 2 and needs 4 halves. The plan puts Sam in early, with no spare.</span></div>
+    <div class="legend">Novice · Intermediate · Experienced</div>
+    <ul class="list"></ul>
+  </section>
+  <nav class="tabs" aria-label="Sections">
+    <button aria-current="page"><svg><use href="#i-squad"/></svg>Squad</button>
+    <button><svg><use href="#i-plan"/></svg>Plan</button>
+    <button><svg><use href="#i-record"/></svg>Record</button>
+    <button><svg><use href="#i-guide"/></svg>Guide</button>
+  </nav>
+</template>
+
+<script>
+  // Made-up squad, display names as Squad import would produce them.
+  const squad = [
+    ['Alfie', 'E'], ['Ava', 'I'], ['Ben', 'N', 'late', 'Arrives G2'], ['Charlie', 'I'],
+    ['Freya', 'E'], ['Isla', 'I'], ['Leo', 'N'], ['Noah', 'I'],
+    ['Oscar', 'E'], ['Sam B', 'I', 'early', 'After G2 <span class="flag">Tight</span>'], ['Sam K', 'N'], ['Theo', 'I'],
+  ];
+  const tpl = document.getElementById('screen');
+  document.querySelectorAll('[data-screen]').forEach(app => {
+    app.append(tpl.content.cloneNode(true));
+    const ul = app.querySelector('.list');
+    for (const [name, lvl, kind, text] of squad) {
+      const li = document.createElement('li');
+      li.className = 'row';
+      const when = kind
+        ? `<span class="tag ${kind === 'early' ? 'red' : ''}">${kind === 'early' ? 'Early' : 'Late'}</span>${text}`
+        : 'All day';
+      li.innerHTML = `<span class="who">${name}</span><span class="when">${when}</span>
+        <span class="seg" role="group" aria-label="${name} experience">${['N', 'I', 'E'].map(l =>
+          `<button aria-pressed="${l === lvl}">${l}</button>`).join('')}</span>`;
+      ul.append(li);
+    }
+    ul.addEventListener('click', e => {
+      const b = e.target.closest('.seg button');
+      if (!b) return;
+      b.parentElement.querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b));
+    });
+  });
+</script>
+</body>
+</html>
