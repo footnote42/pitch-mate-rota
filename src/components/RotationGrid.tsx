@@ -27,10 +27,9 @@ interface RotationGridProps {
   clearHalf: (game: number, half: 1 | 2) => void;
   clearGame: (game: number) => void;
   gameLabels: Record<number, string>;
-  updateGameLabel: (game: number, label: string) => void;
 }
 
-const displayFont = '"Big Shoulders Display", system-ui, sans-serif';
+const displayFont = 'var(--display)';
 
 export const RotationGrid = ({
   players,
@@ -43,7 +42,6 @@ export const RotationGrid = ({
   clearHalf,
   clearGame,
   gameLabels,
-  updateGameLabel,
 }: RotationGridProps) => {
   const [clearAction, setClearAction] = useState<{ type: 'half' | 'game'; game: number; half?: 1 | 2 } | null>(null);
 
@@ -70,39 +68,8 @@ export const RotationGrid = ({
 
   return (
     <div className="rounded-lg border overflow-hidden relative bg-background">
-      {/* Trojans logo watermark */}
-      <img
-        src="/trojans_logo.png"
-        alt=""
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-[0.04] pointer-events-none w-72 h-72 object-contain z-0"
-        aria-hidden="true"
-      />
-
       <div className="overflow-x-auto relative z-10">
         <div className="inline-block min-w-full">
-
-          {/* Row 1 — opponent / kick-off label inputs */}
-          <div className="flex bg-muted/50 border-b border-border">
-            <div className="sticky left-0 z-20 bg-muted/50 border-r border-border min-w-[140px] px-3 py-2 flex items-end">
-              <span
-                className="text-[0.58rem] font-semibold uppercase text-muted-foreground"
-                style={{ letterSpacing: '0.18em' }}
-              >
-                vs · Time
-              </span>
-            </div>
-            {games.map(game => (
-              <div key={`label-${game}`} className="min-w-[176px] py-2 border-r border-border last:border-r-0">
-                <input
-                  type="text"
-                  value={gameLabels[game] || ''}
-                  onChange={(e) => updateGameLabel(game, e.target.value)}
-                  placeholder="e.g. Tigers · 10:00"
-                  className="w-full text-center text-xs font-medium bg-transparent border-none focus:outline-none focus:ring-1 focus:ring-primary rounded px-2 py-1 placeholder:text-muted-foreground/35"
-                />
-              </div>
-            ))}
-          </div>
 
           {/* Row 2 — game/half column headers */}
           <div
@@ -242,7 +209,7 @@ export const RotationGrid = ({
                   onClick={() => setClearAction({ type: 'game', game })}
                 >
                   <Eraser className="h-3 w-3 mr-1.5" />
-                  Game {game}
+                  {gameLabels[game] || `Game ${game}`}
                 </Button>
               </div>
             ))}

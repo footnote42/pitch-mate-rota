@@ -20,6 +20,13 @@ describe('picks', () => {
     expect(assess(s).halves[halfKey(1, 1)]).toMatchObject({ count: 4, capacity: 4, full: true });
   });
 
+  it('renaming keeps picks, re-sorts, ignores blank names', () => {
+    const s = run(add('a', 'Zed'), add('b', 'Amy'), pick('a', 1, 1), { type: 'renamePlayer', playerId: 'a', name: ' Abe ' });
+    expect(s.squad.map(p => p.name)).toEqual(['Abe', 'Amy']);
+    expect(s.festival.picks).toHaveLength(1);
+    expect(reduce(s, { type: 'renamePlayer', playerId: 'a', name: '  ' })).toBe(s);
+  });
+
   it('removing a player drops their picks', () => {
     const s = run(add('a'), pick('a', 1, 1), { type: 'removePlayer', playerId: 'a' });
     expect(s.festival.picks).toEqual([]);

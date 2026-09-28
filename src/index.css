@@ -1,66 +1,60 @@
-@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@400;600;700;800;900&family=Figtree:wght@400;500;600;700&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* Warm off-white — matchday programme inner page */
-    --background: 220 22% 97%;
-    --foreground: 222 52% 14%;
-
-    --card: 220 18% 95%;
-    --card-foreground: 222 52% 14%;
-
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 52% 14%;
-
-    /* Trojans RFC deep navy */
-    --primary: 222 62% 22%;
-    --primary-foreground: 42 40% 95%;
-
-    --secondary: 220 18% 92%;
-    --secondary-foreground: 222 52% 14%;
-
-    --muted: 220 18% 92%;
-    --muted-foreground: 220 18% 46%;
-
-    /* Gold-tinted hover accent — subtle warm tint for rows/surfaces */
-    --accent: 42 55% 93%;
-    --accent-foreground: 222 52% 14%;
-
-    --destructive: 3 72% 50%;
+    /* shadcn tokens mapped onto the chalk-on-paper palette (see src/styles/app.css) */
+    --background: 46 39% 94%;
+    --foreground: 221 51% 16%;
+    --card: 47 100% 98%;
+    --card-foreground: 221 51% 16%;
+    --popover: 47 100% 98%;
+    --popover-foreground: 221 51% 16%;
+    --primary: 221 51% 16%;
+    --primary-foreground: 46 39% 94%;
+    --secondary: 222 25% 91%;
+    --secondary-foreground: 221 51% 16%;
+    --muted: 222 25% 91%;
+    --muted-foreground: 224 20% 37%;
+    --accent: 222 25% 91%;
+    --accent-foreground: 221 51% 16%;
+    --destructive: 6 87% 42%;
     --destructive-foreground: 0 0% 100%;
+    --success: 221 51% 16%;
+    --success-foreground: 46 39% 94%;
+    --warning: 30 84% 29%;
+    --warning-foreground: 34 83% 93%;
+    --info: 221 51% 16%;
+    --info-foreground: 46 39% 94%;
+    --border: 40 18% 78%;
+    --input: 40 18% 78%;
+    --ring: 44 77% 59%;
+    --radius: 0.75rem;
+    --trojans-gold: 44 77% 59%;
+    --trojans-gold-foreground: 221 51% 16%;
+    --trojans-gold-light: 44 77% 90%;
+  }
 
-    --success: 148 64% 26%;
-    --success-foreground: 0 0% 100%;
-
-    --warning: 38 88% 44%;
-    --warning-foreground: 0 0% 100%;
-
-    --info: 217 75% 52%;
-    --info-foreground: 0 0% 100%;
-
-    --border: 220 14% 87%;
-    --input: 220 14% 87%;
-    --ring: 222 62% 32%;
-
-    --radius: 0.375rem;
-
-    /* Trojans amber-gold — the one accent, used sparingly */
-    --trojans-gold: 42 82% 43%;
-    --trojans-gold-foreground: 0 0% 100%;
-    --trojans-gold-light: 42 70% 93%;
-
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+  :root[data-theme='dark'] {
+    --background: 221 51% 16%;
+    --foreground: 48 29% 92%;
+    --card: 222 52% 12%;
+    --card-foreground: 48 29% 92%;
+    --popover: 222 52% 12%;
+    --popover-foreground: 48 29% 92%;
+    --primary: 48 29% 92%;
+    --primary-foreground: 221 51% 16%;
+    --secondary: 222 38% 25%;
+    --secondary-foreground: 48 29% 92%;
+    --muted: 222 38% 25%;
+    --muted-foreground: 222 17% 80%;
+    --accent: 222 38% 25%;
+    --accent-foreground: 48 29% 92%;
+    --destructive: 7 83% 46%;
+    --border: 222 25% 38%;
+    --input: 222 25% 38%;
+    --trojans-gold-light: 44 40% 25%;
   }
 }
 
@@ -71,7 +65,6 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: 'Figtree', system-ui, sans-serif;
   }
 }
 

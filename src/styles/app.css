@@ -1,0 +1,517 @@
+/* Chalk & Turf with Trojans colours. Tokens and classes from docs/prototypes/look-and-feel.html
+   and plan-tab.html. Light "chalk on paper" by default; navy dark mode via data-theme="dark". */
+
+:root {
+  --bg: #f5f2e8;
+  --surface: #fffdf6;
+  --ink: #14213d;
+  --soft: #4b5570;
+  --gold: #e7bd45; /* gold: the one primary action */
+  --gold-ink: #14213d;
+  --scarlet: #c8200e; /* club touches and selection */
+  --pad-blue: #14213d;
+  --flag: #8a4a0c; /* soft orange: worth a look, never red */
+  --flag-bg: #fbeedd;
+  --tag: #e3e7f0;
+  --line: rgba(20, 33, 61, 0.38);
+  --chalk: 2px dashed var(--line);
+  --hair: 1px dashed var(--line);
+  --seg-bg: rgba(20, 33, 61, 0.07);
+  --shadow: 0 14px 30px -18px rgba(20, 33, 61, 0.35);
+  --display: 'Bricolage Grotesque Variable', 'Atkinson Hyperlegible', Verdana, sans-serif;
+  --body: 'Atkinson Hyperlegible', Verdana, sans-serif;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #14213d;
+  --surface: rgba(6, 12, 28, 0.42);
+  --ink: #f3f0e4;
+  --soft: #c3c8d4;
+  --scarlet: #d62b14;
+  --pad-blue: #6f8fd8;
+  --flag: #f2b27a;
+  --flag-bg: rgba(242, 178, 122, 0.14);
+  --tag: #2c4270;
+  --line: rgba(243, 240, 228, 0.5);
+  --seg-bg: rgba(243, 240, 228, 0.08);
+  --shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--ink);
+}
+body {
+  font: 17px/1.45 var(--body);
+  -webkit-tap-highlight-color: transparent;
+}
+::selection {
+  background: var(--gold);
+  color: var(--gold-ink);
+}
+:focus-visible {
+  outline: 3px solid var(--gold);
+  outline-offset: 2px;
+}
+input,
+select,
+button,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+input,
+select {
+  caret-color: var(--scarlet);
+}
+[hidden] {
+  display: none !important;
+}
+
+/* ---------- shell ---------- */
+.shell {
+  height: 100dvh;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+.top {
+  padding: 12px 16px 10px;
+  padding-top: max(12px, env(safe-area-inset-top));
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 10px;
+  align-items: center;
+  border-bottom: 2px dashed var(--scarlet);
+}
+/* Wider screens stretch the phone layout; header and tab bar line up with the page column. */
+.top,
+.tabs {
+  padding-inline: max(16px, calc((100% - 608px) / 2));
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.brand svg {
+  width: 30px;
+  height: 30px;
+}
+.brand b {
+  font: 800 1.45rem/1 var(--display);
+  letter-spacing: -0.02em;
+}
+.fest {
+  font-size: 13px;
+  color: var(--soft);
+  line-height: 1.3;
+  text-align: right;
+  min-width: 0;
+}
+.fest strong {
+  color: var(--ink);
+  display: block;
+  font-size: 14px;
+}
+.iconbtn {
+  width: 44px;
+  height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  border-radius: 10px;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .iconbtn:hover {
+    background: var(--seg-bg);
+  }
+}
+
+.main {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line) transparent;
+}
+.page {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 18px 16px 32px;
+  display: grid;
+  gap: 16px;
+  align-content: start;
+}
+
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: var(--chalk);
+  padding: 6px 8px max(10px, env(safe-area-inset-bottom));
+  background: var(--bg);
+}
+.tabs button {
+  min-height: 52px;
+  border: 0;
+  background: transparent;
+  color: var(--soft);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 3px;
+  font-weight: 700;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: 10px;
+  position: relative;
+}
+.tabs button[aria-current='page'] {
+  color: var(--ink);
+}
+.tabs button[aria-current='page']::before {
+  content: '';
+  position: absolute;
+  top: -7px;
+  left: 30%;
+  right: 30%;
+  height: 3px;
+  border-radius: 0 0 3px 3px;
+  background: var(--scarlet);
+}
+
+/* ---------- type and blocks ---------- */
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.head h1 {
+  font: 800 2rem/1.05 var(--display);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.head span {
+  color: var(--soft);
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+.section-title {
+  font: 800 1.35rem/1.1 var(--display);
+  letter-spacing: -0.02em;
+  margin: 16px 0 0;
+  padding-top: 18px;
+  border-top: var(--chalk);
+}
+.hint {
+  font-size: 14px;
+  color: var(--soft);
+  margin: 0;
+}
+
+.go,
+.ghost {
+  min-height: 48px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
+  text-decoration: none;
+}
+.go {
+  background: var(--gold);
+  color: var(--gold-ink);
+  border: 0;
+  box-shadow: var(--shadow);
+}
+.ghost {
+  background: transparent;
+  color: var(--ink);
+  border: var(--chalk);
+}
+@media (hover: hover) {
+  .go:hover {
+    filter: brightness(1.06);
+  }
+  .ghost:hover {
+    background: var(--seg-bg);
+  }
+}
+.go:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.linkish {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--scarlet);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  min-height: 44px;
+}
+
+.note {
+  background: var(--flag-bg);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 15px;
+  color: var(--ink);
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.note strong {
+  color: var(--flag);
+}
+.note svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--flag);
+}
+.note ul {
+  margin: 2px 0 0;
+  padding-left: 18px;
+}
+
+.empty {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+  padding: 22px 18px;
+  border: var(--chalk);
+  border-radius: 12px;
+}
+.empty h2 {
+  font: 800 1.35rem/1.15 var(--display);
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.empty p {
+  margin: 0;
+  max-width: 44ch;
+}
+
+/* ---------- squad ---------- */
+.add {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+.field {
+  min-height: 48px;
+  width: 100%;
+  border-radius: 10px;
+  border: var(--chalk);
+  background: var(--surface);
+  padding: 0 12px;
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--ink);
+}
+.field::placeholder {
+  color: var(--soft);
+  opacity: 1;
+}
+.field:focus-visible {
+  border-style: solid;
+  border-color: var(--ink);
+  outline-offset: 1px;
+}
+.field[aria-invalid='true'] {
+  border-color: var(--flag);
+  border-style: solid;
+}
+.error {
+  color: var(--flag);
+  font-size: 14px;
+  font-weight: 700;
+  margin: -4px 0 0;
+}
+
+.legend {
+  font-size: 13px;
+  color: var(--soft);
+  text-align: right;
+  margin: -6px 0 -8px;
+}
+.list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  background: var(--surface);
+  border-radius: 12px;
+}
+:root:not([data-theme='dark']) .list {
+  box-shadow: var(--shadow);
+}
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  align-items: center;
+  padding: 8px 10px 8px 4px;
+  min-height: 64px;
+}
+.row + .row {
+  border-top: var(--hair);
+}
+.who {
+  justify-self: start;
+  min-height: 44px;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 0;
+  background: transparent;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 17px;
+  text-align: left;
+  cursor: pointer;
+}
+.who span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.who svg {
+  flex: none;
+  color: var(--soft);
+}
+@media (hover: hover) {
+  .who:hover {
+    background: var(--seg-bg);
+  }
+}
+.when {
+  grid-column: 1;
+  padding-left: 10px;
+  font-size: 13px;
+  color: var(--soft);
+  font-variant-numeric: tabular-nums;
+}
+.seg {
+  grid-row: 1 / span 2;
+  grid-column: 2;
+  display: inline-grid;
+  grid-template-columns: repeat(3, 44px);
+  background: var(--seg-bg);
+  border-radius: 10px;
+  padding: 2px;
+}
+.seg button {
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--soft);
+  font-weight: 700;
+  font-size: 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.seg button[aria-pressed='true'] {
+  background: var(--ink);
+  color: var(--bg);
+}
+@media (hover: hover) {
+  .seg button:not([aria-pressed='true']):hover {
+    color: var(--ink);
+  }
+}
+
+/* ---------- festival setup ---------- */
+.label .seg {
+  grid-row: auto;
+  grid-column: auto;
+  justify-self: start;
+}
+.form {
+  display: grid;
+  gap: 14px;
+}
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+}
+.label small {
+  font-weight: 400;
+  color: var(--soft);
+  font-size: 13px;
+}
+select.field {
+  appearance: none;
+  padding-right: 36px;
+  background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
+    linear-gradient(135deg, var(--ink) 50%, transparent 50%);
+  background-position: right 18px center, right 12px center;
+  background-size: 6px 6px;
+  background-repeat: no-repeat;
+}
+.labels {
+  display: grid;
+  gap: 8px;
+}
+.labels label {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--soft);
+}
+
+/* ---------- dialogs (shadcn content restyled) ---------- */
+.sheet-actions {
+  display: grid;
+  gap: 10px;
+}
+
+/* ---------- guide stub ---------- */
+.links {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.links a {
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--scarlet);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+.links small {
+  display: block;
+  color: var(--soft);
+  font-weight: 400;
+}

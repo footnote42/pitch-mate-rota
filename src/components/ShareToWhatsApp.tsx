@@ -70,7 +70,7 @@ export const ShareToWhatsApp = ({
             <h3
                 className="text-foreground uppercase mb-3"
                 style={{
-                    fontFamily: '"Big Shoulders Display", system-ui, sans-serif',
+                    fontFamily: 'var(--display)',
                     fontSize: '1.05rem',
                     fontWeight: 800,
                     letterSpacing: '0.04em',

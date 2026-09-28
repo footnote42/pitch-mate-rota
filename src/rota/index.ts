@@ -33,6 +33,7 @@ export interface State {
 export type Action =
   | { type: 'addPlayer'; id: string; name: string; experienceLevel: ExperienceLevel }
   | { type: 'removePlayer'; playerId: string }
+  | { type: 'renamePlayer'; playerId: string; name: string }
   | { type: 'setExperienceLevel'; playerId: string; level: ExperienceLevel }
   | { type: 'togglePick'; playerId: string; game: number; half: Half }
   | { type: 'clearHalf'; game: number; half: Half }
@@ -74,6 +75,11 @@ export function reduce(state: State, action: Action): State {
         ...withFestival(state, { picks: festival.picks.filter(p => p.playerId !== action.playerId) }),
         squad: state.squad.filter(p => p.id !== action.playerId),
       };
+    case 'renamePlayer': {
+      const name = action.name.trim();
+      if (!name) return state;
+      return { ...state, squad: state.squad.map(p => (p.id === action.playerId ? { ...p, name } : p)).sort(byName) };
+    }
     case 'setExperienceLevel':
       return {
         ...state,

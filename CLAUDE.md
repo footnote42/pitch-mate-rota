@@ -56,8 +56,8 @@ The project uses a **relaxed TypeScript config** (`noImplicitAny: false`, `stric
 
 ## Important Notes
 
-- **localStorage keys**: `'pitch-mate-rota'` (versioned state), `'pitch-mate-rota-backup'` (unreadable data kept on load), `'tutorial-completed'`. Old `squad-rotation-state` / `squad-rotation-age-group` keys are migrated then removed
-- **Trojans RFC branding**: Logo at `/trojans_logo.png`, primary blue color scheme
+- **localStorage keys**: `'pitch-mate-rota'` (versioned state), `'pitch-mate-rota-backup'` (unreadable data kept on load), `'theme'` (`dark` when the coach chose dark mode). Old `squad-rotation-state` / `squad-rotation-age-group` keys are migrated then removed
+- **Look**: Chalk & Turf with Trojans colours, from `docs/prototypes/`. Tokens and classes in `src/styles/app.css` (light default, `data-theme="dark"` for navy); shadcn tokens in `src/index.css` are mapped onto the same palette. Gold is for the one primary action, scarlet for club touches and selection, soft orange (never red) for flags. Fonts are self-hosted via @fontsource (the hub CSP blocks Google Fonts).
 - **Players per half and RFU fairness rules** are age-group dependent and computed in `src/rota/` from `src/types/ageGroup.ts` — not hardcoded constants
 
 ## Status

@@ -1,7 +1,7 @@
 import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ["class"],
+  darkMode: ["selector", '[data-theme="dark"]'],
   content: ["./pages/**/*.{ts,tsx}", "./components/**/*.{ts,tsx}", "./app/**/*.{ts,tsx}", "./src/**/*.{ts,tsx}"],
   prefix: "",
   theme: {
@@ -14,8 +14,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        headings: ['"Big Shoulders Display"', 'system-ui', 'sans-serif'],
-        body: ['Figtree', 'system-ui', 'sans-serif'],
+        headings: ['"Bricolage Grotesque Variable"', 'Verdana', 'sans-serif'],
+        body: ['"Atkinson Hyperlegible"', 'Verdana', 'sans-serif'],
       },
       colors: {
         'trojans-gold': 'hsl(var(--trojans-gold))',
