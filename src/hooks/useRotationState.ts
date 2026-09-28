@@ -1,5 +1,5 @@
 import { useEffect, useReducer, useState } from 'react';
-import { Action, Pick, reduce, State } from '@/rota';
+import { Action, addedPicks, Pick, reduce, State } from '@/rota';
 import { BACKUP_KEY, deserialize, LEGACY_KEYS, serialize, STORAGE_KEY } from '@/rota/storage';
 
 interface History {
@@ -8,23 +8,15 @@ interface History {
   filled: Pick[] | null; // picks the last auto-fill added, until the next change
 }
 
-type HistoryAction = Action | { type: 'undo' } | { type: 'shuffle'; seed: number };
-
-const added = (before: State, after: State) => after.festival.picks.filter(p => !before.festival.picks.includes(p));
+type HistoryAction = Action | { type: 'undo' };
 
 function historyReducer(history: History, action: HistoryAction): History {
   if (action.type === 'undo') {
     return history.previous ? { state: history.previous, previous: null, filled: null } : history;
   }
-  if (action.type === 'shuffle') {
-    // Same empty places, new seed: re-run from before the fill, keeping that as the undo point.
-    if (!history.filled || !history.previous) return history;
-    const next = reduce(history.previous, { type: 'autoFill', seed: action.seed });
-    return { state: next, previous: history.previous, filled: added(history.previous, next) };
-  }
   const next = reduce(history.state, action);
   if (next === history.state) return history;
-  return { state: next, previous: history.state, filled: action.type === 'autoFill' ? added(history.state, next) : null };
+  return { state: next, previous: history.state, filled: action.type === 'autoFill' ? addedPicks(history.state, next) : null };
 }
 
 function load(): { history: History; recovered: boolean } {
@@ -55,7 +47,11 @@ export const useRotationState = () => {
     undo: () => dispatch({ type: 'undo' }),
     canUndo: history.previous !== null,
     autoFill: () => dispatch({ type: 'autoFill', seed: 0 }), // seed 0: ties go to squad order
-    shuffle: () => dispatch({ type: 'shuffle', seed: newSeed() }),
+    // Shuffle: undo the fill, then fill the same empty places with a new seed.
+    shuffle: () => {
+      dispatch({ type: 'undo' });
+      dispatch({ type: 'autoFill', seed: newSeed() });
+    },
     filled: history.filled,
     recovered: loaded.recovered, // saved data was unreadable and kept under BACKUP_KEY
     lastSaved,

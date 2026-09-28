@@ -20,7 +20,7 @@ const Index = () => {
   const { toast } = useToast();
   const { state, dispatch, preview, undo, canUndo, autoFill, shuffle, filled, recovered } = useRotationState();
   const { festival } = state;
-  const { games: numberOfGames, ageGroup, picks: assignments } = festival;
+  const { games: numberOfGames, ageGroup, picks } = festival;
   const assessment = assess(state);
   const playersOnField = AGE_GROUP_CONFIGS[ageGroup].playersOnField;
 
@@ -34,14 +34,14 @@ const Index = () => {
   }, [recovered, toast]);
 
   useEffect(() => {
-    const key = `${numberOfGames}-${assignments.length}`;
+    const key = `${numberOfGames}-${picks.length}`;
     if (assessment.complete && celebrationShown !== key) {
       toast({ title: 'Looking good, Coach!', description: 'Your squad is match-ready.', duration: 4000 });
       setCelebrationShown(key);
     } else if (!assessment.complete && celebrationShown) {
       setCelebrationShown(null);
     }
-  }, [assessment.complete, numberOfGames, assignments.length, celebrationShown, toast]);
+  }, [assessment.complete, numberOfGames, picks.length, celebrationShown, toast]);
 
   const toggleDark = () => {
     const next = !dark;
@@ -78,7 +78,7 @@ const Index = () => {
 
         {tab === 'record' && <RecordTab state={state} assessment={assessment} dispatch={dispatch} onGoTo={setTab} />}
 
-        {tab === 'guide' && <GuideTab />}
+        {tab === 'guide' && <GuideTab ageGroup={ageGroup} />}
       </main>
 
       <UpdateBar />

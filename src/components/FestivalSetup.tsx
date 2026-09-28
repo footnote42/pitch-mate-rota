@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Info } from 'lucide-react';
-import { Action, Assessment, MAX_GAMES, MIN_GAMES, State } from '@/rota';
+import { Action, Assessment, gameNumbers, MAX_GAMES, MIN_GAMES, State } from '@/rota';
 import { AgeGroup, AGE_GROUP_CONFIGS } from '@/types/ageGroup';
 import {
   AlertDialog,
@@ -114,7 +114,7 @@ export const FestivalSetup = ({ state, assessment, dispatch, preview }: Festival
 
       <div className="labels" role="group" aria-label="Game labels">
         <span className="label">Opponent or kick-off <small>Shown on the plan and the shared message.</small></span>
-        {Array.from({ length: festival.games }, (_, i) => i + 1).map(game => (
+        {gameNumbers(festival).map(game => (
           <label key={game}>
             Game {game}
             <input

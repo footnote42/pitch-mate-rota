@@ -1,14 +1,15 @@
 // The plan as a WhatsApp message for the parents' group. Display names only; the coach pastes it.
-import { assess, Half, State, toHalves } from './index';
+import { assess } from './index';
+import { gameNumbers, halfKey, HALVES, State, toHalves } from './model';
 
 export function planMessage(state: State): string {
   const { squad, festival } = state;
   const a = assess(state);
-  const games = Array.from({ length: festival.games }, (_, i) => i + 1).map(game => {
-    const halves = ([1, 2] as Half[]).map(half => {
+  const games = gameNumbers(festival).map(game => {
+    const halves = HALVES.map(half => {
       const ids = new Set(festival.picks.filter(p => p.game === game && p.half === half).map(p => p.playerId));
       const names = squad.filter(p => ids.has(p.id)).map(p => a.players[p.id].displayName);
-      const open = a.halves[`${game}-${half}`].capacity - names.length;
+      const open = a.halves[halfKey(game, half)].capacity - names.length;
       const line = names.length === 0 ? 'TBC' : open > 0 ? `${names.join(', ')} + ${open} TBC` : names.join(', ');
       return `${half === 1 ? '1st' : '2nd'}: ${line}`;
     });

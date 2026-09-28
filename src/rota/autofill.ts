@@ -4,9 +4,10 @@
 //   2. fill: the rest shared evenly (fewest halves first), balance choosing inside that.
 // Recorded games are read-only; their quarters count (one quarter is half a half) and removed players aren't picked.
 // Runs of more than MAX_RUN halves are avoided unless a Tight player needs one, or nobody else can play.
-// Ties go to fewest halves, then rested last half, then squad order; a seed shuffles only that last step.
-import { AGE_GROUP_CONFIGS } from '@/types/ageGroup';
-import { Pick, State, Half, MAX_RUN, balanceTarget, canPlayHalf, gameRecord, halfOf, isRecorded } from './index';
+// Ties go to fewest halves, then rested last half, then squad order; a seed shuffles that last step. Early halves
+// tie widely, so a new seed changes about 40% of places (12 players, 4 games) while every rule still holds.
+import type { Pick, State, Half } from './model';
+import { MAX_RUN, balanceTarget, canPlayHalf, gameNumbers, gameRecord, halfOf, isRecorded, minimumQuarters, sideSize } from './model';
 
 // Small seeded PRNG (mulberry32), so the same seed always gives the same plan.
 const random = (seed: number) => () => {
@@ -37,9 +38,9 @@ const byKeys = (a: number[], b: number[]) => {
 
 export function autoFill(state: State, seed: number): State {
   const { squad, festival } = state;
-  const cap = AGE_GROUP_CONFIGS[festival.ageGroup].playersOnField;
+  const cap = sideSize(festival);
   const slots = Array.from({ length: festival.games * 2 }, (_, i) => ({ game: Math.floor(i / 2) + 1, half: ((i % 2) + 1) as Half }));
-  const minimum = festival.games * 2; // quarters: half of every half on the day
+  const minimum = minimumQuarters(festival);
   const level = new Map(squad.map(p => [p.id, p.experienceLevel]));
   const average = balanceTarget(state) / cap;
   const target = balanceTarget(state);
@@ -57,9 +58,9 @@ export function autoFill(state: State, seed: number): State {
     count[i]++;
     total[i] += level.get(k.playerId);
   }
-  for (let game = 1; game <= festival.games; game++) {
+  for (const game of gameNumbers(festival)) {
     if (!isRecorded(festival, game)) continue;
-    for (const q of gameRecord(state, game)) {
+    for (const q of gameRecord(festival, game)) {
       if (quarters.has(q.playerId)) quarters.get(q.playerId)[(game - 1) * 2 + halfOf(q.quarter) - 1]++;
     }
   }

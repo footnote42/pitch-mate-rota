@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Check } from 'lucide-react';
-import { Action, Assessment, canPlayQuarter, gameRecord, halfOf, isRecorded, Quarter, RemovalReason, State } from '@/rota';
+import {
+  absence, Action, Assessment, canTick, gameNumbers, halfOf, isRecorded, Quarter, QUARTERS, REMOVAL_REASONS, RemovalReason, State,
+} from '@/rota';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { HalfGameRule, Pager, useGamePager } from './GamePager';
+import { Pager, useGamePager } from './GamePager';
+import { HalfGameRule } from './HalfGameRule';
+import { ABSENCE_LABEL } from './availability';
 
-const QUARTERS: Quarter[] = [1, 2, 3, 4];
-const REASONS: [RemovalReason, string][] = [['injury', 'Injury'], ['risk', 'Risk of injury'], ['redCard', 'Red card']];
-const REASON_LABEL = Object.fromEntries(REASONS) as Record<RemovalReason, string>;
+const REASON_LABEL: Record<RemovalReason, string> = { injury: 'Injury', risk: 'Risk of injury', redCard: 'Red card' };
 
 interface RecordTabProps {
   state: State;
@@ -17,7 +19,7 @@ interface RecordTabProps {
 
 export const RecordTab = ({ state, assessment, dispatch, onGoTo }: RecordTabProps) => {
   const { squad, festival } = state;
-  const games = Array.from({ length: festival.games }, (_, i) => i + 1);
+  const games = gameNumbers(festival);
   // Opens on the first game not yet recorded.
   const [first] = useState(() => games.find(g => !isRecorded(festival, g)) ?? festival.games);
   const { game, carousel, goTo, onScroll, restore } = useGamePager(first);
@@ -40,7 +42,7 @@ export const RecordTab = ({ state, assessment, dispatch, onGoTo }: RecordTabProp
     );
   }
 
-  const cap = Object.values(assessment.halves)[0]?.capacity ?? 0;
+  const cap = assessment.capacity;
   const recorded = (g: number) => isRecorded(festival, g);
   const planned = (playerId: string, g: number, q: Quarter) =>
     festival.picks.some(k => k.playerId === playerId && k.game === g && k.half === halfOf(q));
@@ -49,13 +51,13 @@ export const RecordTab = ({ state, assessment, dispatch, onGoTo }: RecordTabProp
     <>
       <div className="bar">
         <HalfGameRule assessment={assessment} players={squad.length} />
-        <Pager festival={festival} game={game} goTo={goTo} done={recorded} />
+        <Pager festival={festival} game={game} goTo={goTo} recorded={recorded} />
       </div>
 
       <div className="carousel" ref={carousel} onScroll={onScroll}>
         {games.map(g => {
-          const record = gameRecord(state, g);
-          const inQuarter = (q: Quarter) => record.filter(r => r.quarter === q).length;
+          const record = assessment.record[g];
+          const inQuarter = (q: Quarter) => assessment.quarterCounts[g][q];
           const played = (playerId: string, q: Quarter) => record.some(r => r.playerId === playerId && r.quarter === q);
           return (
             <section key={g} className="gpage" aria-label={`Game ${g} record`}>
@@ -72,14 +74,14 @@ export const RecordTab = ({ state, assessment, dispatch, onGoTo }: RecordTabProp
                 {squad.map(p => {
                   const a = assessment.players[p.id];
                   const out = festival.removals[p.id];
-                  const here = g >= a.arrives && g <= a.leaves;
+                  const absent = absence(festival, p.id, g);
                   return (
                     <li key={p.id} className="row rrow">
                       <button className="who" onClick={() => setOutFor({ playerId: p.id, game: g })} aria-label={`${p.name}: out for the day`}>
                         <span>{a.displayName}</span>
                       </button>
                       <span className="when">
-                        {out ? `Out: ${REASON_LABEL[out.reason].toLowerCase()}, game ${out.game} Q${out.quarter}` : !here ? (g < a.arrives ? 'Not here yet' : 'Gone') : ''}
+                        {out ? `Out: ${REASON_LABEL[out.reason].toLowerCase()}, game ${out.game} Q${out.quarter}` : absent ? ABSENCE_LABEL[absent] : ''}
                       </span>
                       <span className="quarters">
                         {QUARTERS.map(q => {
@@ -91,7 +93,7 @@ export const RecordTab = ({ state, assessment, dispatch, onGoTo }: RecordTabProp
                               key={q}
                               className={cls}
                               aria-pressed={on}
-                              disabled={!on && (inQuarter(q) >= cap || !canPlayQuarter(festival, p.id, g, q))}
+                              disabled={!on && !canTick(state, p.id, g, q)}
                               aria-label={`${p.name}, game ${g} quarter ${q}${plan ? ', planned' : ''}`}
                               onClick={() => dispatch({ type: 'toggleQuarter', playerId: p.id, game: g, quarter: q })}
                             />
@@ -155,7 +157,8 @@ const OutForTheDay = ({ state, target, onClose, dispatch }: OutProps) => {
             <DialogHeader className="text-left">
               <DialogTitle>{player?.name} is out for the day</DialogTitle>
               <DialogDescription>
-                {REASON_LABEL[current.reason]} in game {current.game}, quarter {current.quarter}. Their minimum is waived.
+                {REASON_LABEL[current.reason]} in game {current.game}, quarter {current.quarter}. Their minimum is waived. To take
+                it back straight away, use Undo.
               </DialogDescription>
             </DialogHeader>
             <div className="sheet-actions">
@@ -166,8 +169,9 @@ const OutForTheDay = ({ state, target, onClose, dispatch }: OutProps) => {
                   onClose();
                 }}
               >
-                Back in: they can play again
+                Back in for later games
               </button>
+              <p className="hint">Their minimum applies again. Picks and quarters already cleared stay cleared; add them back by hand.</p>
             </div>
           </>
         ) : (
@@ -182,8 +186,8 @@ const OutForTheDay = ({ state, target, onClose, dispatch }: OutProps) => {
             <div className="label">
               Why
               <span className="seg wide" role="group" aria-label="Reason">
-                {REASONS.map(([r, label]) => (
-                  <button key={r} type="button" aria-pressed={reason === r} onClick={() => setReason(r)}>{label}</button>
+                {REMOVAL_REASONS.map(r => (
+                  <button key={r} type="button" aria-pressed={reason === r} onClick={() => setReason(r)}>{REASON_LABEL[r]}</button>
                 ))}
               </span>
             </div>

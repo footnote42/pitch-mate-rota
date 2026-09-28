@@ -1,15 +1,27 @@
 import { ChevronDown } from 'lucide-react';
+import { AgeGroup } from '@/types/ageGroup';
 
-const RFU_LINKS = [
+const REG15 = 'https://www.englandrugby.com/run/rules-governance/rfu-rules-and-regulations/regulation-15-age-grade-rugby';
+// Regulation 15 appendices 1-6: the Rules of Play for each age group (docs/research/reg15-age-groups.md).
+const RULES_OF_PLAY: Record<AgeGroup, string> = {
+  U7: `${REG15}/regulation-15-appendix-1-u7-rules-of-play`,
+  U8: `${REG15}/regulation-15-appendix-2-u8-rules-of-play`,
+  U9: `${REG15}/regulation-15-appendix-3-u9-rules-of-play`,
+  U10: `${REG15}/regulation-15-appendix-4-u10-rules-of-play`,
+  U11: `${REG15}/regulation-15-appendix-5-u11-rules-of-play`,
+  U12: `${REG15}/regulation-15-appendix-6-u12-rules-of-play`,
+};
+
+const rfuLinks = (ageGroup: AgeGroup) => [
   {
     href: 'https://rfu.widen.net/s/fcvtlrnlqb/rfu-regulation-15-2026-27',
     title: 'RFU Regulation 15: Age Grade Rugby',
     note: '2026-27 season (PDF)',
   },
   {
-    href: 'https://www.englandrugby.com/run/rules-governance/rfu-rules-and-regulations/regulation-15-age-grade-rugby',
-    title: 'Rules of Play for age grade rugby',
-    note: '2026-27 season, U7 to U12 appendices',
+    href: RULES_OF_PLAY[ageGroup],
+    title: `${ageGroup} Rules of Play for age grade rugby`,
+    note: '2026-27 season (Regulation 15 appendix)',
   },
 ];
 
@@ -23,7 +35,7 @@ const Section = ({ title, open, children }: { title: string; open?: boolean; chi
   </details>
 );
 
-export const GuideTab = () => (
+export const GuideTab = ({ ageGroup }: { ageGroup: AgeGroup }) => (
   <div className="page">
     <div className="head"><h1>Guide</h1></div>
 
@@ -58,6 +70,7 @@ export const GuideTab = () => (
           <li><b>Short:</b> they can no longer reach the minimum with the places left.</li>
           <li><b>N in a row:</b> more than three halves in a row without a rest.</li>
           <li><b>Light or Heavy on experience:</b> a full half well below or above your squad's average.</li>
+          <li><b>Short of players:</b> not enough players are here to fill a half.</li>
           <li><b>Worth a look:</b> the minutes per half, or for the day, are over the RFU maximum. Check with the organiser.</li>
         </ul>
         <p>The one hard limit: you cannot pick more players than fit on the pitch.</p>
@@ -67,7 +80,7 @@ export const GuideTab = () => (
         <p>
           Auto-fill fills every empty place and never moves a pick you have made. First it makes sure everyone can
           reach the minimum, starting with early leavers. Then it shares the extra halves evenly and keeps each half's
-          experience close to your squad's average. New picks get a gold ring.
+          experience close to your squad's average. New picks get a dashed red ring.
         </p>
         <p>Shuffle gives a different suggestion for the same places. Undo takes back the last change, whatever it was.</p>
       </Section>
@@ -109,7 +122,7 @@ export const GuideTab = () => (
 
       <Section title="RFU regulations">
         <ul className="links">
-          {RFU_LINKS.map(l => (
+          {rfuLinks(ageGroup).map(l => (
             <li key={l.href}>
               <a href={l.href} target="_blank" rel="noreferrer">{l.title}</a>
               <small>{l.note}</small>

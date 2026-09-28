@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { Action, assess, emptyState, gameRecord, reduce, State } from '../index';
+import { Action, assess, emptyState, reduce, State } from '../index';
 import { deserialize, serialize, STORAGE_KEY } from '../storage';
 
 const run = (...actions: Action[]): State => actions.reduce(reduce, emptyState());
@@ -12,7 +12,7 @@ const out = (playerId: string, game: number, quarter: 1 | 2 | 3 | 4): Action => 
 // U7 (4 a side), 3 games: minimum 3 halves = 6 quarters.
 const ids = ['a', 'b', 'c', 'd', 'e', 'f'];
 const u7 = (...actions: Action[]) => run({ type: 'setAgeGroup', ageGroup: 'U7' }, { type: 'setGames', games: 3 }, ...ids.map(id => add(id)), ...actions);
-const quarters = (s: State, game: number, id: string) => gameRecord(s, game).filter(q => q.playerId === id).map(q => q.quarter).sort();
+const quarters = (s: State, game: number, id: string) => assess(s).record[game].filter(q => q.playerId === id).map(q => q.quarter).sort();
 
 describe('match record', () => {
   it('starts from the plan, in quarters', () => {
@@ -30,21 +30,21 @@ describe('match record', () => {
 
   it('blocks a quarter once the side is full', () => {
     const s = u7(...['a', 'b', 'c', 'd', 'e'].map(id => tick(id, 1, 1)));
-    expect(gameRecord(s, 1).filter(q => q.quarter === 1)).toHaveLength(4);
+    expect(assess(s).record[1].filter(q => q.quarter === 1)).toHaveLength(4);
     expect(quarters(s, 1, 'e')).toEqual([]);
   });
 
   it('the plan counts until the game is played; then the record does', () => {
     const s = u7(pick('a', 1, 1), pick('a', 1, 2), tick('a', 1, 4));
-    expect(assess(s).players.a.planned).toBe(4);
+    expect(assess(s).players.a.counted).toBe(4);
     const recorded = reduce(s, played(1));
-    expect(assess(recorded).players.a.planned).toBe(3);
-    expect(assess(reduce(recorded, played(1, false))).players.a.planned).toBe(4);
+    expect(assess(recorded).players.a.counted).toBe(3);
+    expect(assess(reduce(recorded, played(1, false))).players.a.counted).toBe(4);
   });
 
   it('with a half length, a quarter is half a half in minutes', () => {
     const s = u7({ type: 'setHalfLength', minutes: 10 }, tick('a', 1, 1), played(1));
-    expect(assess(s).players.a.plannedMinutes).toBe(5);
+    expect(assess(s).players.a.countedMinutes).toBe(5);
   });
 
   it('a partial half counts toward consecutive halves', () => {
@@ -59,6 +59,24 @@ describe('match record', () => {
     const fills = [2, 3].flatMap(g => [1, 2].flatMap(h => others.map(id => pick(id, g, h as 1 | 2))));
     const s = u7(...fills, played(1));
     expect(assess(s).players.a.status).toBe('impossible');
+  });
+});
+
+describe('recorded games in the assessment', () => {
+  it('a recorded game is not judged on its plan: no balance flag, no open places', () => {
+    // U7: a half of four Experienced in a mixed squad is heavy
+    const s = run({ type: 'setAgeGroup', ageGroup: 'U7' }, { type: 'setGames', games: 3 },
+      ...['a', 'b', 'c', 'd'].map(id => add(id, 3)), ...['e', 'f', 'g', 'h'].map(id => add(id, 1)),
+      ...['a', 'b', 'c', 'd'].map(id => pick(id, 1, 1)));
+    expect(assess(s).flags).toContainEqual({ kind: 'unbalanced', game: 1, half: 1 });
+    const recorded = assess(reduce(s, played(1)));
+    expect(recorded.flags.some(f => f.kind === 'unbalanced')).toBe(false);
+    expect(recorded.openPlaces).toBe(16); // games 2 and 3 only
+  });
+
+  it('counts players per quarter', () => {
+    const s = u7(pick('a', 1, 1), tick('b', 1, 1));
+    expect(assess(s).quarterCounts[1]).toEqual({ 1: 2, 2: 1, 3: 0, 4: 0 });
   });
 });
 
@@ -92,7 +110,7 @@ describe('auto-fill after a recorded game', () => {
     const recorded = u7(...['a', 'b', 'c', 'd'].flatMap(id => [1, 2, 3, 4].map(q => tick(id, 1, q as 1 | 2 | 3 | 4))), played(1));
     const s = reduce(recorded, { type: 'autoFill', seed: 0 });
     expect(s.festival.picks.filter(p => p.game === 1)).toEqual([]);
-    expect(gameRecord(s, 1)).toEqual(gameRecord(recorded, 1));
+    expect(assess(s).record[1]).toEqual(assess(recorded).record[1]);
     // e and f, who sat out game 1, are owed three halves from the four left
     for (const id of ['e', 'f']) expect(s.festival.picks.filter(p => p.playerId === id).length).toBeGreaterThanOrEqual(3);
     expect(Object.values(assess(s).players).every(p => p.status === 'ok')).toBe(true);

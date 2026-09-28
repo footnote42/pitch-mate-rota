@@ -1,23 +1,26 @@
 import { useState } from 'react';
 import { Check, Info, Shuffle, Undo2, Wand2 } from 'lucide-react';
-import { Action, Assessment, canPlayHalf, gameRecord, Half, halfKey, halfOf, isRecorded, MAX_RUN, Pick, PlayerAssessment, State, toHalves } from '@/rota';
+import {
+  absence, Action, Assessment, canPick, gameNumbers, Half, halfKey, halfOf, HALVES, isRecorded, MAX_RUN, Pick, PlayerAssessment,
+  State, toHalves,
+} from '@/rota';
 import { SharePlan } from './SharePlan';
-import { presenceLabel } from './presence';
-import { Flag, HalfGameRule, Pager, useGamePager } from './GamePager';
+import { ABSENCE_LABEL, availabilityLabel, availabilityShort } from './availability';
+import { HalfGameRule, Flag } from './HalfGameRule';
+import { Pager, useGamePager } from './GamePager';
 
 const LEVEL = { 1: 'N', 2: 'I', 3: 'E' } as const;
-const HALVES: Half[] = [1, 2];
 const halfName = (h: Half) => (h === 1 ? '1st' : '2nd');
 
 const watchLabel = (p: PlayerAssessment) => (p.status === 'impossible' ? 'Short' : p.status === 'tight' ? 'Tight' : null);
 
-// One tick per half of the minimum planned, "+n" beyond it.
-const Ticks = ({ planned, minimum }: { planned: number; minimum: number }) => (
-  <span className="ticks" title={`${planned} of ${minimum} halves`}>
+// One tick per half of the minimum counted so far, "+n" beyond it.
+const Ticks = ({ counted, minimum }: { counted: number; minimum: number }) => (
+  <span className="ticks" title={`${counted} of ${minimum} halves`}>
     {Array.from({ length: minimum }, (_, i) => (
-      <i key={i} className={i < planned ? 'f' : undefined} />
+      <i key={i} className={i < counted ? 'f' : undefined} />
     ))}
-    {planned > minimum && <span>+{planned - minimum}</span>}
+    {counted > minimum && <span>+{counted - minimum}</span>}
   </span>
 );
 
@@ -56,14 +59,14 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
   const players = squad.map(p => ({ player: p, a: assessment.players[p.id] }));
   const isPicked = (playerId: string, g: number, h: Half) =>
     festival.picks.some(k => k.playerId === playerId && k.game === g && k.half === h);
-  const games = Array.from({ length: festival.games }, (_, i) => i + 1);
+  const games = gameNumbers(festival);
   const isNew = (playerId: string, g: number, h: Half) =>
     !!filled?.some(k => k.playerId === playerId && k.game === g && k.half === h);
-  const allHalves = Object.values(assessment.halves).filter(h => !h.recorded); // recorded games are not planned into
-  const openPlaces = allHalves.reduce((n, h) => n + h.capacity - h.count, 0);
-  const toWatch =
-    assessment.flags.filter(f => (f.kind === 'belowMinimum' && f.impossible) || f.kind === 'unbalanced' || f.kind === 'consecutive').length +
-    allHalves.filter(h => !h.full).length;
+  const { openPlaces, toWatch } = assessment;
+  const flaggedHalves = (kind: 'unbalanced' | 'shortOfPlayers') =>
+    new Set(assessment.flags.flatMap(f => (f.kind === kind ? [halfKey(f.game, f.half)] : [])));
+  const unbalanced = flaggedHalves('unbalanced');
+  const shortOf = flaggedHalves('shortOfPlayers');
 
   const showView = (v: 'game' | 'overview') => {
     setView(v);
@@ -72,7 +75,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
   const recorded = (g: number) => isRecorded(festival, g);
   // Quarters a player played in a half of a recorded game (0-2).
   const playedIn = (playerId: string, g: number, h: Half) =>
-    gameRecord(state, g).filter(q => q.playerId === playerId && halfOf(q.quarter) === h).length;
+    assessment.record[g].filter(q => q.playerId === playerId && halfOf(q.quarter) === h).length;
 
   const capFlags = assessment.flags.filter(f => f.kind === 'halfOverCap' || f.kind === 'dayOverCap');
 
@@ -111,7 +114,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
             </div>
           )
         )}
-        {view === 'game' && <Pager festival={festival} game={game} goTo={goTo} done={recorded} />}
+        {view === 'game' && <Pager festival={festival} game={game} goTo={goTo} recorded={recorded} />}
       </div>
 
       {view === 'game' ? (
@@ -120,7 +123,8 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
             <section key={g} className="gpage" aria-label={`Game ${g}`}>
               <div className="halves">
                 {HALVES.map(h => {
-                  const { count, capacity, balance } = assessment.halves[halfKey(g, h)];
+                  const key = halfKey(g, h);
+                  const { count, capacity, balance } = assessment.halves[key];
                   return (
                     <div key={h} className="half">
                       <span className="t">{halfName(h)} half</span>
@@ -129,9 +133,9 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                         <small>{count < capacity ? `${capacity - count} to pick` : 'full'}</small>
                       </span>
                       <span className="mix">{balance.mix[3]} Exp · {balance.mix[2]} Int · {balance.mix[1]} Nov</span>
-                      {balance.verdict === 'light' && <Flag>Light on experience</Flag>}
-                      {balance.verdict === 'heavy' && <Flag>Heavy on experience</Flag>}
+                      {unbalanced.has(key) && <Flag>{balance.verdict === 'light' ? 'Light' : 'Heavy'} on experience</Flag>}
                       {balance.verdict === 'ok' && <span className="ok"><Check size={16} strokeWidth={2.6} aria-hidden="true" />Balanced</span>}
+                      {shortOf.has(key) && <Flag>Short of players</Flag>}
                     </div>
                   );
                 })}
@@ -142,11 +146,10 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
 
               <ul className="list">
                 {players.map(({ player, a }) => {
-                  const planned = toHalves(a.planned);
+                  const counted = toHalves(a.counted);
                   const label = watchLabel(a);
-                  const out = festival.removals[player.id];
-                  const here = g >= a.arrives && g <= a.leaves && !(out && g > out.game);
-                  const away = out ? 'Out for the day' : presenceLabel(a, festival.games);
+                  const absent = absence(festival, player.id, g);
+                  const away = festival.removals[player.id] ? 'Out for the day' : availabilityLabel(a, festival.games);
                   return (
                     <li key={player.id} className="row">
                       <span className="pname">
@@ -154,21 +157,20 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                         <span className="lvl" title={`Experience: ${LEVEL[player.experienceLevel]}`}>{LEVEL[player.experienceLevel]}</span>
                       </span>
                       <span className="meta">
-                        <Ticks planned={planned} minimum={minimum} />
+                        <Ticks counted={counted} minimum={minimum} />
                         {label && <Flag>{label}</Flag>}
                         {a.longestRun > MAX_RUN && <Flag>{a.longestRun} in a row</Flag>}
                         {away && <span className="nowrap">{away}</span>}
                       </span>
-                      {here ? <span className="picks">
+                      {!absent ? <span className="picks">
                         {HALVES.map(h => {
                           const on = isPicked(player.id, g, h);
-                          const full = assessment.halves[halfKey(g, h)].full;
                           return (
                             <button
                               key={h}
                               className={isNew(player.id, g, h) ? 'pick new' : 'pick'}
                               aria-pressed={on}
-                              disabled={!on && (full || !canPlayHalf(festival, player.id, g, h))}
+                              disabled={!on && !canPick(state, player.id, g, h)}
                               aria-label={`${player.name}, game ${g} ${h === 1 ? 'first' : 'second'} half`}
                               onClick={() => dispatch({ type: 'togglePick', playerId: player.id, game: g, half: h })}
                             >
@@ -176,7 +178,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                             </button>
                           );
                         })}
-                      </span> : <span className="picks away">{out ? 'Out' : g < a.arrives ? 'Not here yet' : 'Gone'}</span>}
+                      </span> : <span className="picks away">{ABSENCE_LABEL[absent]}</span>}
                     </li>
                   );
                 })}
@@ -231,11 +233,15 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
               <tbody>
                 {players.map(({ player, a }) => {
                   const warn = a.status === 'tight' || a.status === 'impossible';
+                  const note = festival.removals[player.id] ? 'Out' : availabilityShort(a, festival.games);
                   return (
                     <tr key={player.id}>
-                      <td className="nm">{a.displayName}</td>
+                      <td className="nm">
+                        {a.displayName}
+                        {note && <small>{note}</small>}
+                      </td>
                       {games.flatMap(g => HALVES.map(h => {
-                        const here = g >= a.arrives && g <= a.leaves;
+                        const here = !absence(festival, player.id, g);
                         const q = recorded(g) ? playedIn(player.id, g, h) : 0;
                         return (
                           <td key={`${g}-${h}`} className={[g > 1 && h === 1 ? 'g2' : '', here ? '' : 'away'].join(' ').trim() || undefined}>
@@ -247,8 +253,8 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                         );
                       }))}
                       <td className={warn ? 'tot warn' : 'tot'}>
-                        {toHalves(a.planned)}/{minimum}
-                        {a.plannedMinutes !== null && <small>{a.plannedMinutes}m</small>}
+                        {toHalves(a.counted)}/{minimum}
+                        {a.countedMinutes !== null && <small>{a.countedMinutes}m</small>}
                       </td>
                     </tr>
                   );
@@ -258,9 +264,10 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                 <tr>
                   <td className="nm">Picked</td>
                   {games.flatMap(g => HALVES.map(h => {
-                    const { count, balance } = assessment.halves[halfKey(g, h)];
+                    const { count } = assessment.halves[halfKey(g, h)];
+                    const warn = unbalanced.has(halfKey(g, h)) || shortOf.has(halfKey(g, h));
                     return (
-                      <td key={`${g}-${h}`} className={[g > 1 && h === 1 ? 'g2' : '', balance.balanced ? '' : 'warn'].join(' ').trim() || undefined}>
+                      <td key={`${g}-${h}`} className={[g > 1 && h === 1 ? 'g2' : '', warn ? 'warn' : ''].join(' ').trim() || undefined}>
                         {count}
                       </td>
                     );
@@ -278,7 +285,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
           </div>
           <p>
             Read only. Tap Game to change picks. Orange totals are players who could miss {minimum} halves; orange
-            counts are halves light or heavy on experience.
+            counts are halves light or heavy on experience, or short of players.
           </p>
         </div>
       )}

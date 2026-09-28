@@ -76,6 +76,8 @@ describe('auto-fill', () => {
   it('9. with fewer players than places, places stay empty', () => {
     const s = run({ type: 'setAgeGroup', ageGroup: 'U9' }, { type: 'setGames', games: 3 }, ...ids.slice(0, 5).map(id => add(id)), fill());
     expect(Object.values(assess(s).halves).map(h => h.count)).toEqual([5, 5, 5, 5, 5, 5]);
+    expect(assess(s).flags.filter(f => f.kind === 'shortOfPlayers')).toHaveLength(6);
+    expect(assess(s).openPlaces).toBe(12);
   });
 
   it('10. no run of 4+ unless a minimum needs it, then flagged', () => {
@@ -88,6 +90,10 @@ describe('auto-fill', () => {
     expect(u9(fill(7)).festival.picks).toEqual(u9(fill(7)).festival.picks);
     const other = u9(fill(8));
     expect(other.festival.picks).not.toEqual(u9(fill(7)).festival.picks);
+    // Shuffle varies who plays, not just one tie: a good share of places change hands
+    const key = (s: State) => new Set(s.festival.picks.map(p => `${p.playerId}|${p.game}|${p.half}`));
+    const seven = key(u9(fill(7)));
+    expect([...key(other)].filter(k => !seven.has(k)).length).toBeGreaterThanOrEqual(10);
     expect(Object.values(assess(other).players).every(p => p.status === 'ok')).toBe(true);
     const c = counts(other);
     expect(Math.max(...c) - Math.min(...c)).toBeLessThanOrEqual(1);

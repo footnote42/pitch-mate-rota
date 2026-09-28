@@ -12,7 +12,7 @@ Pitch-Mate-Rota is a rugby player rotation management tool for festival games. I
 
 ```bash
 npm i                  # Install dependencies
-npm run dev            # Start dev server (http://localhost:5173)
+npm run dev            # Start dev server (http://localhost:8080/rota/)
 npm build              # Build for production
 npm run build:dev      # Build with source maps
 npm run lint           # Lint the codebase
@@ -23,13 +23,13 @@ npm preview            # Preview production build
 
 ### State Management
 
-Every rule lives in the pure `src/rota/` module (no React, no storage): `reduce(state, action)` and `assess(state)`; saving, validation and migration in `src/rota/storage.ts`. `src/hooks/useRotationState.ts` is only `useReducer`, localStorage read/write and one-step undo. No Redux, Context API, or other state management libraries — props drilling only.
+Every rule lives in the pure `src/rota/` module (no React, no storage): `reduce(state, action)` and `assess(state)`, with types and shared rule helpers (`canPick`, `canTick`, `absence`, `gameRecord`, `minimumQuarters`) in `model.ts`, auto-fill in `autofill.ts`, squad import in `squad.ts`, the WhatsApp message in `share.ts`; saving, validation and migration in `src/rota/storage.ts`. `src/hooks/useRotationState.ts` is only `useReducer`, localStorage read/write and one-step undo (Shuffle is Undo then `autoFill` with a new seed). No Redux, Context API, or other state management libraries — props drilling only.
 
 State flows from `Index.tsx` down to child components. All changes are `dispatch`ed actions; confirmations use a dry run (`preview(action)`) to word the dialog. The UI computes no rules itself.
 
 ### Important Architectural Decisions
 
-1. **State shape**: `{version, squad, festival}`. The festival holds age group, games, labels, optional half length and picks; picks reference players by `playerId`. Time is counted in quarters internally.
+1. **State shape**: `{version, squad, festival}`. The festival holds age group, games, labels, optional half length, picks, availability, match records (per game, in quarters, with a `played` flag) and removals (Out for the day); picks reference players by `playerId`. Time is counted in quarters internally; a Recorded game counts from its record, the rest from the plan.
 
 2. **Consecutive halves are allowed**: players can play both halves of a game. The rota tracks total halves across the festival; more than three in a row is flagged, never blocked.
 
@@ -56,6 +56,7 @@ The project uses a **relaxed TypeScript config** (`noImplicitAny: false`, `stric
 
 ## Important Notes
 
+- **Served at `/rota`** under the rugby hub (ADR 0003): Vite `base: '/rota/'`, offline PWA via vite-plugin-pwa in prompt mode with scope `/rota`; `vercel.json` sends `Service-Worker-Allowed: /rota` and the cache headers
 - **localStorage keys**: `'pitch-mate-rota'` (versioned state), `'pitch-mate-rota-backup'` (unreadable data kept on load), `'theme'` (`dark` when the coach chose dark mode). Old `squad-rotation-state` / `squad-rotation-age-group` keys are migrated then removed
 - **Look**: Chalk & Turf with Trojans colours, from `docs/prototypes/`. Tokens and classes in `src/styles/app.css` (light default, `data-theme="dark"` for navy); shadcn tokens in `src/index.css` are mapped onto the same palette. Gold is for the one primary action, scarlet for club touches and selection, soft orange (never red) for flags. Fonts are self-hosted via @fontsource (the hub CSP blocks Google Fonts).
 - **Players per half and RFU fairness rules** are age-group dependent and computed in `src/rota/` from `src/types/ageGroup.ts` — not hardcoded constants
@@ -70,7 +71,7 @@ Active. Feature 001 (preserve assignments on game change) complete.
 
 Vitest + React Testing Library, configured in `vite.config.ts` (`test` block). Run `npm test`.
 - Tests live in `src/rota/__tests__/`
-- Test only through `reduce`, `assess` and `serialize`/`deserialize`
+- Test only through the module's public interface: `reduce`, `assess`, `serialize`/`deserialize`, `planMessage`, `parseSquad`/`matchSquad`. Not through `model.ts` helpers or internals
 
 ## Active Technologies
 - TypeScript (relaxed config — `noImplicitAny: false`, `strictNullChecks: false`) + React 18, Vite, shadcn-ui, Tailwind CSS (001-preserve-assignments-on-game-change)

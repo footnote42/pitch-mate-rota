@@ -1,10 +1,10 @@
 import { FormEvent, useRef, useState } from 'react';
 import { Pencil } from 'lucide-react';
-import { Action, Assessment, State, toHalves } from '@/rota';
+import { Action, Assessment, gameNumbers, State, toHalves } from '@/rota';
 import { ExperienceLevel, EXPERIENCE_LABELS, Player } from '@/types/rotation';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { FestivalSetup } from './FestivalSetup';
-import { presenceLabel } from './presence';
+import { availabilityLabel } from './availability';
 import { ImportSquad } from './ImportSquad';
 
 const LEVELS: [ExperienceLevel, string][] = [[1, 'N'], [2, 'I'], [3, 'E']];
@@ -91,15 +91,15 @@ export const SquadTab = ({ state, assessment, dispatch, preview, onOpenGuide }: 
           <ul className="list">
             {squad.map(p => {
               const a = assessment.players[p.id];
-              const planned = toHalves(a?.planned ?? 0);
-              const away = a && presenceLabel(a, state.festival.games);
+              const counted = toHalves(a?.counted ?? 0);
+              const away = a && availabilityLabel(a, state.festival.games);
               return (
                 <li key={p.id} className="row">
                   <button className="who" onClick={() => setEditing(p)} aria-label={`Edit ${p.name}`}>
                     <span>{p.name}</span>
                     <Pencil size={14} strokeWidth={2} aria-hidden="true" />
                   </button>
-                  <span className="when">{planned} of {minimum} halves planned</span>
+                  <span className="when">{counted} of {minimum} halves</span>
                   {away && <span className="when away">{away}</span>}
                   <LevelPicker
                     name={p.name}
@@ -136,13 +136,14 @@ interface EditPlayerProps {
 
 const EditPlayer = ({ player, state, onClose, dispatch, preview }: EditPlayerProps) => {
   const { festival } = state;
-  const games = Array.from({ length: festival.games }, (_, i) => i + 1);
+  const games = gameNumbers(festival);
   const pickCount = player ? festival.picks.filter(k => k.playerId === player.id).length : 0;
   const [name, setName] = useState('');
   const [level, setLevel] = useState<ExperienceLevel>(2);
   const [arrives, setArrives] = useState(1);
   const [leaves, setLeaves] = useState(1);
   const [removing, setRemoving] = useState(false);
+  const [clearing, setClearing] = useState(false); // confirming picks outside the new availability
   const [error, setError] = useState<string | null>(null);
 
   const open = (isOpen: boolean) => {
@@ -157,6 +158,7 @@ const EditPlayer = ({ player, state, onClose, dispatch, preview }: EditPlayerPro
     setArrives(festival.availability[player.id]?.arrives ?? 1);
     setLeaves(festival.availability[player.id]?.leaves ?? festival.games);
     setRemoving(false);
+    setClearing(false);
     setError(null);
   }
   if (!player && shownFor !== null) setShownFor(null);
@@ -166,6 +168,10 @@ const EditPlayer = ({ player, state, onClose, dispatch, preview }: EditPlayerPro
     const problem = nameError(name);
     setError(problem);
     if (problem || !player) return;
+    if (dropped > 0) return setClearing(true);
+    commit();
+  };
+  const commit = () => {
     dispatch({ type: 'renamePlayer', playerId: player.id, name });
     dispatch({ type: 'setExperienceLevel', playerId: player.id, level });
     dispatch(availability);
@@ -184,7 +190,21 @@ const EditPlayer = ({ player, state, onClose, dispatch, preview }: EditPlayerPro
   return (
     <Dialog open={!!player} onOpenChange={open}>
       <DialogContent className="max-w-[calc(100vw-32px)] sm:max-w-md rounded-xl">
-        {removing ? (
+        {clearing ? (
+          <>
+            <DialogHeader className="text-left">
+              <DialogTitle>Clear {dropped === 1 ? '1 pick' : `${dropped} picks`}?</DialogTitle>
+              <DialogDescription>
+                {player?.name} is picked for {dropped === 1 ? 'a half' : `${dropped} halves`} outside these games. Saving
+                clears {dropped === 1 ? 'it' : 'them'}.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="sheet-actions">
+              <button className="go" onClick={commit}>Save and clear</button>
+              <button className="ghost" onClick={() => setClearing(false)}>Back</button>
+            </div>
+          </>
+        ) : removing ? (
           <>
             <DialogHeader className="text-left">
               <DialogTitle>Remove {player?.name}?</DialogTitle>

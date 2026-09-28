@@ -1,7 +1,10 @@
 // Saved-state format, validation and migration. Pure: the caller does the reading and writing.
 import { AgeGroup, AGE_GROUP_CONFIGS, DEFAULT_AGE_GROUP } from '@/types/ageGroup';
 import { ExperienceLevel, Player } from '@/types/rotation';
-import { Availability, canPlayHalf, emptyState, Festival, GameRecord, Half, MAX_GAMES, MIN_GAMES, DEFAULT_GAMES, Pick, Played, Quarter, Removal, State } from './index';
+import {
+  Availability, canPlayHalf, emptyState, Festival, GameRecord, Half, MAX_GAMES, MIN_GAMES, DEFAULT_GAMES, newFestival, Pick, Played,
+  Quarter, QUARTERS, Removal, REMOVAL_REASONS, State,
+} from './model';
 
 export const STORAGE_KEY = 'pitch-mate-rota';
 export const BACKUP_KEY = 'pitch-mate-rota-backup';
@@ -64,8 +67,7 @@ const toAvailability = (v: unknown, squad: Player[], games: number): Record<stri
   );
 };
 
-const isQuarter = (v: unknown): v is Quarter => v === 1 || v === 2 || v === 3 || v === 4;
-const REASONS = ['injury', 'risk', 'redCard'];
+const isQuarter = (v: unknown): v is Quarter => QUARTERS.includes(v as Quarter);
 
 // Keeps records of real games, dropping quarters for unknown players or repeats.
 const toRecords = (v: unknown, squad: Player[], games: number): Record<number, GameRecord> => {
@@ -92,7 +94,7 @@ const toRemovals = (v: unknown, squad: Player[], games: number): Record<string, 
   const ids = new Set(squad.map(p => p.id));
   return Object.fromEntries(
     Object.entries(v)
-      .filter(([id, r]) => ids.has(id) && isObject(r) && REASONS.includes(r.reason) && Number.isInteger(r.game) && r.game >= 1 && r.game <= games && isQuarter(r.quarter))
+      .filter(([id, r]) => ids.has(id) && isObject(r) && REMOVAL_REASONS.includes(r.reason) && Number.isInteger(r.game) && r.game >= 1 && r.game <= games && isQuarter(r.quarter))
       .map(([id, r]) => [id, { reason: r.reason, game: r.game, quarter: r.quarter }]),
   );
 };
@@ -144,14 +146,10 @@ function fromLegacy(data: unknown, ageGroup: string | null): State {
     version: 1,
     squad,
     festival: {
-      ageGroup: toAgeGroup(ageGroup),
+      ...newFestival(toAgeGroup(ageGroup)),
       games,
       labels: toLabels(data.gameLabels),
-      halfLength: null,
       picks: toPicks(data.assignments, squad, games),
-      availability: {},
-      records: {},
-      removals: {},
     },
   };
 }

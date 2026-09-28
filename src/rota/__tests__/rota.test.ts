@@ -79,12 +79,12 @@ describe('assess: minimum and status', () => {
     // 4 games = 8 halves = 16 quarters; minimum 8 quarters = 4 halves
     const a = assess(run({ type: 'setGames', games: 4 }, add('a')));
     expect(a.minimum).toBe(8);
-    expect(a.players.a).toMatchObject({ planned: 0, minimum: 8, status: 'below' });
+    expect(a.players.a).toMatchObject({ counted: 0, minimum: 8, status: 'below' });
   });
 
   it('ok once the minimum is planned', () => {
     const s = run({ type: 'setGames', games: 3 }, add('a'), pick('a', 1, 1), pick('a', 2, 1), pick('a', 3, 1));
-    expect(assess(s).players.a).toMatchObject({ planned: 6, status: 'ok' });
+    expect(assess(s).players.a).toMatchObject({ counted: 6, status: 'ok' });
     expect(assess(s).flags.some(f => f.kind === 'belowMinimum')).toBe(false);
   });
 
@@ -152,14 +152,14 @@ describe('assess: minutes and caps', () => {
   it('no minutes until a half length is set', () => {
     const a = assess(run(add('a')));
     expect(a.totalMinutes).toBeNull();
-    expect(a.players.a.plannedMinutes).toBeNull();
+    expect(a.players.a.countedMinutes).toBeNull();
   });
 
   it('reads quarters as minutes and flags caps', () => {
     // U9: 15 min per half, 60 per day. 4 games x 2 x 8 = 64 > 60.
     const s = run({ type: 'setAgeGroup', ageGroup: 'U9' }, { type: 'setGames', games: 4 }, { type: 'setHalfLength', minutes: 8 }, add('a'), pick('a', 1, 1));
     const a = assess(s);
-    expect(a.players.a.plannedMinutes).toBe(8);
+    expect(a.players.a.countedMinutes).toBe(8);
     expect(a.totalMinutes).toBe(64);
     expect(a.minimumMinutes).toBe(32);
     expect(a.flags).toContainEqual({ kind: 'dayOverCap', totalMinutes: 64, cap: 60 });

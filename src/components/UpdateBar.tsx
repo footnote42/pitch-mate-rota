@@ -10,7 +10,7 @@ export const UpdateBar = () => {
   return (
     <div className="update" role="status">
       <span>Update ready</span>
-      <button className="go" onClick={() => updateServiceWorker(true)}>Reload</button>
+      <button className="ghost" onClick={() => updateServiceWorker(true)}>Reload</button>
     </div>
   );
 };
