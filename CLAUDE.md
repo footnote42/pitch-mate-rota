@@ -68,9 +68,8 @@ Active. Feature 001 (preserve assignments on game change) complete.
 
 ## Testing
 
-No testing infrastructure is currently set up. When adding tests:
-- Vitest for unit tests (already compatible with Vite)
-- React Testing Library for component tests
+Vitest + React Testing Library, configured in `vite.config.ts` (`test` block). No `npm test` script — run `npx vitest run`.
+- Tests live in `src/hooks/__tests__/`
 - Focus on `useRotationState` hook logic (business rules)
 
 ## Active Technologies
