@@ -1,16 +1,15 @@
-import { useRef, useState } from 'react';
-import { Check, ChevronLeft, ChevronRight, Info, Shuffle, Undo2, Wand2 } from 'lucide-react';
-import { Action, Assessment, Half, halfKey, MAX_RUN, Pick, PlayerAssessment, State, toHalves } from '@/rota';
+import { useState } from 'react';
+import { Check, Info, Shuffle, Undo2, Wand2 } from 'lucide-react';
+import { Action, Assessment, canPlayHalf, gameRecord, Half, halfKey, halfOf, isRecorded, MAX_RUN, Pick, PlayerAssessment, State, toHalves } from '@/rota';
 import { SharePlan } from './SharePlan';
 import { presenceLabel } from './presence';
+import { Flag, HalfGameRule, Pager, useGamePager } from './GamePager';
 
 const LEVEL = { 1: 'N', 2: 'I', 3: 'E' } as const;
 const HALVES: Half[] = [1, 2];
 const halfName = (h: Half) => (h === 1 ? '1st' : '2nd');
 
 const watchLabel = (p: PlayerAssessment) => (p.status === 'impossible' ? 'Short' : p.status === 'tight' ? 'Tight' : null);
-
-const Flag = ({ children }: { children: React.ReactNode }) => <span className="flag">{children}</span>;
 
 // One tick per half of the minimum planned, "+n" beyond it.
 const Ticks = ({ planned, minimum }: { planned: number; minimum: number }) => (
@@ -37,8 +36,7 @@ interface PlanTabProps {
 export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, shuffle, filled, onGoTo }: PlanTabProps) => {
   const { squad, festival } = state;
   const [view, setView] = useState<'game' | 'overview'>('game');
-  const [game, setGame] = useState(1);
-  const carousel = useRef<HTMLDivElement>(null);
+  const { game, carousel, goTo, onScroll, restore } = useGamePager();
 
   if (squad.length === 0) {
     return (
@@ -56,34 +54,25 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
 
   const minimum = toHalves(assessment.minimum);
   const players = squad.map(p => ({ player: p, a: assessment.players[p.id] }));
-  const watch = players.filter(({ a }) => a.status === 'tight' || a.status === 'impossible').length;
-  const onTrack = squad.length - watch;
   const isPicked = (playerId: string, g: number, h: Half) =>
     festival.picks.some(k => k.playerId === playerId && k.game === g && k.half === h);
   const games = Array.from({ length: festival.games }, (_, i) => i + 1);
   const isNew = (playerId: string, g: number, h: Half) =>
     !!filled?.some(k => k.playerId === playerId && k.game === g && k.half === h);
-  const allHalves = Object.values(assessment.halves);
+  const allHalves = Object.values(assessment.halves).filter(h => !h.recorded); // recorded games are not planned into
   const openPlaces = allHalves.reduce((n, h) => n + h.capacity - h.count, 0);
   const toWatch =
     assessment.flags.filter(f => (f.kind === 'belowMinimum' && f.impossible) || f.kind === 'unbalanced' || f.kind === 'consecutive').length +
     allHalves.filter(h => !h.full).length;
 
-  const goTo = (g: number) => {
-    const el = carousel.current;
-    if (el) el.scrollTo({ left: (g - 1) * el.clientWidth, behavior: 'smooth' });
-  };
-  const onScroll = () => {
-    const el = carousel.current;
-    if (!el) return;
-    const g = Math.round(el.scrollLeft / el.clientWidth) + 1;
-    if (g !== game) setGame(g);
-  };
   const showView = (v: 'game' | 'overview') => {
     setView(v);
-    // The carousel remounts at scroll 0; put it back on the current game.
-    if (v === 'game') requestAnimationFrame(() => carousel.current?.scrollTo({ left: (game - 1) * carousel.current.clientWidth }));
+    if (v === 'game') restore();
   };
+  const recorded = (g: number) => isRecorded(festival, g);
+  // Quarters a player played in a half of a recorded game (0-2).
+  const playedIn = (playerId: string, g: number, h: Half) =>
+    gameRecord(state, g).filter(q => q.playerId === playerId && halfOf(q.quarter) === h).length;
 
   const capFlags = assessment.flags.filter(f => f.kind === 'halfOverCap' || f.kind === 'dayOverCap');
 
@@ -100,15 +89,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
           </button>
           <SharePlan state={state} />
         </div>
-        <div className="hgr">
-          <span>
-            Half Game Rule: <b>{onTrack}</b> of {squad.length} on track for{' '}
-            <span className="nowrap">
-              {minimum} halves{assessment.minimumMinutes !== null && ` (${assessment.minimumMinutes} min)`}
-            </span>
-          </span>
-          {watch > 0 ? <Flag>{watch} to watch</Flag> : <span className="ok"><Check size={16} strokeWidth={2.6} aria-label="All on track" /></span>}
-        </div>
+        <HalfGameRule assessment={assessment} players={squad.length} />
         {filled ? (
           <div className="fillbar" role="status">
             <span>
@@ -130,28 +111,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
             </div>
           )
         )}
-        {view === 'game' && (
-          <div className="pager">
-            <button className="iconbtn" onClick={() => goTo(game - 1)} disabled={game === 1} aria-label="Previous game">
-              <ChevronLeft size={24} strokeWidth={2.2} aria-hidden="true" />
-            </button>
-            <div>
-              <h2>
-                Game {game}
-                <small>
-                  {festival.labels[game] ? `${festival.labels[game]} · ` : ''}of {festival.games}
-                  {game < festival.games ? ' · swipe for the next' : ''}
-                </small>
-              </h2>
-              <div className="dots" aria-hidden="true">
-                {games.map(g => <i key={g} className={g === game ? 'on' : undefined} />)}
-              </div>
-            </div>
-            <button className="iconbtn" onClick={() => goTo(game + 1)} disabled={game === festival.games} aria-label="Next game">
-              <ChevronRight size={24} strokeWidth={2.2} aria-hidden="true" />
-            </button>
-          </div>
-        )}
+        {view === 'game' && <Pager festival={festival} game={game} goTo={goTo} done={recorded} />}
       </div>
 
       {view === 'game' ? (
@@ -176,13 +136,17 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                   );
                 })}
               </div>
+              {recorded(g) && (
+                <p className="hint">Game {g} is played: time counts from the record, not these picks.</p>
+              )}
 
               <ul className="list">
                 {players.map(({ player, a }) => {
                   const planned = toHalves(a.planned);
                   const label = watchLabel(a);
-                  const here = g >= a.arrives && g <= a.leaves;
-                  const away = presenceLabel(a, festival.games);
+                  const out = festival.removals[player.id];
+                  const here = g >= a.arrives && g <= a.leaves && !(out && g > out.game);
+                  const away = out ? 'Out for the day' : presenceLabel(a, festival.games);
                   return (
                     <li key={player.id} className="row">
                       <span className="pname">
@@ -204,7 +168,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                               key={h}
                               className={isNew(player.id, g, h) ? 'pick new' : 'pick'}
                               aria-pressed={on}
-                              disabled={!on && full}
+                              disabled={!on && (full || !canPlayHalf(festival, player.id, g, h))}
                               aria-label={`${player.name}, game ${g} ${h === 1 ? 'first' : 'second'} half`}
                               onClick={() => dispatch({ type: 'togglePick', playerId: player.id, game: g, half: h })}
                             >
@@ -212,7 +176,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                             </button>
                           );
                         })}
-                      </span> : <span className="picks away">{g < a.arrives ? 'Not here yet' : 'Gone'}</span>}
+                      </span> : <span className="picks away">{out ? 'Out' : g < a.arrives ? 'Not here yet' : 'Gone'}</span>}
                     </li>
                   );
                 })}
@@ -249,7 +213,10 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                 <tr>
                   <th />
                   {games.map(g => (
-                    <th key={g} colSpan={2} className={g > 1 ? 'g2' : undefined}>G{g}</th>
+                    <th key={g} colSpan={2} className={g > 1 ? 'g2' : undefined}>
+                      G{g}
+                      {recorded(g) && <Check className="done" size={13} strokeWidth={3} aria-label="played" />}
+                    </th>
                   ))}
                   <th />
                 </tr>
@@ -269,9 +236,12 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
                       <td className="nm">{a.displayName}</td>
                       {games.flatMap(g => HALVES.map(h => {
                         const here = g >= a.arrives && g <= a.leaves;
+                        const q = recorded(g) ? playedIn(player.id, g, h) : 0;
                         return (
                           <td key={`${g}-${h}`} className={[g > 1 && h === 1 ? 'g2' : '', here ? '' : 'away'].join(' ').trim() || undefined}>
-                            {isPicked(player.id, g, h) && <span className={isNew(player.id, g, h) ? 'c new' : 'c'} aria-label="planned" />}
+                            {recorded(g)
+                              ? q > 0 && <span className={q === 1 ? 'c part' : 'c'} aria-label={q === 1 ? 'played a quarter' : 'played'} />
+                              : isPicked(player.id, g, h) && <span className={isNew(player.id, g, h) ? 'c new' : 'c'} aria-label="planned" />}
                             {!here && <span className="sr-only">not there</span>}
                           </td>
                         );
@@ -303,6 +273,7 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
           <div className="key">
             <span><span className="c" />Planned</span>
             <span><span className="c away" />Not there</span>
+            {games.some(recorded) && <span><span className="c part" />One quarter</span>}
             <span className="warn-text">Orange: worth a look</span>
           </div>
           <p>

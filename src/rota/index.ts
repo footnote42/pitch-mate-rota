@@ -10,6 +10,7 @@ export const DEFAULT_GAMES = 5;
 const QUARTERS_PER_HALF = 2;
 
 export type Half = 1 | 2;
+export type Quarter = 1 | 2 | 3 | 4;
 
 export interface Pick {
   playerId: string;
@@ -23,6 +24,24 @@ export interface Availability {
   leaves: number; // last game
 }
 
+// Match record: quarters actually played in one game. It counts, instead of the plan, once played.
+export interface Played {
+  playerId: string;
+  quarter: Quarter;
+}
+export interface GameRecord {
+  played: boolean; // the coach has confirmed the game as played: a Recorded game
+  quarters: Played[];
+}
+
+// Permanent removal ('Out for the day'): the Half Game Rule is waived for this player.
+export type RemovalReason = 'injury' | 'risk' | 'redCard';
+export interface Removal {
+  reason: RemovalReason;
+  game: number;
+  quarter: Quarter; // the quarter it happened in, which they played part of
+}
+
 export interface Festival {
   ageGroup: AgeGroup;
   games: number;
@@ -30,6 +49,8 @@ export interface Festival {
   halfLength: number | null; // minutes, optional
   picks: Pick[];
   availability: Record<string, Availability>; // by player id
+  records: Record<number, GameRecord>; // by game; only games the coach has touched
+  removals: Record<string, Removal>; // by player id
 }
 
 export interface State {
@@ -52,6 +73,10 @@ export type Action =
   | { type: 'setHalfLength'; minutes: number | null }
   | { type: 'setAvailability'; playerId: string; arrives: number; leaves: number }
   | { type: 'autoFill'; seed: number } // seed from the caller, like ids
+  | { type: 'toggleQuarter'; playerId: string; game: number; quarter: Quarter }
+  | { type: 'setPlayed'; game: number; played: boolean }
+  | { type: 'removeForDay'; playerId: string; reason: RemovalReason; game: number; quarter: Quarter }
+  | { type: 'cancelRemoval'; playerId: string }
   | { type: 'newFestival'; keepSquad: boolean };
 
 export const newFestival = (ageGroup: AgeGroup = DEFAULT_AGE_GROUP): Festival => ({
@@ -61,6 +86,8 @@ export const newFestival = (ageGroup: AgeGroup = DEFAULT_AGE_GROUP): Festival =>
   halfLength: null,
   picks: [],
   availability: {},
+  records: {},
+  removals: {},
 });
 
 export const emptyState = (): State => ({ version: 1, squad: [], festival: newFestival() });
@@ -82,6 +109,34 @@ const isPresent = (festival: Festival, playerId: string, game: number) => {
   return game >= arrives && game <= leaves;
 };
 
+export const halfOf = (quarter: Quarter): Half => (quarter <= 2 ? 1 : 2);
+const QUARTERS: Quarter[] = [1, 2, 3, 4];
+
+// Removed players stay for the quarter it happened in, and the half that quarter belongs to.
+export const canPlayQuarter = (festival: Festival, playerId: string, game: number, quarter: Quarter) => {
+  const r = festival.removals[playerId];
+  return isPresent(festival, playerId, game) && (!r || game < r.game || (game === r.game && quarter <= r.quarter));
+};
+export const canPlayHalf = (festival: Festival, playerId: string, game: number, half: Half) =>
+  canPlayQuarter(festival, playerId, game, half === 1 ? 1 : 3);
+
+export const isRecorded = (festival: Festival, game: number) => !!festival.records[game]?.played;
+
+// A game's match record: what the coach recorded, or the plan in quarters until they touch it.
+export function gameRecord({ festival }: State, game: number): Played[] {
+  const record = festival.records[game];
+  if (record) return record.quarters;
+  return festival.picks
+    .filter(p => p.game === game)
+    .flatMap(p => (p.half === 1 ? [1, 2] : [3, 4]).map(quarter => ({ playerId: p.playerId, quarter: quarter as Quarter })));
+}
+
+const withRecord = (state: State, game: number, quarters: Played[], played = isRecorded(state.festival, game)): State =>
+  withFestival(state, { records: { ...state.festival.records, [game]: { played, quarters } } });
+
+const byKey = <T,>(obj: Record<string | number, T>, keep: (key: string, value: T) => boolean) =>
+  Object.fromEntries(Object.entries(obj).filter(([k, v]) => keep(k, v))) as Record<string, T>;
+
 // Full-day entries are dropped, so availability only lists players who are not there all day.
 const withAvailability = (festival: Festival, playerId: string, a: Availability | null): Festival => {
   const { [playerId]: _, ...rest } = festival.availability;
@@ -102,6 +157,10 @@ export function reduce(state: State, action: Action): State {
         ...withFestival(state, {
           picks: festival.picks.filter(p => p.playerId !== action.playerId),
           availability: withAvailability(festival, action.playerId, null).availability,
+          records: Object.fromEntries(
+            Object.entries(festival.records).map(([g, r]) => [g, { ...r, quarters: r.quarters.filter(q => q.playerId !== action.playerId) }]),
+          ),
+          removals: byKey(festival.removals, id => id !== action.playerId),
         }),
         squad: state.squad.filter(p => p.id !== action.playerId),
       };
@@ -121,7 +180,7 @@ export function reduce(state: State, action: Action): State {
       if (festival.picks.some(same)) return withFestival(state, { picks: festival.picks.filter(p => !same(p)) });
       const inHalf = festival.picks.filter(p => p.game === game && p.half === half).length;
       if (inHalf >= capacity(state) || game < 1 || game > festival.games) return state; // hard block
-      if (!isPresent(festival, playerId, game)) return state;
+      if (!canPlayHalf(festival, playerId, game, half)) return state;
       return withFestival(state, { picks: [...festival.picks, { playerId, game, half }] });
     }
     case 'clearHalf':
@@ -133,7 +192,13 @@ export function reduce(state: State, action: Action): State {
     case 'setGames': {
       if (action.games < MIN_GAMES || action.games > MAX_GAMES) return state;
       const games = action.games;
-      let next: Festival = { ...festival, games, picks: festival.picks.filter(p => p.game <= games) };
+      let next: Festival = {
+        ...festival,
+        games,
+        picks: festival.picks.filter(p => p.game <= games),
+        records: byKey(festival.records, g => Number(g) <= games),
+        removals: byKey(festival.removals, (_, r) => r.game <= games),
+      };
       for (const [id, a] of Object.entries(festival.availability)) {
         next = withAvailability(next, id, { arrives: Math.min(a.arrives, games), leaves: Math.min(a.leaves, games) });
       }
@@ -141,7 +206,7 @@ export function reduce(state: State, action: Action): State {
     }
     case 'setAgeGroup':
       if (action.ageGroup === festival.ageGroup) return state;
-      return withFestival(state, { ageGroup: action.ageGroup, picks: [] });
+      return withFestival(state, { ageGroup: action.ageGroup, picks: [], records: {} }); // new side size
     case 'setLabel':
       return withFestival(state, { labels: { ...festival.labels, [action.game]: action.label } });
     case 'setHalfLength':
@@ -154,6 +219,42 @@ export function reduce(state: State, action: Action): State {
     }
     case 'autoFill':
       return autoFill(state, action.seed);
+    case 'toggleQuarter': {
+      const { playerId, game, quarter } = action;
+      if (game < 1 || game > festival.games || !QUARTERS.includes(quarter)) return state;
+      const quarters = gameRecord(state, game);
+      const same = (q: Played) => q.playerId === playerId && q.quarter === quarter;
+      if (quarters.some(same)) return withRecord(state, game, quarters.filter(q => !same(q)));
+      if (quarters.filter(q => q.quarter === quarter).length >= capacity(state)) return state; // hard block
+      if (!canPlayQuarter(festival, playerId, game, quarter) || !state.squad.some(p => p.id === playerId)) return state;
+      return withRecord(state, game, [...quarters, { playerId, quarter }]);
+    }
+    case 'setPlayed': {
+      if (action.game < 1 || action.game > festival.games) return state;
+      return withRecord(state, action.game, gameRecord(state, action.game), action.played);
+    }
+    case 'removeForDay': {
+      const { playerId, reason, game, quarter } = action;
+      if (game < 1 || game > festival.games || !QUARTERS.includes(quarter) || !state.squad.some(p => p.id === playerId)) return state;
+      const after: Festival = { ...festival, removals: { ...festival.removals, [playerId]: { reason, game, quarter } } };
+      const records: Record<number, GameRecord> = {};
+      for (let g = 1; g <= festival.games; g++) {
+        if (g !== game && !festival.records[g]) continue;
+        const quarters = gameRecord(state, g).filter(q => q.playerId !== playerId || canPlayQuarter(after, playerId, g, q.quarter));
+        records[g] = { played: isRecorded(festival, g), quarters };
+      }
+      return {
+        ...state,
+        festival: {
+          ...after,
+          records,
+          picks: festival.picks.filter(p => p.playerId !== playerId || canPlayHalf(after, playerId, p.game, p.half)),
+        },
+      };
+    }
+    case 'cancelRemoval':
+      if (!festival.removals[action.playerId]) return state;
+      return withFestival(state, { removals: byKey(festival.removals, id => id !== action.playerId) });
     case 'newFestival':
       return action.keepSquad
         ? { ...state, festival: newFestival(festival.ageGroup) }
@@ -195,6 +296,7 @@ export interface HalfAssessment {
   count: number;
   capacity: number;
   full: boolean;
+  recorded: boolean; // the game is played: the record counts, not this half of the plan
   balance: Balance;
 }
 
@@ -277,6 +379,7 @@ export function assess(state: State): Assessment {
         count: inHalf.length,
         capacity: cap,
         full,
+        recorded: isRecorded(festival, game),
         balance: { total, target, balanced, verdict, mix },
       };
       if (!balanced) flags.push({ kind: 'unbalanced', game, half });
@@ -289,20 +392,35 @@ export function assess(state: State): Assessment {
   const names = displayNames(squad);
 
   const players: Record<string, PlayerAssessment> = {};
+  // Recorded games count from the match record; the rest from the plan.
+  const records = new Map<number, Played[]>();
+  for (let game = 1; game <= festival.games; game++) {
+    if (isRecorded(festival, game)) records.set(game, gameRecord(state, game));
+  }
   for (const p of squad) {
     const mine = picks.filter(k => k.playerId === p.id);
-    const planned = mine.length * QUARTERS_PER_HALF;
+    const playedHalf = (game: number, half: Half) =>
+      records.has(game)
+        ? records.get(game).some(q => q.playerId === p.id && halfOf(q.quarter) === half)
+        : mine.some(k => k.game === game && k.half === half);
+    let planned = 0;
+    for (let game = 1; game <= festival.games; game++) {
+      planned += records.has(game)
+        ? records.get(game).filter(q => q.playerId === p.id).length
+        : mine.filter(k => k.game === game).length * QUARTERS_PER_HALF;
+    }
     const openElsewhere = Object.values(halves).filter(
-      h => !h.full && isPresent(festival, p.id, h.game) && !mine.some(k => k.game === h.game && k.half === h.half),
+      h => !h.full && !h.recorded && canPlayHalf(festival, p.id, h.game, h.half) && !playedHalf(h.game, h.half),
     ).length;
     const reachable = planned + openElsewhere * QUARTERS_PER_HALF;
-    const status: PlayerStatus =
-      planned >= minimum ? 'ok' : reachable < minimum ? 'impossible' : reachable === minimum ? 'tight' : 'below';
+    const status: PlayerStatus = festival.removals[p.id]
+      ? 'exempt'
+      : planned >= minimum ? 'ok' : reachable < minimum ? 'impossible' : reachable === minimum ? 'tight' : 'below';
     let run = 0;
     let longestRun = 0;
     for (let game = 1; game <= festival.games; game++) {
       for (const half of [1, 2] as Half[]) {
-        run = mine.some(k => k.game === game && k.half === half) ? run + 1 : 0;
+        run = playedHalf(game, half) ? run + 1 : 0; // any quarter of a half counts as playing it
         longestRun = Math.max(longestRun, run);
       }
     }

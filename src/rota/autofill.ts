@@ -2,10 +2,11 @@
 // Two passes, each half by half in time order:
 //   1. minimum: players still owed their minimum; Tight first, then whoever keeps the half on target, then urgency;
 //   2. fill: the rest shared evenly (fewest halves first), balance choosing inside that.
+// Recorded games are read-only; their quarters count (one quarter is half a half) and removed players aren't picked.
 // Runs of more than MAX_RUN halves are avoided unless a Tight player needs one, or nobody else can play.
 // Ties go to fewest halves, then rested last half, then squad order; a seed shuffles only that last step.
 import { AGE_GROUP_CONFIGS } from '@/types/ageGroup';
-import { Pick, State, Half, MAX_RUN, balanceTarget } from './index';
+import { Pick, State, Half, MAX_RUN, balanceTarget, canPlayHalf, gameRecord, halfOf, isRecorded } from './index';
 
 // Small seeded PRNG (mulberry32), so the same seed always gives the same plan.
 const random = (seed: number) => () => {
@@ -38,31 +39,37 @@ export function autoFill(state: State, seed: number): State {
   const { squad, festival } = state;
   const cap = AGE_GROUP_CONFIGS[festival.ageGroup].playersOnField;
   const slots = Array.from({ length: festival.games * 2 }, (_, i) => ({ game: Math.floor(i / 2) + 1, half: ((i % 2) + 1) as Half }));
-  const minimum = festival.games; // halves: half of every half on the day
+  const minimum = festival.games * 2; // quarters: half of every half on the day
   const level = new Map(squad.map(p => [p.id, p.experienceLevel]));
   const average = balanceTarget(state) / cap;
   const target = balanceTarget(state);
   const rank = tieOrder(squad.map(p => p.id), seed);
 
-  const on = new Map(squad.map(p => [p.id, slots.map(() => false)]));
+  // Quarters each player has in each half: from the record in recorded games, the plan elsewhere.
+  const fixed = slots.map(s => isRecorded(festival, s.game));
+  const quarters = new Map(squad.map(p => [p.id, slots.map(() => 0)]));
   const count = slots.map(() => 0);
   const total = slots.map(() => 0);
   for (const k of festival.picks) {
     const i = (k.game - 1) * 2 + (k.half - 1);
-    if (!on.has(k.playerId) || i >= slots.length) continue;
-    on.get(k.playerId)[i] = true;
+    if (!quarters.has(k.playerId) || i >= slots.length || fixed[i]) continue;
+    quarters.get(k.playerId)[i] = 2;
     count[i]++;
     total[i] += level.get(k.playerId);
   }
+  for (let game = 1; game <= festival.games; game++) {
+    if (!isRecorded(festival, game)) continue;
+    for (const q of gameRecord(state, game)) {
+      if (quarters.has(q.playerId)) quarters.get(q.playerId)[(game - 1) * 2 + halfOf(q.quarter) - 1]++;
+    }
+  }
+  const on = new Map(squad.map(p => [p.id, quarters.get(p.id).map(n => n > 0)])); // any quarter counts toward a run
   const added: Pick[] = [];
 
-  const present = (id: string, i: number) => {
-    const a = festival.availability[id];
-    return !a || (slots[i].game >= a.arrives && slots[i].game <= a.leaves);
-  };
-  const canPlay = (id: string, i: number) => present(id, i) && !on.get(id)[i];
-  const played = (id: string) => on.get(id).filter(Boolean).length;
-  const owed = (id: string) => Math.max(0, minimum - played(id));
+  const canPlay = (id: string, i: number) => !fixed[i] && canPlayHalf(festival, id, slots[i].game, slots[i].half) && !on.get(id)[i];
+  const played = (id: string) => quarters.get(id).reduce((a, b) => a + b, 0) / 2; // halves
+  // Halves still owed; a removed player is owed nothing.
+  const owed = (id: string) => (festival.removals[id] ? 0 : Math.ceil(Math.max(0, minimum - quarters.get(id).reduce((a, b) => a + b, 0)) / 2));
   const chancesLeft = (id: string, from: number) =>
     slots.reduce((n, _, j) => n + (j >= from && canPlay(id, j) && count[j] < cap ? 1 : 0), 0);
   const runIfPicked = (id: string, i: number) => {
@@ -80,6 +87,7 @@ export function autoFill(state: State, seed: number): State {
   };
   const place = (id: string, i: number) => {
     on.get(id)[i] = true;
+    quarters.get(id)[i] = 2;
     count[i]++;
     total[i] += level.get(id);
     added.push({ playerId: id, game: slots[i].game, half: slots[i].half });

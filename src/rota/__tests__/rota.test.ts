@@ -207,6 +207,8 @@ describe('saving', () => {
       halfLength: null,
       picks: [{ playerId: 'p1', game: 1, half: 1 }],
       availability: {},
+      records: {},
+      removals: {},
     });
   });
 

@@ -1,7 +1,7 @@
 // Saved-state format, validation and migration. Pure: the caller does the reading and writing.
 import { AgeGroup, AGE_GROUP_CONFIGS, DEFAULT_AGE_GROUP } from '@/types/ageGroup';
 import { ExperienceLevel, Player } from '@/types/rotation';
-import { Availability, emptyState, Festival, Half, MAX_GAMES, MIN_GAMES, DEFAULT_GAMES, Pick, State } from './index';
+import { Availability, canPlayHalf, emptyState, Festival, GameRecord, Half, MAX_GAMES, MIN_GAMES, DEFAULT_GAMES, Pick, Played, Quarter, Removal, State } from './index';
 
 export const STORAGE_KEY = 'pitch-mate-rota';
 export const BACKUP_KEY = 'pitch-mate-rota-backup';
@@ -64,6 +64,39 @@ const toAvailability = (v: unknown, squad: Player[], games: number): Record<stri
   );
 };
 
+const isQuarter = (v: unknown): v is Quarter => v === 1 || v === 2 || v === 3 || v === 4;
+const REASONS = ['injury', 'risk', 'redCard'];
+
+// Keeps records of real games, dropping quarters for unknown players or repeats.
+const toRecords = (v: unknown, squad: Player[], games: number): Record<number, GameRecord> => {
+  if (!isObject(v)) return {};
+  const ids = new Set(squad.map(p => p.id));
+  const records: Record<number, GameRecord> = {};
+  for (const [key, r] of Object.entries(v)) {
+    const game = Number(key);
+    if (!Number.isInteger(game) || game < 1 || game > games || !isObject(r) || !Array.isArray(r.quarters)) continue;
+    const seen = new Set<string>();
+    const quarters: Played[] = [];
+    for (const q of r.quarters as unknown[]) {
+      if (!isObject(q) || !ids.has(q.playerId) || !isQuarter(q.quarter) || seen.has(`${q.playerId}|${q.quarter}`)) continue;
+      seen.add(`${q.playerId}|${q.quarter}`);
+      quarters.push({ playerId: q.playerId, quarter: q.quarter });
+    }
+    records[game] = { played: r.played === true, quarters };
+  }
+  return records;
+};
+
+const toRemovals = (v: unknown, squad: Player[], games: number): Record<string, Removal> => {
+  if (!isObject(v)) return {};
+  const ids = new Set(squad.map(p => p.id));
+  return Object.fromEntries(
+    Object.entries(v)
+      .filter(([id, r]) => ids.has(id) && isObject(r) && REASONS.includes(r.reason) && Number.isInteger(r.game) && r.game >= 1 && r.game <= games && isQuarter(r.quarter))
+      .map(([id, r]) => [id, { reason: r.reason, game: r.game, quarter: r.quarter }]),
+  );
+};
+
 // Drops picks that point at missing players, games or halves, or repeat.
 const toPicks = (v: unknown, squad: Player[], games: number): Pick[] => {
   if (v === undefined) return [];
@@ -95,12 +128,11 @@ function fromCurrent(data: unknown): State {
     halfLength,
     picks: toPicks(f.picks, squad, games),
     availability: toAvailability(f.availability, squad, games),
+    records: toRecords(f.records, squad, games),
+    removals: toRemovals(f.removals, squad, games),
   };
-  const present = (p: Pick) => {
-    const a = festival.availability[p.playerId];
-    return !a || (p.game >= a.arrives && p.game <= a.leaves);
-  };
-  return { version: 1, squad, festival: { ...festival, picks: festival.picks.filter(present) } };
+  const picks = festival.picks.filter(p => canPlayHalf(festival, p.playerId, p.game, p.half));
+  return { version: 1, squad, festival: { ...festival, picks } };
 }
 
 // Old app: { players, assignments, numberOfGames, gameLabels } plus a separate age group key.
@@ -118,6 +150,8 @@ function fromLegacy(data: unknown, ageGroup: string | null): State {
       halfLength: null,
       picks: toPicks(data.assignments, squad, games),
       availability: {},
+      records: {},
+      removals: {},
     },
   };
 }

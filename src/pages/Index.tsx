@@ -6,6 +6,7 @@ import { AppHeader } from '@/components/AppHeader';
 import { TabBar, Tab } from '@/components/TabBar';
 import { SquadTab } from '@/components/SquadTab';
 import { PlanTab } from '@/components/PlanTab';
+import { RecordTab } from '@/components/RecordTab';
 import { useToast } from '@/hooks/use-toast';
 
 const RFU_LINKS = [
@@ -86,19 +87,7 @@ const Index = () => {
           <PlanTab state={state} assessment={assessment} dispatch={dispatch} undo={undo} canUndo={canUndo} autoFill={autoFill} shuffle={shuffle} filled={filled} onGoTo={setTab} />
         )}
 
-        {tab === 'record' && (
-          <div className="page">
-            <div className="head"><h1>Record</h1></div>
-            <div className="empty">
-              <h2>Record who actually played</h2>
-              <p>
-                Pitchside, you will mark who played each quarter, side by side with the plan. The plan itself never
-                changes. Recording arrives in a later update.
-              </p>
-              <button className="linkish" onClick={() => setTab('plan')}>Back to the plan</button>
-            </div>
-          </div>
-        )}
+        {tab === 'record' && <RecordTab state={state} assessment={assessment} dispatch={dispatch} onGoTo={setTab} />}
 
         {tab === 'guide' && (
           <div className="page">

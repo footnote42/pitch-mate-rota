@@ -42,7 +42,7 @@ export const FestivalSetup = ({ state, assessment, dispatch, preview }: Festival
 
   const setAgeGroup = (ageGroup: AgeGroup) =>
     change({ type: 'setAgeGroup', ageGroup }, `Change to ${ageGroup}?`, () =>
-      `${ageGroup} plays ${AGE_GROUP_CONFIGS[ageGroup].playersOnField} a side, so the plan is cleared. The squad and game labels stay.`);
+      `${ageGroup} plays ${AGE_GROUP_CONFIGS[ageGroup].playersOnField} a side, so the plan and any match record are cleared. The squad and game labels stay.`);
 
   const setGames = (games: number) =>
     change({ type: 'setGames', games }, `Change to ${games} games?`, dropped =>
