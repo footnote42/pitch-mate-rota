@@ -63,6 +63,10 @@ export const AppHeader = ({ title, detail, dark, onToggleDark, onNewFestival }: 
           <DropdownMenuItem className="min-h-[44px] text-base" onSelect={onToggleDark}>
             {dark ? 'Light mode' : 'Dark mode'}
           </DropdownMenuItem>
+          {/* Out of the service worker's /rota scope, so a normal page load of the hub. Absolute so it works from the old vercel.app address too. */}
+          <DropdownMenuItem asChild className="min-h-[44px] text-base">
+            <a href="https://rugby.waynetellis.com/">Rugby hub</a>
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
