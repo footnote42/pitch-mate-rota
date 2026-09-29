@@ -1,23 +1,21 @@
 # NOW — pitch-mate-rota
 
 ## Status
-QUEUED — UI rework so other Trojans coaches can use it unaided, then host on portfolio rugby subdomain
+DELIVERED — rework shipped and live at rugby.waynetellis.com/rota. No open issues.
 
 ## Next
-Rework the UI to be more intuitive and presentable for coaches using it for the first time (first-run experience, empty state, comprehension without explanation).
+Use it at the next festival; log what trips coaches up as new issues (made-up names only: repo is public).
 
 ## Context
-- **Housekeeping on return (flagged 2026-09-25):** review the untracked `.claude/commands/` (speckit command defs), then commit or delete it. Delete `.playwright-mcp/` and `docs/screenshots/Screenshot_20260417-202119.png`, or add them to `.gitignore`.
-- Obsidian: `C:/Users/kenho/Obsidian/Second Brain/Projects/pitch-mate-rota/` — vault note says `status: active` and slot 2 for November. It is now top priority, so the slate is out of date.
-- Active roadmap: `polish-plan.md` (Stages 1–2 done). Its stated goal is "portfolio-ready", but the real goal is adoption by other coaches.
-- Decisions: `docs/adr/` (from 2026-09-27). `DECISIONS.md` is frozen history — do not append, do not use `/decide`
-- Purpose: festival-day squad rotation — experience balance on pitch + RFU Half Game Rule playing time. Used through the 2025-26 season, and will be used again this season.
-- History: began as a Lovable project, later deployed on Vercel. Target hosting: portfolio site, rugby subdomain.
-- Uncommitted at triage: `README.md` Reg 15 wording, `.claude/settings.local.json`, untracked `.claude/commands/`, `.playwright-mcp/`, `docs/screenshots/Screenshot_20260417-202119.png`
-- `.gitignore` has no `.env` rule (no env file exists yet)
+- Obsidian: `C:/Users/kenho/Obsidian/Second Brain/Projects/pitch-mate-rota/` (vault note priority slot likely stale now it's delivered)
+- Decisions: `docs/adr/`; rejected requests: `.out-of-scope/`. `DECISIONS.md` is frozen history, do not append
+- Rules live in pure `src/rota/`; UI computes none (see CLAUDE.md)
+- Hosting: served at /rota under the rugby hub (ADR 0003); Vercel deploys on push to main
+- `polish-plan.md` is superseded by the closed issues; delete or archive it
+- Phone shortcut: re-add from rugby.waynetellis.com/rota to get the H icon (old shortcuts keep their icon)
 
 ## Blocker
 None
 
 ## Last session
-2026-09-23 — Triage (no NOW.md before this). Remote in sync, entry point intact, no secrets. Last code commit 2026-06-05 (season end). Lesson: building a useful tool depends on identifying the source material and putting the workflow into words.
+2026-09-29 — Closed #44, #46, #43, #8, #22, #11 plus triage of the rest (wontfix + out-of-scope records). Plan tab ordering (#11) and H-posts favicon replacing Lovable's. All pushed.
