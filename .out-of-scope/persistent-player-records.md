@@ -21,3 +21,5 @@ next festival, without an archive.
 
 - #12: "Create master squad database with up to 50 players"
 - #13: "Add per-player profiles with detailed skill ratings"
+- #7: "Save completed festivals for end-of-season analysis" (an archive of festivals is a
+  season-long record of which children played, the same clash)
