@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
     VitePWA({
       registerType: "prompt", // never a surprise reload pitchside; the coach taps Reload
       scope: "/rota",
-      includeAssets: ["favicon.ico", "apple-touch-icon.png"],
+      includeAssets: ["favicon.svg", "apple-touch-icon.png"],
       manifest: {
         id: "/rota",
         name: "Festival Rota",
