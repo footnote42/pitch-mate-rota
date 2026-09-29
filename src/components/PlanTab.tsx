@@ -10,6 +10,10 @@ import { HalfGameRule, Flag } from './HalfGameRule';
 import { Pager, useGamePager } from './GamePager';
 
 const LEVEL = { 1: 'N', 2: 'I', 3: 'E' } as const;
+
+// Display order only: never saved, never seen by auto-fill. Array sort is stable, so ties keep squad order.
+type Order = 'squad' | 'experience' | 'halves';
+const ORDERS: [Order, string][] = [['squad', 'Squad'], ['experience', 'Experience'], ['halves', 'Halves so far']];
 const halfName = (h: Half) => (h === 1 ? '1st' : '2nd');
 
 const watchLabel = (p: PlayerAssessment) => (p.status === 'impossible' ? 'Short' : p.status === 'tight' ? 'Tight' : null);
@@ -39,6 +43,7 @@ interface PlanTabProps {
 export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, shuffle, filled, onGoTo }: PlanTabProps) => {
   const { squad, festival } = state;
   const [view, setView] = useState<'game' | 'overview'>('game');
+  const [order, setOrder] = useState<Order>('squad');
   const { game, carousel, goTo, onScroll, restore } = useGamePager();
 
   if (squad.length === 0) {
@@ -57,6 +62,8 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
 
   const minimum = toHalves(assessment.minimum);
   const players = squad.map(p => ({ player: p, a: assessment.players[p.id] }));
+  if (order === 'experience') players.sort((x, y) => y.player.experienceLevel - x.player.experienceLevel);
+  if (order === 'halves') players.sort((x, y) => x.a.counted - y.a.counted);
   const isPicked = (playerId: string, g: number, h: Half) =>
     festival.picks.some(k => k.playerId === playerId && k.game === g && k.half === h);
   const games = gameNumbers(festival);
@@ -115,6 +122,15 @@ export const PlanTab = ({ state, assessment, dispatch, undo, canUndo, autoFill, 
           )
         )}
         {view === 'game' && <Pager festival={festival} game={game} goTo={goTo} recorded={recorded} />}
+      </div>
+
+      <div className="sortby">
+        <span id="order-label">Order</span>
+        <span className="seg wide" role="group" aria-labelledby="order-label">
+          {ORDERS.map(([o, label]) => (
+            <button key={o} type="button" aria-pressed={order === o} onClick={() => setOrder(o)}>{label}</button>
+          ))}
+        </span>
       </div>
 
       {view === 'game' ? (
