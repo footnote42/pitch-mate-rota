@@ -1,5 +1,6 @@
 import { ChevronDown } from 'lucide-react';
 import { AgeGroup } from '@/types/ageGroup';
+import { CONTACT } from './AppHeader';
 
 const REG15 = 'https://www.englandrugby.com/run/rules-governance/rfu-rules-and-regulations/regulation-15-age-grade-rugby';
 // Regulation 15 appendices 1-6: the Rules of Play for each age group (docs/research/reg15-age-groups.md).
@@ -131,6 +132,10 @@ export const GuideTab = ({ ageGroup }: { ageGroup: AgeGroup }) => (
         </ul>
         <p className="hint">The RFU regulations are the authority; this app helps you follow them.</p>
       </Section>
+
+      <p className="credit">
+        Built by Wayne Ellis, volunteer coach. <a href={CONTACT}>Contact me</a>
+      </p>
     </div>
   </div>
 );

@@ -550,6 +550,25 @@ select.field {
   font-weight: 400;
 }
 
+/* Guide footer: who built it and how to reach him. */
+.credit {
+  margin: 8px 0 0;
+  padding-top: 16px;
+  border-top: var(--hair);
+  font-size: 14px;
+  color: var(--soft);
+}
+.credit a {
+  display: inline-block;
+  padding: 12px 0;
+  color: var(--ink);
+  font-weight: 700;
+  text-decoration: underline;
+  text-decoration-color: var(--scarlet);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 3px;
+}
+
 /* ---------- plan tab (docs/prototypes/plan-tab.html) ---------- */
 .bar {
   position: sticky;

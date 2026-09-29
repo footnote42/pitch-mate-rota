@@ -16,6 +16,9 @@ import {
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 
+// Opens the coach's mail app; the subject says where it came from.
+export const CONTACT = 'mailto:hello@waynetellis.com?subject=Festival%20Rota';
+
 // Front-on H-posts, the rugby hub's mark, with hooped pads in club colours.
 export const PostsMark = () => (
   <svg viewBox="0 0 32 32" aria-hidden="true">
@@ -66,6 +69,9 @@ export const AppHeader = ({ title, detail, dark, onToggleDark, onNewFestival }: 
           {/* Out of the service worker's /rota scope, so a normal page load of the hub. Absolute so it works from the old vercel.app address too. */}
           <DropdownMenuItem asChild className="min-h-[44px] text-base">
             <a href="https://rugby.waynetellis.com/">Rugby hub</a>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild className="min-h-[44px] text-base">
+            <a href={CONTACT}>Contact me</a>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
