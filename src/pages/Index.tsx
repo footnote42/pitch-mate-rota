@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRotationState } from '@/hooks/useRotationState';
-import { assess } from '@/rota';
-import { AGE_GROUP_CONFIGS } from '@/types/ageGroup';
+import { assess, Pick } from '@/rota';
+import { AGE_GROUP_CONFIGS, AgeGroup } from '@/types/ageGroup';
 import { AppHeader } from '@/components/AppHeader';
 import { TabBar, Tab } from '@/components/TabBar';
 import { SquadTab } from '@/components/SquadTab';
@@ -13,16 +13,23 @@ import { useToast } from '@/hooks/use-toast';
 
 const readDark = () => document.documentElement.dataset.theme === 'dark';
 
+const allocationKey = (ageGroup: AgeGroup, games: number, picks: Pick[]) =>
+  `${ageGroup}:${games}:${picks.map(p => `${p.playerId}@${p.game}.${p.half}`).sort().join(',')}`;
+
 const Index = () => {
   const [tab, setTab] = useState<Tab>('squad');
   const [dark, setDark] = useState(readDark);
-  const [celebrationShown, setCelebrationShown] = useState<string | null>(null);
   const { toast } = useToast();
   const { state, dispatch, preview, undo, canUndo, autoFill, shuffle, filled, recovered } = useRotationState();
   const { festival } = state;
   const { games: numberOfGames, ageGroup, picks } = festival;
   const assessment = assess(state);
   const playersOnField = AGE_GROUP_CONFIGS[ageGroup].playersOnField;
+
+  const celebratedAllocation = useRef<string | null | undefined>(undefined);
+  if (celebratedAllocation.current === undefined) {
+    celebratedAllocation.current = assessment.complete ? allocationKey(ageGroup, numberOfGames, picks) : null;
+  }
 
   useEffect(() => {
     if (recovered) {
@@ -34,14 +41,16 @@ const Index = () => {
   }, [recovered, toast]);
 
   useEffect(() => {
-    const key = `${numberOfGames}-${picks.length}`;
-    if (assessment.complete && celebrationShown !== key) {
-      toast({ title: 'Looking good, Coach!', description: 'Your squad is match-ready.', duration: 4000 });
-      setCelebrationShown(key);
-    } else if (!assessment.complete && celebrationShown) {
-      setCelebrationShown(null);
+    if (assessment.complete) {
+      const key = allocationKey(ageGroup, numberOfGames, picks);
+      if (celebratedAllocation.current !== key) {
+        toast({ title: 'Looking good, Coach!', description: 'Your squad is match-ready.', duration: 4000 });
+        celebratedAllocation.current = key;
+      }
+    } else if (celebratedAllocation.current) {
+      celebratedAllocation.current = null;
     }
-  }, [assessment.complete, numberOfGames, picks.length, celebrationShown, toast]);
+  }, [assessment.complete, ageGroup, numberOfGames, picks, toast]);
 
   const toggleDark = () => {
     const next = !dark;
