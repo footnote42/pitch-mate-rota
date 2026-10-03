@@ -1,7 +1,7 @@
 # NOW — pitch-mate-rota
 
 ## Status
-DELIVERED — rework shipped and live at rugby.waynetellis.com/rota. No open issues.
+DELIVERED — celebration toast fix shipped and live on main. No open issues.
 
 ## Next
 Use it at the next festival; log what trips coaches up as new issues (made-up names only: repo is public).
@@ -18,4 +18,4 @@ Use it at the next festival; log what trips coaches up as new issues (made-up na
 None
 
 ## Last session
-2026-09-29 — Closed #44, #46, #43, #8, #22, #11 plus triage of the rest (wontfix + out-of-scope records). Plan tab ordering (#11) and H-posts favicon replacing Lovable's. All pushed.
+2026-10-03 — Suppressed completion celebration toast on page refresh; now fires only when selections change. Tested and pushed to main.
