@@ -17,11 +17,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      # TODO: switch to `npm ci` once package-lock.json is regenerated; on main it is
-      # out of sync with package.json (npm ci fails: esbuild@0.28.2 missing from lock).
-      - run: npm install --no-audit --no-fund
-      # Expected red: `npm run lint` currently reports 3 errors on main. Not fixed here.
+      # The lockfile is written by npm 11; Node 22 bundles npm 10, which reads it
+      # differently and fails `npm ci` (vite 8's optional esbuild peer).
+      - run: npm install -g npm@11
+      - run: npm ci --no-audit --no-fund
       - run: npm run lint
-        continue-on-error: true
       - run: npm test
       - run: npm run build
